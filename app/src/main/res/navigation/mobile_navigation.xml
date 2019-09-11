@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.cs407.team15.redstone.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_aboutpurdue"
+        android:name="com.cs407.team15.redstone.ui.aboutpurdue.AboutPurdueFragment"
+        android:label="@string/menu_aboutpurdue"
+        tools:layout="@layout/fragment_about_purdue" />
+
+    <fragment
+        android:id="@+id/nav_tour"
+        android:name="com.cs407.team15.redstone.ui.tour.TourFragment"
+        android:label="@string/menu_tour"
+        tools:layout="@layout/fragment_tour" />
+
+    <fragment
+        android:id="@+id/nav_ar"
+        android:name="com.cs407.team15.redstone.ui.ar.ARFragment"
+        android:label="@string/menu_ar"
+        tools:layout="@layout/fragment_ar" />
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.cs407.team15.redstone.ui.profile.ProfileFragment"
+        android:label="@string/menu_profile"
+        tools:layout="@layout/fragment_profile" />
+
+</navigation>
