@@ -13,15 +13,7 @@ import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import android.view.Menu
-import android.view.MenuItem
-import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.core.view.GravityCompat
-import androidx.fragment.app.Fragment
-import com.cs407.team15.redstone.ui.aboutpurdue.AboutPurdueFragment
-import com.cs407.team15.redstone.ui.ar.ARFragment
-import com.cs407.team15.redstone.ui.home.HomeFragment
-import com.cs407.team15.redstone.ui.profile.ProfileFragment
-import com.cs407.team15.redstone.ui.tour.TourFragment
 
 
 class MainActivity : AppCompatActivity() {
@@ -50,6 +42,7 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(setOf(
                 R.id.nav_home, R.id.nav_aboutpurdue, R.id.nav_tour,
                 R.id.nav_ar, R.id.nav_profile), drawerLayout)
+
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
     }
