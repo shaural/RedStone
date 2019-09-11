@@ -39,6 +39,8 @@ class MainActivity : AppCompatActivity() {
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
+
+        // Add menu ID here if you need
         appBarConfiguration = AppBarConfiguration(setOf(
                 R.id.nav_home, R.id.nav_aboutpurdue, R.id.nav_tour,
                 R.id.nav_ar, R.id.nav_profile), drawerLayout)
