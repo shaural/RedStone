@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "336852207439",
+    "firebase_url": "https://redstone-7e137.firebaseio.com",
+    "project_id": "redstone-7e137",
+    "storage_bucket": "redstone-7e137.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:336852207439:android:2d526691aa80b3935ce73a",
+        "android_client_info": {
+          "package_name": "com.cs407.team15.redstone"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "336852207439-e4r4tddf6c5mkckhvd6lj5rgprosio45.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cs407.team15.redstone",
+            "certificate_hash": "e8d8aefe6f08243ea517d899e5ecf8eba1ad12b6"
+          }
+        },
+        {
+          "client_id": "336852207439-5ocfjdkr7bp8nsvajstmo68dr7aljcr1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA84F5D49iHtL81wjNwP6m5rV_W_5ozfwc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "336852207439-5ocfjdkr7bp8nsvajstmo68dr7aljcr1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
