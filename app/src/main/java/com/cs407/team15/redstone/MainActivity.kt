@@ -20,7 +20,7 @@ import android.widget.Toast
 import androidx.core.view.GravityCompat
 import com.cs407.team15.redstone.ui.authentication.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
-
+import com.google.firebase.firestore.*;
 
 class MainActivity : AppCompatActivity() {
 
