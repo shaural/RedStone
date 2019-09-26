@@ -50,13 +50,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        editTextEmail = (EditText) findViewById(R.id.et_eamil);
-        editTextPassword = (EditText) findViewById(R.id.et_password);
-        signupButton = (Button) findViewById(R.id.btn_signUp);
-        signinButton = (Button) findViewById(R.id.btn_signIn);
-        forgotButton = (Button) findViewById(R.id.btn_forgot);
-        buttonGoogle = findViewById(R.id.btn_google_signin);
-
         // [START config_signin]
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -70,6 +63,26 @@ public class LoginActivity extends AppCompatActivity {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
+        initView();
+        setListener();
+    }
+
+    /**
+     * Init View
+     */
+    private void initView() {
+        editTextEmail = (EditText) findViewById(R.id.et_eamil);
+        editTextPassword = (EditText) findViewById(R.id.et_password);
+        signupButton = (Button) findViewById(R.id.btn_signUp);
+        signinButton = (Button) findViewById(R.id.btn_signIn);
+        forgotButton = (Button) findViewById(R.id.btn_forgot);
+        buttonGoogle = findViewById(R.id.btn_google_signin);
+    }
+
+    /**
+     * set listener
+     */
+    private void setListener() {
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,20 +98,6 @@ public class LoginActivity extends AppCompatActivity {
                 startActivityForResult(signInIntent, RC_SIGN_IN);
             }
         });
-
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-
-        if (currentUser != null) {
-            Log.e(TAG, "ON START - User info detected.");
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-        }
-//        updateUI(currentUser);
     }
 
     // [START onactivityresult]
@@ -123,7 +122,9 @@ public class LoginActivity extends AppCompatActivity {
     }
     // [END onactivityresult]
 
-    // [START auth_with_google]
+    /**
+     * Auth with google account
+     */
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.e(TAG, "firebaseAuthWithGoogle:" + acct.getId());
 
@@ -148,16 +149,24 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
-    // [END auth_with_google]
 
-    // Auth_with_Email&PW
+    /**
+     * Sign in
+     */
     public void signIn(View view) {
         email = editTextEmail.getText().toString();
         password = editTextPassword.getText().toString();
-        signInUser(email, password);
+
+        if (!email.isEmpty() && !password.isEmpty()) {
+            signInUser(email, password);
+        } else {
+            Toast.makeText(getApplicationContext(), "Check your Email or Password please", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    // Sign In Auth_with_Email&PW
+    /**
+     * Sign in user && check email verification
+     */
     private void signInUser(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -165,11 +174,16 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.e(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Toast.makeText(getApplicationContext(), R.string.success_signup, Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                            finish();
+                            if(user.isEmailVerified()){
+                                Log.e(TAG, "signInWithEmail:success:emailVerified");
+                                Toast.makeText(getApplicationContext(), "Welcome!", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                                finish();
+                            } else {
+                                Log.e(TAG, "signInWithEmail:success:emailNotVerified");
+                                Toast.makeText(getApplicationContext(), "Please verify your email", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.e(TAG, "signInWithEmail:failure", task.getException());
@@ -178,5 +192,19 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        if (currentUser != null && currentUser.isEmailVerified()) {
+            Log.e(TAG, "ON START - User info detected.");
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+            finish();
+        }
+//        updateUI(currentUser);
     }
 }
