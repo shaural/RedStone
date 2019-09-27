@@ -5,12 +5,47 @@
     android:layout_height="match_parent"
     tools:context=".ui.authentication.RegisterActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="200dp"
+        android:id="@+id/username_layout">
+
+        <TextView
+            android:id="@+id/tv_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/username"
+            android:layout_marginLeft="50dp"
+            android:layout_weight="1"/>
+        <TextView
+            android:id="@+id/tv_username_chk"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="This username is taken!"
+            android:layout_weight="1"
+            android:textColor="@color/colorAccent"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+
+    <EditText
+        android:id="@+id/et_username"
+        android:layout_below="@id/username_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:inputType="text"
+        android:hint="Username"/>
+
     <TextView
         android:id="@+id/tv_email"
+        android:layout_below="@id/et_username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/email"
-        android:layout_marginTop="200dp"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp" />
 
@@ -45,31 +80,50 @@
         android:ems="10"
         android:hint="Password"/>
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/et_password_chk"
+        android:layout_below="@id/et_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/et_password">
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:inputType="textPassword"
+        android:ems="10"
+        android:hint="Confirm Password"/>
 
-        <Button
-            android:id="@+id/btn_signUp"
-            android:text="@string/signup"
-            android:onClick="singUp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginLeft="50dp"/>
+    <TextView
+        android:id="@+id/isSamePwTxt"
+        android:layout_below="@id/et_password_chk"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Password doesn't match"
+        android:layout_centerInParent="true"
+        android:textColor="@color/colorAccent"
+        android:visibility="visible" />
 
-        <Button
-            android:id="@+id/btn_signIn"
-            android:text="@string/signin"
+    <Button
+        android:id="@+id/btn_signUp"
+        android:layout_below="@id/isSamePwTxt"
+        android:text="Create an account"
+        android:onClick="signUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:layout_centerInParent="true" />
 
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginRight="50dp"/>
-
-    </LinearLayout>
-
-
+    <Button
+        android:id="@+id/btn_signIn"
+        android:layout_below="@id/btn_signUp"
+        android:text="Already have an account?"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:layout_centerInParent="true"/>
 
 </RelativeLayout>
