@@ -52,18 +52,18 @@ public class RegisterActivity extends AppCompatActivity {
     private TextView textViewUsername_chk;
     Button signupButton,signinButton;
 
-    FirebaseAuth firebaseAuth;
-    FirebaseFirestore db;
-    FirebaseDatabase db2;
+    private FirebaseAuth firebaseAuth;
+    private FirebaseFirestore db;
+    private FirebaseDatabase db2;
     private DatabaseReference usernameref;
-    CollectionReference userref;
+    private CollectionReference userref;
 
     private String email = "";
     private String password = "";
     private String username = "";
     private boolean isSamePassword = false;
 
-    public static  final  String COLLECTION_NAME_KEY = "users";
+    public static final String COLLECTION_NAME_KEY = "users";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -240,6 +240,7 @@ public class RegisterActivity extends AppCompatActivity {
                             member.uid = user.getUid();
                             member.token = refreshedToken;
                             member.email = user.getEmail();
+                            member.login_attempt = 0;
                             member.username = username;
 
                             Log.e("Token", refreshedToken);

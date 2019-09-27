@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.cs407.team15.redstone.MainActivity;
 import com.cs407.team15.redstone.R;
+import com.cs407.team15.redstone.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -20,6 +21,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.AuthCredential;
@@ -27,12 +29,17 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LoginActivity extends AppCompatActivity {
     private String TAG = "CCC: LOGIN ACTIVITY";
 
     private FirebaseAuth mAuth;
-
+    private FirebaseFirestore db;
+    private CollectionReference userref;
 
 //    private static final int RC_SIGN_IN = 9001;
 //    private GoogleSignInClient mGoogleSignInClient;
@@ -45,6 +52,9 @@ public class LoginActivity extends AppCompatActivity {
 
     private String email = "";
     private String password = "";
+
+    public static final String COLLECTION_NAME_KEY = "users";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +72,8 @@ public class LoginActivity extends AppCompatActivity {
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        userref = db.collection(COLLECTION_NAME_KEY);
 
         initView();
         setListener();
@@ -161,16 +173,47 @@ public class LoginActivity extends AppCompatActivity {
         password = editTextPassword.getText().toString();
 
         if (!email.isEmpty() && !password.isEmpty()) {
-            signInUser(email, password);
+            signInAttempt();
         } else {
             Toast.makeText(getApplicationContext(), "Check your Email or Password please", Toast.LENGTH_SHORT).show();
         }
     }
 
+    private void signInAttempt() {
+        // Sign in attempts
+        DocumentReference docRef = db.collection("users").document(email);
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        if (document.getLong("login_attempt") != null) {
+                            long attempts = document.getLong("login_attempt");
+                            Log.d(TAG, "DocumentSnapshot data: " + attempts);
+                            if (attempts <= 5) {
+                                signInUser(email, password);
+                            } else {
+                                Toast.makeText(getApplicationContext(), "This account has been locked", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "This account has been locked", Toast.LENGTH_SHORT).show();
+                        }
+
+                    } else {
+                        Log.d(TAG, "No User document");
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
+    }
+
     /**
      * Sign in user && check email verification
      */
-    private void signInUser(String email, String password) {
+    private void signInUser(final String email, final String password) {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -197,11 +240,35 @@ public class LoginActivity extends AppCompatActivity {
                              * For test
                              */
                             Log.e(TAG, "signInWithEmail:success:emailVerified");
+
+                            // sign in attempts init
+                            db.collection("users").document(user.getEmail()).get()
+                                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onSuccess(DocumentSnapshot document) {
+                                            User me = document.toObject(User.class);
+                                            me.login_attempt = 0;
+                                            document.getReference().set(me);
+                                        }
+                                    });
+
                             Toast.makeText(getApplicationContext(), "Welcome! "+user.getEmail(), Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(getApplicationContext(), MainActivity.class));
                             finish();
 
                         } else {
+                            // increase sign in attempts
+                            db.collection("users").document(email).get()
+                                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onSuccess(DocumentSnapshot document) {
+                                            User me = document.toObject(User.class);
+                                            Log.e(TAG, email + " Attempts:" + me.login_attempt);
+                                            me.login_attempt++;
+                                            document.getReference().set(me);
+                                        }
+                                    });
+
                             Log.e(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(getApplicationContext(), "Authentication failed.", Toast.LENGTH_SHORT).show();
 

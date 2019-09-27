@@ -5,6 +5,7 @@ public class User {
     public String token;
     public String email;
     public String username;
+    public int login_attempt;
 
     public User() {
 
