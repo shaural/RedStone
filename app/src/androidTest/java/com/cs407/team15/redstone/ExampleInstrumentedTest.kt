@@ -33,6 +33,62 @@ class ExampleInstrumentedTest {
         assert(!doesLocationExist("test_location"))
     }
 
+    @Test
+    // Test adding and removing a flag
+    fun flag_addition_and_removal() = runBlocking {
+        removeLocation("test_location")
+        assert(!doesLocationExist("test_location"))
+        makeLocationFlagThresholdsUnreachable()
+
+        addLocation("test_location")
+        assert(!Location.hasUserFlaggedLocation("test_user", "test_location"))
+        Location.toggleHasUserFlaggedLocation("test_user", "test_location")
+        assert(Location.hasUserFlaggedLocation("test_user", "test_location"))
+        assert(Location.getNumberOfFlagsForLocation("test_location") == 1)
+        Location.toggleHasUserFlaggedLocation("test_user", "test_location")
+        assert(Location.getNumberOfFlagsForLocation("test_location") == 0)
+        assert(!Location.hasUserFlaggedLocation("test_user", "test_location"))
+
+        removeLocation("test_location")
+        assert(!doesLocationExist("test_location"))
+    }
+
+    @Test
+    // Test that location gets removed when hitting the absolute flag threshold
+    fun hit_absolute_flag_threshold() = runBlocking {
+        removeLocation("test_location")
+        assert(!doesLocationExist("test_location"))
+
+        addLocation("test_location")
+        setLocationFlagThresholds(5, Double.MAX_VALUE)
+        Location.toggleHasUserFlaggedLocation("test_user_1", "test_location")
+        Location.toggleHasUserFlaggedLocation("test_user_2", "test_location")
+        Location.toggleHasUserFlaggedLocation("test_user_3", "test_location")
+        Location.toggleHasUserFlaggedLocation("test_user_4", "test_location")
+        assert(doesLocationExist("test_location"))
+        assertEquals(4, Location.getNumberOfFlagsForLocation("test_location"))
+        Location.toggleHasUserFlaggedLocation("test_user_5", "test_location")
+        assert(!doesLocationExist("test_location"))
+    }
+
+    @Test
+    fun hit_proportional_flag_threshold() = runBlocking {
+        removeLocation("test_location")
+        assert(!doesLocationExist("test_location"))
+
+        addLocation("test_location")
+        setLocationFlagThresholds(Int.MAX_VALUE, 0.5)
+        val numberOfUsers = FirebaseFirestore.getInstance().collection("users").get().await().size()
+
+        var numberOfFlagsNeededToTrigger = kotlin.math.ceil(0.5 * numberOfUsers).toInt()
+        for (i in 1 until numberOfFlagsNeededToTrigger) {
+            Location.toggleHasUserFlaggedLocation("test_user_$i", "test_location")
+        }
+        assertEquals(numberOfFlagsNeededToTrigger - 1, Location.getNumberOfFlagsForLocation("test_location"))
+        Location.toggleHasUserFlaggedLocation("test_user_$numberOfFlagsNeededToTrigger", "test_location")
+        assert(!doesLocationExist("test_location"))
+    }
+
     suspend fun setLocationFlagThresholds(absoluteLocationFlagThreshold: Int, proportionalLocationFlagThreshold: Double) {
         val db = FirebaseFirestore.getInstance()
         db.document("configurationAndMetaData/absoluteLocationFlagThreshold")
