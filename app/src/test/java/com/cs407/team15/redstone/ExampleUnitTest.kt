@@ -1,5 +1,9 @@
 package com.cs407.team15.redstone
 
+import com.cs407.team15.redstone.model.Location
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.tasks.await
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -11,7 +15,7 @@ import org.junit.Assert.*
  */
 class ExampleUnitTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun example() {
+        
     }
 }

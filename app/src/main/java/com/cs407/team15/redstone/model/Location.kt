@@ -119,7 +119,7 @@ class Location(val coordinates: GeoPoint, val description: String, val name: Str
                 val proportionalFlagThreshold = db.document(PROPORTIONAL_FLAG_THRESHOLD).get()
                     .await().get("value") as Double
                 val absoluteFlagThreshold = db.document(ABSOLUTE_FLAG_THRESHOLD).get()
-                    .await().get("value") as Double
+                    .await().get("value") as Long
                 // Ensure fetching number of flags succeeded
                 if (numberOfFlags > 0) {
                     (1.0 * numberOfFlags / userCount >= proportionalFlagThreshold ||

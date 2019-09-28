@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {
     private String TAG = "CCC: REGISTER ACTIVITY";
-    private String NUMBER_OF_USERS = "configurationAndMetaData/numberOfUsers";
 
     // Password Regex
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^[a-zA-Z0-9!@.#$%^&*?_~]{4,16}$");
@@ -113,16 +112,6 @@ public class RegisterActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if(task.isSuccessful()){
-                            // AFAIK there is no way to query the number of users unless you
-                            // maintain a count of the users yourself, so set/increment the user
-                            // count here. Number of users is useful for flag thresholds
-                            FirebaseFirestore.getInstance().document(NUMBER_OF_USERS).get()
-                                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                        @Override
-                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                            documentSnapshot.getReference().update("count", FieldValue.increment(1));
-                                        }
-                                    });
                             Toast.makeText(getApplicationContext(), R.string.success_signup, Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(getApplicationContext(), MainActivity.class));
                             finish();
