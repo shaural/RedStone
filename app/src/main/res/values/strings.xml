@@ -32,4 +32,6 @@
     <string name="success_signup">Welcome</string>
     <string name="failed_signup">Failed Sign up</string>
     <string name="continue_to_sign_up">Continue to Sign Up</string>
+
+    <string name="a">Continue to Sign Up</string>
 </resources>
