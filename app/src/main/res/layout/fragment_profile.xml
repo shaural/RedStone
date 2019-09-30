@@ -25,9 +25,10 @@
 
             <TextView
                 android:id="@+id/profile_username"
-                android:layout_width="wrap_content"
+                android:layout_width="283dp"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="TextView"
+                android:textAlignment="textEnd" />
         </TableRow>
 
         <TableRow
@@ -44,9 +45,26 @@
                 android:id="@+id/prfile_email"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="TextView"
+                android:textAlignment="textEnd" />
         </TableRow>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
 
+            <TextView
+                android:id="@+id/user_type_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/user_type" />
+
+            <TextView
+                android:id="@+id/user_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextView"
+                android:textAlignment="textEnd" />
+        </TableRow>
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
@@ -61,7 +79,8 @@
                 android:id="@+id/recieved_like"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="TextView"
+                android:textAlignment="textEnd" />
         </TableRow>
 
         <TableRow
@@ -78,7 +97,8 @@
                 android:id="@+id/recieved_dislike"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="TextView"
+                android:textAlignment="textEnd" />
         </TableRow>
 
         <TableRow
@@ -95,7 +115,8 @@
                 android:id="@+id/recieved_net_likes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="TextView"
+                android:textAlignment="textEnd" />
         </TableRow>
 
         <TableRow
@@ -112,7 +133,8 @@
                 android:id="@+id/user_likes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="TextView"
+                android:textAlignment="textEnd" />
 
         </TableRow>
 
@@ -130,7 +152,8 @@
                 android:id="@+id/user_dislike"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="TextView"
+                android:textAlignment="textEnd" />
         </TableRow>
 
         <TableRow
@@ -147,7 +170,8 @@
                 android:id="@+id/user_net_likes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="TextView"
+                android:textAlignment="textEnd" />
         </TableRow>
 
     </TableLayout>

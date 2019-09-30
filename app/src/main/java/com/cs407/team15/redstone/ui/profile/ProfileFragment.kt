@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.cs407.team15.redstone.R
+import com.cs407.team15.redstone.model.User
 
 class ProfileFragment : Fragment() {
 
@@ -27,6 +28,7 @@ class ProfileFragment : Fragment() {
        // profileViewModel.text.observe(this, Observer {
          //   textView.text = it
         //})
+
         return root
     }
 }

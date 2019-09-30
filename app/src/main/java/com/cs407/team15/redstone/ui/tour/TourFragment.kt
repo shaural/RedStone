@@ -15,39 +15,40 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import android.util.Log
 
 
 class TourFragment : Fragment(), OnMapReadyCallback{
 
+    private lateinit var mMap: GoogleMap
     private lateinit var tourViewModel: TourViewModel
-    private  lateinit var mMap: GoogleMap
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        tourViewModel =
-            ViewModelProviders.of(this).get(TourViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_tour, container, false)
-        //val textView: TextView = root.findViewById(R.id.text_tour)
-        //tourViewModel.text.observe(this, Observer {
-          //  textView.text = it
-            //val mapFragment = childFragmentManager.findFragmentById(R.id.tour_map) as SupportMapFragment
-            //mapFragment.getMapAsync(this)
-        //})
-
         val mapFragment = childFragmentManager.findFragmentById(R.id.tour_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         return root
     }
+    fun addLocation(location: LatLng, title:String){
+       mMap.addMarker(MarkerOptions().position(location).title(title))
+    }
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-        mMap.setMaxZoomPreference(6.0f)
         mMap.uiSettings.isZoomControlsEnabled=true
+        mMap.setMinZoomPreference(6f)
         val purdue = LatLng(40.4237,-86.9212)
-        mMap.addMarker(MarkerOptions().position(purdue).title("PURDUEEE"))
-        mMap.animateCamera(CameraUpdateFactory.zoomIn())
+        mMap.addMarker(MarkerOptions().position(purdue).title("PURDUE"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(purdue))
+
+        mMap.setOnMapClickListener(
+            object : GoogleMap.OnMapClickListener {
+            override fun onMapClick(location: LatLng?) {
+                //gets Latitude & Longitude where user Clicked
+            }
+        }
+        )
     }
 }
