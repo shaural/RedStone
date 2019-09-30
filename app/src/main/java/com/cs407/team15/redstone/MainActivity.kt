@@ -18,8 +18,17 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.core.view.GravityCompat
+import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.ui.authentication.LoginActivity
+import com.cs407.team15.redstone.ui.settings.SettingsFragment
 import com.google.firebase.auth.FirebaseAuth
+import android.R.attr.fragment
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 
 
 class MainActivity : AppCompatActivity() {
@@ -40,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         val fab: FloatingActionButton = findViewById(R.id.fab)
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+                .setAction("Action", null).show()
         }
 
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
@@ -53,8 +62,8 @@ class MainActivity : AppCompatActivity() {
 
         // Add menu ID here if you need
         appBarConfiguration = AppBarConfiguration(setOf(
-                R.id.nav_home, R.id.nav_aboutpurdue, R.id.nav_tour,
-                R.id.nav_ar, R.id.nav_profile), drawerLayout)
+            R.id.nav_home, R.id.nav_aboutpurdue, R.id.nav_tour,
+            R.id.nav_ar, R.id.nav_profile), drawerLayout)
 
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
@@ -69,10 +78,6 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle item selection
         return when (item.itemId) {
-            R.id.action_settings -> {
-                Toast.makeText(this, "Setting Clicked", Toast.LENGTH_SHORT).show()
-                true
-            }
             R.id.action_signout -> {
                 signOut()
                 true

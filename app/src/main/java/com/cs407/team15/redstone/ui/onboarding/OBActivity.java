@@ -18,12 +18,12 @@ public class OBActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        final String PREFS_NAME = "MyPrefsFile";
+        final String PREFS_NAME = "PrefsFile";
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 
         //for testing
-        settings.edit().putBoolean("my_first_time", true).apply();
-        if (settings.getBoolean("my_first_time", true)) {
+        //settings.edit().putBoolean("first_time", true).apply();
+        if (settings.getBoolean("first_time", true)) {
             //the app is being launched for first time, do something
             setContentView(R.layout.activity_onboarding);
 
@@ -32,7 +32,7 @@ public class OBActivity extends AppCompatActivity {
             viewPager.setAdapter(slideAdaptor);
 
             // record the fact that the app has been started at least once
-            settings.edit().putBoolean("my_first_time", false).apply();
+            settings.edit().putBoolean("first_time", false).apply();
         }
         else{
             Intent intent = new Intent(this, LoginActivity.class);
