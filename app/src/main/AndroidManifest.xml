@@ -4,7 +4,7 @@
     <!-- Permission Here -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -12,6 +12,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCFvgJwTQKi42b9Hmj6R_Zo9OY-FoUfRWQ"/>
         <activity android:name=".ui.onboarding.OBActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
