@@ -14,6 +14,7 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,6 +52,8 @@ public class RegisterActivity extends AppCompatActivity {
     private TextView isSamePwTxt;
     private TextView textViewUsername_chk;
     Button signupButton,signinButton;
+    private ProgressBar progressBar;
+
 
     private FirebaseAuth firebaseAuth;
     private FirebaseFirestore db;
@@ -100,6 +103,8 @@ public class RegisterActivity extends AppCompatActivity {
         signupButton = (Button) findViewById(R.id.btn_signUp);
         signinButton = (Button) findViewById(R.id.btn_signIn);
 
+        progressBar = findViewById(R.id.progressBar);
+
         isSamePwTxt.setVisibility(View.GONE);
         textViewUsername_chk.setVisibility(View.GONE);
     }
@@ -142,6 +147,8 @@ public class RegisterActivity extends AppCompatActivity {
      * SignUp
      */
     public void signUp(View view) {
+        progressBar.setVisibility(View.VISIBLE);
+
         email = editTextEmail.getText().toString();
         password = editTextPassword.getText().toString();
         username = editTextUsername.getText().toString();
@@ -246,10 +253,14 @@ public class RegisterActivity extends AppCompatActivity {
                             Log.e("Token", refreshedToken);
                             userref.document(user.getEmail()).set(member);
                             usernameref.child(username).setValue(true);
+
+                            progressBar.setVisibility(View.GONE);
+
                             startActivity(new Intent(getApplicationContext(), LoginActivity.class));
                             finish();
                         }
                         else{
+                            progressBar.setVisibility(View.GONE);
                             Toast.makeText(getApplicationContext(), R.string.failed_signup, Toast.LENGTH_SHORT).show();                        }
                     }
                 });

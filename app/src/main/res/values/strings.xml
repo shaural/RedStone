@@ -19,16 +19,22 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <!-- Sign up form -->
+    <!-- Authentication -->
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="username">Username</string>
-
     <string name="signin">Sign in</string>
     <string name="success_login">Success Sign in</string>
     <string name="failed_login">Failed Sign in</string>
-
     <string name="signup">Sign up</string>
     <string name="success_signup">Welcome</string>
     <string name="failed_signup">Failed Sign up</string>
+    <string name="lbl_forgot_password">Forgot password?</string>
+    <string name="forgot_password_msg">We just need your registered Email Id to sent you password reset instructions.</string>
+    <string name="title_activity_reset_password">ResetPasswordActivity</string>
+    <string name="btn_forgot_password">Forgot your password?</string>
+    <string name="btn_reset_password">Reset Password</string>
+    <string name="btn_back"><![CDATA[<< Back]]></string>
+
+
 </resources>

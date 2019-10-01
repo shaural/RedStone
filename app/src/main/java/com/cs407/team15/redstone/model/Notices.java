@@ -1,7 +1,5 @@
 package com.cs407.team15.redstone.model;
 
-import com.cs407.team15.redstone.model.Notice;
-
 public class Notices {
     private String description;
     private int n_id;
