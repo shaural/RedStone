@@ -21,9 +21,12 @@ import com.cs407.team15.redstone.MainActivity;
 import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,6 +39,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.w3c.dom.Text;
 
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public class RegisterActivity extends AppCompatActivity {

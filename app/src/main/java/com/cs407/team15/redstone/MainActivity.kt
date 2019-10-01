@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.ui.authentication.LoginActivity
 import com.cs407.team15.redstone.ui.settings.SettingsFragment
 import com.google.firebase.auth.FirebaseAuth
+
 import android.R.attr.fragment
 import androidx.core.app.ComponentActivity
 import androidx.core.app.ComponentActivity.ExtraData
@@ -30,6 +31,7 @@ import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 
+import com.google.firebase.firestore.*;
 
 class MainActivity : AppCompatActivity() {
 
