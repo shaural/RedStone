@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.cs407.team15.redstone.MainActivity;
@@ -41,14 +42,11 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private CollectionReference userref;
 
-//    private static final int RC_SIGN_IN = 9001;
-//    private GoogleSignInClient mGoogleSignInClient;
-//    // Google Sign in
-//    private SignInButton buttonGoogle;
-
     private EditText editTextEmail;
     private EditText editTextPassword;
     Button signupButton,signinButton, forgotButton;
+    private ProgressBar progressBar;
+
 
     private String email = "";
     private String password = "";
@@ -60,15 +58,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-
-//        // Configure Google Sign In
-//        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//                .requestIdToken(getString(R.string.default_web_client_id))
-//                .requestEmail()
-//                .build();
-//
-//        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
@@ -88,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
         signupButton = (Button) findViewById(R.id.btn_signUp);
         signinButton = (Button) findViewById(R.id.btn_signIn);
         forgotButton = (Button) findViewById(R.id.btn_forgot);
-//        buttonGoogle = findViewById(R.id.btn_google_signin);
+        progressBar = findViewById(R.id.progressBar);
     }
 
     /**
@@ -101,74 +90,21 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(getApplicationContext(),RegisterActivity.class));
             }
         });
-
-//        // Google Sign in
-//        buttonGoogle.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-//                startActivityForResult(signInIntent, RC_SIGN_IN);
-//            }
-//        });
+        forgotButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),ForgotPasswordActivity.class));
+            }
+        });
     }
 
-//    // [START onactivityresult]
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-//        if (requestCode == RC_SIGN_IN) {
-//            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-//            try {
-//                // Google Sign In was successful, authenticate with Firebase
-//                GoogleSignInAccount account = task.getResult(ApiException.class);
-//                firebaseAuthWithGoogle(account);
-//            } catch (ApiException e) {
-//                // Google Sign In failed, update UI appropriately
-//                Log.w(TAG, "Google sign in failed", e);
-//                // [START_EXCLUDE]
-//                // [END_EXCLUDE]
-//            }
-//        }
-//    }
-//    // [END onactivityresult]
-
-    /**
-     * Auth with google account
-     */
-//    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-//        Log.e(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-//
-//        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-//        mAuth.signInWithCredential(credential)
-//                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-//                    @Override
-//                    public void onComplete(@NonNull Task<AuthResult> task) {
-//                        if (task.isSuccessful()) {
-//                            // Sign in success, update UI with the signed-in user's information
-//                            Log.e(TAG, "signInWithCredential:success");
-//                            FirebaseUser user = mAuth.getCurrentUser();
-//
-//
-//
-//                            Toast.makeText(getApplicationContext(), R.string.success_signup, Toast.LENGTH_SHORT).show();
-//                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-//                            finish();
-//                        } else {
-//                            // If sign in fails, display a message to the user.
-//                            Log.e(TAG, "signInWithCredential:failure", task.getException());
-//                            Snackbar.make(findViewById(R.id.layout_main), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
-//                        }
-//
-//                    }
-//                });
-//    }
 
     /**
      * Sign in
      */
     public void signIn(View view) {
+        progressBar.setVisibility(View.VISIBLE);
+
         email = editTextEmail.getText().toString();
         password = editTextPassword.getText().toString();
 
@@ -176,9 +112,13 @@ public class LoginActivity extends AppCompatActivity {
             signInAttempt();
         } else {
             Toast.makeText(getApplicationContext(), "Check your Email or Password please", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
         }
     }
 
+    /**
+     * Sign-in Attempts check
+     */
     private void signInAttempt() {
         // Sign in attempts
         DocumentReference docRef = db.collection("users").document(email);
@@ -194,9 +134,11 @@ public class LoginActivity extends AppCompatActivity {
                             if (attempts <= 5) {
                                 signInUser(email, password);
                             } else {
+                                progressBar.setVisibility(View.GONE);
                                 Toast.makeText(getApplicationContext(), "This account has been locked", Toast.LENGTH_SHORT).show();
                             }
                         } else {
+                            progressBar.setVisibility(View.GONE);
                             Toast.makeText(getApplicationContext(), "This account has been locked", Toast.LENGTH_SHORT).show();
                         }
 
@@ -252,6 +194,8 @@ public class LoginActivity extends AppCompatActivity {
                                         }
                                     });
 
+                            progressBar.setVisibility(View.GONE);
+
                             Toast.makeText(getApplicationContext(), "Welcome! "+user.getEmail(), Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(getApplicationContext(), MainActivity.class));
                             finish();
@@ -270,6 +214,7 @@ public class LoginActivity extends AppCompatActivity {
                                     });
 
                             Log.e(TAG, "signInWithEmail:failure", task.getException());
+                            progressBar.setVisibility(View.GONE);
                             Toast.makeText(getApplicationContext(), "Authentication failed.", Toast.LENGTH_SHORT).show();
 
                         }
@@ -283,7 +228,8 @@ public class LoginActivity extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
-        if (currentUser != null && currentUser.isEmailVerified()) {
+//        if (currentUser != null && currentUser.isEmailVerified()) {
+        if (currentUser != null) {
             Log.e(TAG, "ON START - User info detected.");
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
