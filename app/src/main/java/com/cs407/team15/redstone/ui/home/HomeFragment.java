@@ -22,6 +22,8 @@ public class HomeFragment extends Fragment {
     private RecyclerView recyclerView;
     private NoticesAdapter mAdapter;
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -48,6 +50,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void prepareData() {
+        // Get notices from DB here
         noticesArrayList.add(new Notices("First Notice", 0, 0));
     }
 
