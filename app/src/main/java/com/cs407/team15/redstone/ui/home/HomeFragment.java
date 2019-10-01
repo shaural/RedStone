@@ -23,7 +23,6 @@ public class HomeFragment extends Fragment {
     private NoticesAdapter mAdapter;
 
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -33,7 +32,7 @@ public class HomeFragment extends Fragment {
         //recyclerview
         recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-        mAdapter = new NoticesAdapter(noticesArrayList);
+        mAdapter = new NoticesAdapter(getActivity(), noticesArrayList);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
@@ -51,7 +50,9 @@ public class HomeFragment extends Fragment {
 
     private void prepareData() {
         // Get notices from DB here
-        noticesArrayList.add(new Notices("First Notice", 0, 0));
+        noticesArrayList.add(new Notices("Admin", "First Notice", "Welcome!", "2019-10-01", 0));
+        noticesArrayList.add(new Notices("Admin", "Second Notice", "This is Beta!", "2019-10-01", 1));
+
     }
 
 }

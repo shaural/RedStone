@@ -1,46 +1,58 @@
 package com.cs407.team15.redstone.model;
 
 public class Notices {
-    private String description;
-    private int n_id;
-    private int time_created;
+    private String writer;
+    private String title;
+    private String content;
+    private String date;
+    private int notice_id;
 
-    public Notices() {
-
+    public Notices(String writer, String title, String content, String date, int notice_id) {
+        this.writer = writer;
+        this.title = title;
+        this.content = content;
+        this.date = date;
+        this.notice_id = notice_id;
     }
 
-    public Notices(String description, int n_id, int time_created) {
-        this.description = description;
-        this.n_id = n_id;
-        this.time_created = time_created;
+    public String getWriter() {
+        return writer;
     }
 
-    public String getDescription() {
-        return description;
+    public void setWriter(String writer) {
+        this.writer = writer;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public String getTitle() {
+        return title;
     }
 
-    public int getN_id() {
-        return n_id;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public void setN_id(int n_id) {
-        this.n_id = n_id;
+    public String getContent() {
+        return content;
     }
 
-    public int getTime_created() {
-        return time_created;
+    public void setContent(String content) {
+        this.content = content;
     }
 
-    public void setTime_created(int time_created) {
-        this.time_created = time_created;
+    public String getDate() {
+        return date;
     }
 
+    public void setDate(String date) {
+        this.date = date;
+    }
 
+    public int getNotice_id() {
+        return notice_id;
+    }
 
-
-
+    public void setNotice_id(int notice_id) {
+        this.notice_id = notice_id;
+    }
 }
+
