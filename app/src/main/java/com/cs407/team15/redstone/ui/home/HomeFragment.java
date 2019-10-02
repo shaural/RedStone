@@ -70,7 +70,7 @@ public class HomeFragment extends Fragment {
                                                      document.getString("title"),
                                                      document.getString("content"),
                                                      document.getString("date"),
-                                                     document.getLong("notice_id").intValue(),
+                                                     document.getString("notice_id"),
                                                      document.getBoolean("is_dismissed"));
                         if (!notice.is_dismissed()) {
                             noticesArrayList.add(notice);
