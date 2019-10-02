@@ -57,7 +57,6 @@ public class HomeFragment extends Fragment {
     }
 
     private void prepareData() {
-        noticesArrayList = new ArrayList<Notices>();
         String currentUserID = FirebaseAuth.getInstance().getCurrentUser().getEmail();
         FirebaseFirestore.getInstance().collection("users")
                 .document(currentUserID).collection("notices").get()
@@ -75,6 +74,7 @@ public class HomeFragment extends Fragment {
                                                      document.getBoolean("is_dismissed"));
                         if (!notice.is_dismissed()) {
                             noticesArrayList.add(notice);
+                            mAdapter.notifyDataSetChanged();
                         }
                     }
                 }

@@ -17,6 +17,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Notices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -63,9 +69,23 @@ public class NoticesAdapter extends RecyclerView.Adapter<NoticesAdapter.ViewHold
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
+                Notices notice = noticeList.get(position);
                 noticeList.remove(position);
                 notifyItemRemoved(position);
                 notifyItemRangeChanged(position, noticeList.size());
+                // Record that the user dismissed the notification
+                FirebaseFirestore.getInstance().collection("users")
+                        .document(FirebaseAuth.getInstance().getCurrentUser().getEmail())
+                        .collection("notices").whereEqualTo("notice_id", notice.getNotice_id())
+                        .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            task.getResult().getDocuments().get(0).getReference()
+                                    .update("is_dismissed", true);
+                        }
+                    }
+                });
             }
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeCallback);

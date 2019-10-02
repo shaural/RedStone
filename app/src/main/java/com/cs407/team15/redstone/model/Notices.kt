@@ -41,11 +41,5 @@ class Notices(
             return Notices(writer, title, content, date, notice_id, is_dismissed)
         }
     }
-
-    suspend fun dismiss() {
-        val thisNoticesDocument = FirebaseFirestore.getInstance().collectionGroup("notices")
-            .whereEqualTo("notice_id", notice_id).get().await().documents.first()
-        thisNoticesDocument.reference.update("is_dismissed", true).await()
-    }
 }
 
