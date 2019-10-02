@@ -46,7 +46,7 @@ class Location(val coordinates: GeoPoint, val description: String, val name: Str
         // Determine if the currently logged in user has flagged a particular location, defaulting
         // to false in case of an error but failing if no user is logged in
         suspend fun hasUserFlaggedLocation(location_id: String): Boolean {
-            return hasUserFlaggedLocation(FirebaseAuth.getInstance().currentUser!!.uid, location_id)
+            return hasUserFlaggedLocation(FirebaseAuth.getInstance().currentUser!!.email as String, location_id)
         }
 
         // If a particular user has flagged a particular location, attempts to remove the flag,
@@ -95,7 +95,7 @@ class Location(val coordinates: GeoPoint, val description: String, val name: Str
         // Convenience wrapper that toggles whether the currently-logged-in user has flagged the
         // specified location
         suspend fun toggleHasUserFlaggedLocation(location_id: String): Boolean {
-            return toggleHasUserFlaggedLocation(FirebaseAuth.getInstance().currentUser!!.uid, location_id)
+            return toggleHasUserFlaggedLocation(FirebaseAuth.getInstance().currentUser!!.email as String, location_id)
         }
 
         // Get the number of flags for a location, defaulting to -1 in case of an error
