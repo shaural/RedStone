@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
@@ -24,6 +25,7 @@ public class NoticesAdapter extends RecyclerView.Adapter<NoticesAdapter.ViewHold
     Context context;
     private String TAG = getClass().getName();
     private ArrayList<Notices> noticeList;
+    private RecyclerView recyclerView;
 
     public NoticesAdapter(Context context, ArrayList<Notices> noticeList) {
         this.context = context;
@@ -33,7 +35,8 @@ public class NoticesAdapter extends RecyclerView.Adapter<NoticesAdapter.ViewHold
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.notice_recycle_view_item,null);
-        return new ViewHolder(v);
+        ViewHolder viewHolder = new ViewHolder(v);
+        return viewHolder;
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -47,6 +50,26 @@ public class NoticesAdapter extends RecyclerView.Adapter<NoticesAdapter.ViewHold
         holder.tv_title.setText(noticeItem.getTitle()); // Title
         holder.tv_content.setText(noticeItem.getContent()); // Content
         holder.tv_date.setText(noticeItem.getDate()); // Date
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        ItemTouchHelper.SimpleCallback swipeCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                noticeList.remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, noticeList.size());
+            }
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
     @Override
