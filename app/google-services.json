@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "336852207439-e4r4tddf6c5mkckhvd6lj5rgprosio45.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cs407.team15.redstone",
+            "certificate_hash": "e8d8aefe6f08243ea517d899e5ecf8eba1ad12b6"
+          }
+        },
+        {
           "client_id": "336852207439-5ocfjdkr7bp8nsvajstmo68dr7aljcr1.apps.googleusercontent.com",
           "client_type": 3
         }
