@@ -1,6 +1,7 @@
 package com.cs407.team15.redstone.ui.home;
 
-import android.os.AsyncTask;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,9 +28,16 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.ArrayList;
+import com.google.android.gms.tasks.OnSuccessListener;
 
-public class HomeFragment extends Fragment {
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class HomeFragment extends Fragment implements NoticesAdapter.OnNoticeListener {
 
     private ArrayList<Notices> noticesArrayList = new ArrayList<>();
     private RecyclerView recyclerView;
@@ -42,6 +50,8 @@ public class HomeFragment extends Fragment {
     public static final String COLLECTION_NAME_KEY = "users";
     private String TAG = getClass().getName();
 
+    private FirebaseFirestore noticeDB;
+    private static Context context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,11 +62,14 @@ public class HomeFragment extends Fragment {
         //recyclerview
         recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-        mAdapter = new NoticesAdapter(getActivity(), noticesArrayList);
+
+        mAdapter = new NoticesAdapter(getActivity(), noticesArrayList, this);
+
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        mAdapter = new NoticesAdapter(getActivity(), noticesArrayList);
         recyclerView.setAdapter(mAdapter);
 
         return v;
@@ -70,10 +83,40 @@ public class HomeFragment extends Fragment {
     }
 
     private void prepareData() {
+
         // Get notices from DB here
-        noticesArrayList.add(new Notices("Admin", "First Notice", "Welcome!", "2019-10-01", 0));
-        noticesArrayList.add(new Notices("Admin", "Second Notice", "This is Beta!", "2019-10-01", 1));
+
+        noticeDB = FirebaseFirestore.getInstance();
+
+        noticeDB.collection("admin").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                if(!queryDocumentSnapshots.isEmpty()){
+
+                    List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                    for(DocumentSnapshot d: list){
+                        Notices n = d.toObject(Notices.class);
+                        noticesArrayList.add(new Notices(n.getWriter(), n.getTitle(), n.getContent(), n.getDate(), n.getNotice_id()));
+                    }
+
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+
+
 
     }
 
+    @Override
+    public void onNoticeClick(int position) {
+        HomeFragment.context = getActivity().getApplicationContext();
+        CharSequence text = "Position: " + position;
+        int duration = Toast.LENGTH_LONG;
+        Toast.makeText(HomeFragment.context, text, duration).show();
+
+        Intent intent = new Intent(HomeFragment.context, NoticeActivity.class);
+        intent.putExtra("selected_notice", noticesArrayList.get(position));
+        startActivity(intent);
+    }
 }
