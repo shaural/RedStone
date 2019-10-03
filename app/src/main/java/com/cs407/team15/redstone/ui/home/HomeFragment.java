@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -13,8 +14,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Notices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class HomeFragment extends Fragment {
 
@@ -32,11 +40,11 @@ public class HomeFragment extends Fragment {
         //recyclerview
         recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-        mAdapter = new NoticesAdapter(getActivity(), noticesArrayList);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        mAdapter = new NoticesAdapter(getActivity(), noticesArrayList);
         recyclerView.setAdapter(mAdapter);
 
         return v;
@@ -49,10 +57,29 @@ public class HomeFragment extends Fragment {
     }
 
     private void prepareData() {
-        // Get notices from DB here
-        noticesArrayList.add(new Notices("Admin", "First Notice", "Welcome!", "2019-10-01", 0));
-        noticesArrayList.add(new Notices("Admin", "Second Notice", "This is Beta!", "2019-10-01", 1));
-
+        String currentUserID = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        FirebaseFirestore.getInstance().collection("users")
+                .document(currentUserID).collection("notices").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    List<DocumentSnapshot> documents = task.getResult().getDocuments();
+                    for (DocumentSnapshot document : documents) {
+                        Notices notice = new Notices(document.getString("writer"),
+                                                     document.getString("title"),
+                                                     document.getString("content"),
+                                                     document.getString("date"),
+                                                     document.getString("notice_id"),
+                                                     document.getBoolean("is_dismissed"));
+                        if (!notice.is_dismissed()) {
+                            noticesArrayList.add(notice);
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+                }
+            }
+        });
     }
 
 }
