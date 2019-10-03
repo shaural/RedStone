@@ -253,6 +253,11 @@ public class RegisterActivity extends AppCompatActivity {
                             member.email = user.getEmail();
                             member.login_attempt = 0;
                             member.username = username;
+                            member.userDislikes = 0;
+                            member.userLikes = 0;
+                            member.recievedDislikes = 0;
+                            member.recievedLikes =0;
+                            member.userType = 0;
 
                             Log.e("Token", refreshedToken);
                             userref.document(user.getEmail()).set(member);

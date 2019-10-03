@@ -40,5 +40,10 @@
         android:name="com.cs407.team15.redstone.ui.settings.SettingsFragment"
         android:label="Settings"
         tools:layout="@layout/fragment_settings" />
-
+    <fragment
+        android:id="@+id/nav_location"
+        android:name="com.cs407.team15.redstone.ui.location.LocationPage"
+        android:label="Location"
+        tools:layout="@layout/location_display"
+        />
 </navigation>
