@@ -19,6 +19,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.bumptech.glide.Glide
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.location_display.view.*
 
 
@@ -31,8 +32,7 @@ class LocationPage : Fragment() {
         val root = inflater.inflate(R.layout.location_display, container, false)
        val title = arguments?.getCharSequence("title")
         root.loaction_name.text = title
-
-
+        val mainRoot = inflater.inflate(R.layout.app_bar_main, container, false)
 
         val locations= FirebaseFirestore.getInstance().collection("locations").get().addOnSuccessListener {locations->
             for (loc in locations.documents){
@@ -54,30 +54,12 @@ class LocationPage : Fragment() {
 
         } }
 
-
-      /*  for (loc in locations.){
-
-        }*/
-
        val button = root.loc_back_button
         button.setOnClickListener(
             {
-                val frag = fragmentManager!!.beginTransaction()
-                val loc=TourFragment()
-                frag.replace((view!!.parent as ViewGroup).id, loc)
-                // frag.addToBackStack(null)
-                frag.commit()
+                activity?.onBackPressed()
             }
         )
         return root
     }
-/*
-* service firebase.storage {
-  match /b/{bucket}/o {
-    match /{allPaths=**} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}
-* */
 }
