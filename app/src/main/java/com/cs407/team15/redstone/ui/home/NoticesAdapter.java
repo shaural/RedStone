@@ -12,10 +12,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Notices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -24,6 +31,7 @@ public class NoticesAdapter extends RecyclerView.Adapter<NoticesAdapter.ViewHold
     Context context;
     private String TAG = getClass().getName();
     private ArrayList<Notices> noticeList;
+    private RecyclerView recyclerView;
 
     private OnNoticeListener mOnNoticeListener;
 
@@ -36,7 +44,9 @@ public class NoticesAdapter extends RecyclerView.Adapter<NoticesAdapter.ViewHold
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.notice_recycle_view_item,null);
+
         return new ViewHolder(v, mOnNoticeListener);
+
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -50,6 +60,40 @@ public class NoticesAdapter extends RecyclerView.Adapter<NoticesAdapter.ViewHold
         holder.tv_title.setText(noticeItem.getTitle()); // Title
         holder.tv_content.setText(noticeItem.getContent()); // Content
         holder.tv_date.setText(noticeItem.getDate()); // Date
+    }
+
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        ItemTouchHelper.SimpleCallback swipeCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                Notices notice = noticeList.get(position);
+                noticeList.remove(position);
+                notifyItemRemoved(position);
+                notifyItemRangeChanged(position, noticeList.size());
+                // Record that the user dismissed the notification
+                FirebaseFirestore.getInstance().collection("users")
+                        .document(FirebaseAuth.getInstance().getCurrentUser().getEmail())
+                        .collection("notices").whereEqualTo("notice_id", notice.getNotice_id())
+                        .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            task.getResult().getDocuments().get(0).getReference()
+                                    .update("is_dismissed", true);
+                        }
+                    }
+                });
+            }
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
     }
 
     @Override

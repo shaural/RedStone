@@ -1,19 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
-        android:id="@+id/text_about_purdue"
-        android:layout_width="match_parent"
+        android:id="@+id/AboutLabel"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:text="@string/aboutLabel"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:textSize="24sp" />
+
+    <Button
+        android:id="@+id/mypurdue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/AboutLabel"
+        android:layout_toEndOf="@+id/bbbutton"
+        android:layout_alignParentEnd="true"
+        android:text="@string/mypurdue" />
+
+    <TextView
+        android:id="@+id/aboutparagraph"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_below="@+id/locationlisting"
+        android:layout_width="373dp"
+        android:layout_height="370dp"
+        android:text=""
+        android:textSize="14sp" />
+
+    <Button
+        android:id="@+id/bbbutton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/AboutLabel"
+        android:layout_toEndOf="@+id/purduehome"
+        android:text="@string/Blackboard" />
+
+    <Button
+        android:id="@+id/dismiss"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/AboutLabel"
+        android:layout_above="@+id/mypurdue"
+        android:text="@string/X" />
+
+    <Button
+        android:id="@+id/purduehome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/AboutLabel"
+        android:text="@string/purduehome" />
+
+    <Button
+        android:id="@+id/locationlisting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/bbbutton"
+        android:layout_centerHorizontal="true"
+        android:text="Locations" />
+</RelativeLayout>

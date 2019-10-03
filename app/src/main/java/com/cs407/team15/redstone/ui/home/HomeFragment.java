@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DefaultItemAnimator;
@@ -17,7 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Notices;
+
 import com.google.android.gms.tasks.OnSuccessListener;
+
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -43,11 +46,14 @@ public class HomeFragment extends Fragment implements NoticesAdapter.OnNoticeLis
         //recyclerview
         recyclerView = (RecyclerView) v.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
+
         mAdapter = new NoticesAdapter(getActivity(), noticesArrayList, this);
+
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
+        mAdapter = new NoticesAdapter(getActivity(), noticesArrayList);
         recyclerView.setAdapter(mAdapter);
 
         return v;
@@ -60,6 +66,7 @@ public class HomeFragment extends Fragment implements NoticesAdapter.OnNoticeLis
     }
 
     private void prepareData() {
+
         // Get notices from DB here
 
         noticeDB = FirebaseFirestore.getInstance();
@@ -79,6 +86,7 @@ public class HomeFragment extends Fragment implements NoticesAdapter.OnNoticeLis
                 }
             }
         });
+
 
 
     }

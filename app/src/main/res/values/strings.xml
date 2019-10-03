@@ -17,6 +17,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="aboutLabel">About Purdue</string>
 
     <!-- Authentication -->
     <string name="email">Email</string>
@@ -28,6 +29,11 @@
     <string name="signup">Sign up</string>
     <string name="success_signup">Welcome</string>
     <string name="failed_signup">Failed Sign up</string>
+    <string name="mypurdue">MyPurdue</string>
+    <string name="Blackboard">blackboard</string>
+    <string name="X">X</string>
+    <string name="aboutinfo">Purdue University is a public research university in West Lafayette, Indiana, and the flagship campus of the Purdue University system.[6] The university was founded in 1869 after Lafayette businessman John Purdue donated land and money to establish a college of science, technology, and agriculture in his name.[7] The first classes were held on September 16, 1874, with six instructors and 39 students.[7]  The main campus in West Lafayette offers more than 200 majors for undergraduates, over 69 masters and doctoral programs, and professional degrees in pharmacy and veterinary medicine. In addition, Purdue has 18 intercollegiate sports teams and more than 900 student organizations. Purdue is a member of the Big Ten Conference and enrolls the second largest student body of any university in Indiana, as well as the fourth largest foreign student population of any university in the United States.</string>
+    <string name="purduehome">Purdue Homepage</string>
     <string name="lbl_forgot_password">Forgot password?</string>
     <string name="forgot_password_msg">We just need your registered Email Id to sent you password reset instructions.</string>
     <string name="title_activity_reset_password">ResetPasswordActivity</string>
@@ -48,4 +54,5 @@
     <string name="user_dislikes">User Dislikes</string>
     <string name="user_netlikes">User Net Likes</string>
 
+    <string name="back">Back</string>
 </resources>
