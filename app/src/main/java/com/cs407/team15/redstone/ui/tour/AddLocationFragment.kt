@@ -23,7 +23,8 @@ import kotlinx.android.synthetic.main.add_location_fragment.*
 import java.sql.Time
 import java.sql.Timestamp
 import com.google.firebase.auth.FirebaseUser
-
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 
 class AddLocationFragment : Fragment() {
@@ -47,14 +48,15 @@ class AddLocationFragment : Fragment() {
         val btn_add_loc = getView()!!.findViewById(R.id.btn_add_location) as Button
         database = FirebaseDatabase.getInstance().reference
         btn_add_loc.setOnClickListener {
-            val name = view!!.findViewById<EditText>(R.id.et_loc_name)
-            val desc = view!!.findViewById<EditText>(R.id.et_about)
+            val name = view!!.findViewById<EditText>(R.id.et_loc_name).text.toString()
+            var desc = view!!.findViewById<EditText>(R.id.et_about).text.toString()
             val currentFirebaseUser = FirebaseAuth.getInstance().currentUser
 
-            val loc = AddLocationViewModel.Location(GeoPoint(arguments!!.getDouble("latitude"), arguments!!.getDouble("longitude")), name.text.toString(), desc.text.toString(), com.google.firebase.Timestamp.now(), currentFirebaseUser!!.uid)
+            val newKey = database.child("locations").push().key.toString()
 
-            val newKey = database.child("locations").push()
-            newKey.setValue(loc).addOnSuccessListener {
+            FirebaseFirestore.getInstance().collection("locations").document(newKey)
+                .set(hashMapOf("timestamp" to com.google.firebase.Timestamp.now(), "description" to desc, "name" to name, "user_id" to currentFirebaseUser!!.uid, "coordinates" to GeoPoint(arguments!!.getDouble("latitude"), arguments!!.getDouble("longitude"))))
+            .addOnSuccessListener {
                 Toast.makeText(context, "Location Added", Toast.LENGTH_SHORT).show()
                 this.activity!!.supportFragmentManager.popBackStack()
             }.addOnFailureListener{
