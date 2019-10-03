@@ -3,6 +3,7 @@ package com.cs407.team15.redstone.ui.tour
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.type.LatLng
 
 abstract class TourViewModel : ViewModel() {
 
@@ -10,4 +11,6 @@ abstract class TourViewModel : ViewModel() {
         value = "This is Tour Fragment"
     }
     val text: LiveData<String> = _text
+
+
 }
