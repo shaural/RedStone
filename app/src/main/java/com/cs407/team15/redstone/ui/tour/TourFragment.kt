@@ -51,7 +51,7 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
         val locations = FirebaseFirestore.getInstance().collection("locations").get().await()
         val markerIcon = BitmapDescriptorFactory.fromResource(R.drawable.marker)
         // Now that the location data has been fetched, we can quickly add all the markers
-        activity!!.runOnUiThread {
+        activity?.runOnUiThread {
             for (location in locations.documents) {
                 val title = location.get("name") as String
                 val gpsPoint = location.get("coordinates") as GeoPoint
@@ -67,7 +67,7 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
         val loc=LocationPage()
         loc.arguments=bundle
         frag.replace((view!!.parent as ViewGroup).id, loc)
-       // frag.addToBackStack(null)
+        frag.addToBackStack(null)
         frag.commit()
 
         return false
