@@ -9,7 +9,6 @@ import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.firebase.storage.StorageReference;
 import com.bumptech.glide.Glide;
 import java.io.InputStream;
-
 @GlideModule
 public class LocationAppGlideModule extends AppGlideModule {
     @Override
