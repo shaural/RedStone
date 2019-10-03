@@ -84,9 +84,8 @@ public class NoticesAdapter extends RecyclerView.Adapter<NoticesAdapter.ViewHold
                         .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            task.getResult().getDocuments().get(0).getReference()
-                                    .update("is_dismissed", true);
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            task.getResult().getDocuments().get(0).getReference().delete();
                         }
                     }
                 });
