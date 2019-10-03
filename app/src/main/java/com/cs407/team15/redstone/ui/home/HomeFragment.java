@@ -18,6 +18,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Notices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -33,6 +42,13 @@ public class HomeFragment extends Fragment implements NoticesAdapter.OnNoticeLis
     private ArrayList<Notices> noticesArrayList = new ArrayList<>();
     private RecyclerView recyclerView;
     private NoticesAdapter mAdapter;
+    private FloatingActionButton addButton;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private CollectionReference userref;
+
+    public static final String COLLECTION_NAME_KEY = "users";
+    private String TAG = getClass().getName();
 
     private FirebaseFirestore noticeDB;
     private static Context context;
@@ -62,6 +78,7 @@ public class HomeFragment extends Fragment implements NoticesAdapter.OnNoticeLis
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         prepareData();
     }
 

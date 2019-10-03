@@ -55,6 +55,9 @@ class SettingsFragment : Fragment() {
                 Toast.makeText(context,"Account deleted",Toast.LENGTH_SHORT).show()
                 val intent = Intent(context, LoginActivity::class.java)
                 startActivity(intent)
+                // Question
+                // Isn't this fragment still alive after the intent?
+                // ex) onBackPressed it goes back to Main Activity after delete and sign out?
             }
 
             builder.setNegativeButton("NO"){dialog,which ->
@@ -108,4 +111,5 @@ class SettingsFragment : Fragment() {
             }
         }
     }
+
 }
