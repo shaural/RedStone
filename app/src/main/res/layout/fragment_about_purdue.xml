@@ -29,6 +29,7 @@
         android:id="@+id/aboutparagraph"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:layout_below="@+id/locationlisting"
         android:layout_width="373dp"
         android:layout_height="370dp"
         android:text=""
@@ -57,4 +58,12 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/AboutLabel"
         android:text="@string/purduehome" />
+
+    <Button
+        android:id="@+id/locationlisting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/bbbutton"
+        android:layout_centerHorizontal="true"
+        android:text="Locations" />
 </RelativeLayout>

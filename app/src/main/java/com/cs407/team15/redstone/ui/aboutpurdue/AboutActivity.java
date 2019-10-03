@@ -15,8 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.cs407.team15.redstone.R;
+import com.cs407.team15.redstone.ui.location.LocationListFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,18 +36,20 @@ public class AboutActivity extends Fragment {
     private FirebaseFirestore db;
     private DocumentReference docRef;
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         db = FirebaseFirestore.getInstance();
         docRef = db.collection("schools").document("Purdue");
         //super.onCreate(savedInstanceState);
+        final ViewGroup container2 = container;
         View view = inflater.inflate(R.layout.fragment_about_purdue,
                 container, false);
         //setContentView(R.layout.fragment_about_purdue);
-        Button dismiss, home, blackboard, mypurdue;
+        Button dismiss, home, blackboard, mypurdue, locations;
         dismiss = (Button) view.findViewById(R.id.dismiss);
         home = (Button) view.findViewById(R.id.purduehome);
         blackboard = (Button) view.findViewById(R.id.bbbutton);
         mypurdue = (Button) view.findViewById(R.id.mypurdue);
+        locations = (Button) view.findViewById(R.id.locationlisting);
         mypurdue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -67,6 +72,16 @@ public class AboutActivity extends Fragment {
             @Override
             public void onClick(View v) {
                 getActivity().onBackPressed();
+            }
+        });
+        locations.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(container.getId(), new LocationListFragment());
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
         final TextView info = (TextView) view.findViewById(R.id.aboutparagraph);
