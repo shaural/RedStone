@@ -6,11 +6,4 @@ import com.google.firebase.firestore.GeoPoint
 
 class AddLocationViewModel : ViewModel() {
     // TODO: Implement the ViewModel
-    data class Location(
-        var coordinates: GeoPoint,
-        var name: String,
-        var description: String,
-        var timestamp: Timestamp,
-        var user_id: String
-    )
 }
