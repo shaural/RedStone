@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import com.cs407.team15.redstone.MainActivity
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.ui.tour.TourFragment
@@ -28,7 +29,6 @@ import kotlinx.coroutines.runBlocking
 class LocationPage : Fragment() {
 
     lateinit var location_id: String
-    lateinit var btn_flag: Button
     override fun onCreateView(inflater: LayoutInflater,
                           container: ViewGroup?,
                           savedInstanceState: Bundle?): View? {
@@ -36,12 +36,24 @@ class LocationPage : Fragment() {
         val root = inflater.inflate(R.layout.location_display, container, false)
        val title = arguments?.getCharSequence("title")
         root.loaction_name.text = title
-        btn_flag = root.btn_flag_location as Button
+        var btn_flag = root.btn_flag_location as Button
+        val key: String
+
+        Toast.makeText(context, "HELLO", Toast.LENGTH_SHORT)
+
         val locations= FirebaseFirestore.getInstance().collection("locations").get().addOnSuccessListener {locations->
             for (loc in locations.documents){
                 if(loc["name"] as String == title as String){
                     location_id = loc.id
-                    setBtnColor()
+                    var isFlagged = false
+                    Toast.makeText(context, "test", Toast.LENGTH_SHORT)
+//                    runBlocking { isFlagged = Location.hasUserFlaggedLocation(loc.id) }
+                    Toast.makeText(context, "here", Toast.LENGTH_SHORT)
+                    if(isFlagged) {
+                        btn_flag.setBackgroundColor(resources.getColor(R.color.RED))
+                    } else {
+                        btn_flag.setBackgroundColor(resources.getColor(R.color.GREEN))
+                    }
 
                    root.location_description.text=loc["description"] as String
                     //coordinates, timestamp,userid, name, description,image_src
@@ -65,8 +77,14 @@ class LocationPage : Fragment() {
 
         }*/
         btn_flag.setOnClickListener {
-            runBlocking { Location.toggleHasUserFlaggedLocation(location_id) }
-            setBtnColor()
+//            runBlocking { Location.toggleHasUserFlaggedLocation(location_id) }
+            var isFlagged = false
+//            runBlocking { isFlagged = Location.hasUserFlaggedLocation(location_id) }
+            if(isFlagged) {
+                btn_flag.setBackgroundColor(resources.getColor(R.color.RED))
+            } else {
+                btn_flag.setBackgroundColor(resources.getColor(R.color.GREEN))
+            }
         }
 
         val button = root.loc_back_button
@@ -80,16 +98,6 @@ class LocationPage : Fragment() {
             }
         )
         return root
-    }
-    fun setBtnColor() {
-
-        var isFlagged = false
-        runBlocking { isFlagged = Location.hasUserFlaggedLocation(location_id) }
-        if(isFlagged) {
-            btn_flag.setBackgroundColor(resources.getColor(R.color.RED))
-        } else {
-            btn_flag.setBackgroundColor(resources.getColor(R.color.GREEN))
-        }
     }
 /*
 * service firebase.storage {
