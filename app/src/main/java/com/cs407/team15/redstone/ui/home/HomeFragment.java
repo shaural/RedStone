@@ -21,6 +21,7 @@ import com.cs407.team15.redstone.model.Notices;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -53,7 +54,7 @@ public class HomeFragment extends Fragment implements NoticesAdapter.OnNoticeLis
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        mAdapter = new NoticesAdapter(getActivity(), noticesArrayList);
+        mAdapter = new NoticesAdapter(getActivity(), noticesArrayList, this);
         recyclerView.setAdapter(mAdapter);
 
         return v;
@@ -70,7 +71,7 @@ public class HomeFragment extends Fragment implements NoticesAdapter.OnNoticeLis
         // Get notices from DB here
 
         noticeDB = FirebaseFirestore.getInstance();
-
+        // Get admin notifications
         noticeDB.collection("admin").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -87,7 +88,23 @@ public class HomeFragment extends Fragment implements NoticesAdapter.OnNoticeLis
             }
         });
 
+        // Get normal notifications
+        noticeDB.collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getEmail())
+            .collection("notices").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                if(!queryDocumentSnapshots.isEmpty()){
 
+                    List<DocumentSnapshot> list = queryDocumentSnapshots.getDocuments();
+                    for(DocumentSnapshot d: list){
+                        Notices n = d.toObject(Notices.class);
+                        noticesArrayList.add(new Notices(n.getWriter(), n.getTitle(), n.getContent(), n.getDate(), n.getNotice_id()));
+                    }
+
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+        });
 
     }
 
