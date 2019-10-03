@@ -18,7 +18,7 @@ import org.junit.Assert.*
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 @RunWith(AndroidJUnit4::class)
-class ExampleInstrumentedTest {
+class LocationTest {
     @Test
     // Sanity test of test helper functions
     fun location_deletion() = runBlocking<Unit> {
@@ -27,7 +27,7 @@ class ExampleInstrumentedTest {
         makeLocationFlagThresholdsUnreachable()
 
         addLocation("test_location")
-        Location.toggleHasUserFlaggedLocation("test_location", "test_user")
+        Location.toggleHasUserFlaggedLocation("test_user", "test_location")
         removeLocation("test_location")
 
         assert(!doesLocationExist("test_location"))
@@ -59,7 +59,7 @@ class ExampleInstrumentedTest {
         removeLocation("test_location")
         assert(!doesLocationExist("test_location"))
 
-        addLocation("test_location")
+        addLocation("test_location", "test_location", "daniel.j.ostrowski@gmail.com")
         setLocationFlagThresholds(5, Double.MAX_VALUE)
         Location.toggleHasUserFlaggedLocation("test_user_1", "test_location")
         Location.toggleHasUserFlaggedLocation("test_user_2", "test_location")
