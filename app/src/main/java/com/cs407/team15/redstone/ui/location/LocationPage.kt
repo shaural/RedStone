@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import com.cs407.team15.redstone.MainActivity
 import com.cs407.team15.redstone.R
@@ -18,12 +19,16 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.bumptech.glide.Glide
+import com.cs407.team15.redstone.model.Location
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.location_display.view.*
+import kotlinx.coroutines.runBlocking
 
 
 class LocationPage : Fragment() {
 
+    lateinit var location_id: String
+    lateinit var btn_flag: Button
     override fun onCreateView(inflater: LayoutInflater,
                           container: ViewGroup?,
                           savedInstanceState: Bundle?): View? {
@@ -31,12 +36,13 @@ class LocationPage : Fragment() {
         val root = inflater.inflate(R.layout.location_display, container, false)
        val title = arguments?.getCharSequence("title")
         root.loaction_name.text = title
-
-
-
+        btn_flag = root.btn_flag_location as Button
         val locations= FirebaseFirestore.getInstance().collection("locations").get().addOnSuccessListener {locations->
             for (loc in locations.documents){
                 if(loc["name"] as String == title as String){
+                    location_id = loc.id
+                    setBtnColor()
+
                    root.location_description.text=loc["description"] as String
                     //coordinates, timestamp,userid, name, description,image_src
 
@@ -58,8 +64,12 @@ class LocationPage : Fragment() {
       /*  for (loc in locations.){
 
         }*/
+        btn_flag.setOnClickListener {
+            runBlocking { Location.toggleHasUserFlaggedLocation(location_id) }
+            setBtnColor()
+        }
 
-       val button = root.loc_back_button
+        val button = root.loc_back_button
         button.setOnClickListener(
             {
                 val frag = fragmentManager!!.beginTransaction()
@@ -70,6 +80,16 @@ class LocationPage : Fragment() {
             }
         )
         return root
+    }
+    fun setBtnColor() {
+
+        var isFlagged = false
+        runBlocking { isFlagged = Location.hasUserFlaggedLocation(location_id) }
+        if(isFlagged) {
+            btn_flag.setBackgroundColor(resources.getColor(R.color.RED))
+        } else {
+            btn_flag.setBackgroundColor(resources.getColor(R.color.GREEN))
+        }
     }
 /*
 * service firebase.storage {
