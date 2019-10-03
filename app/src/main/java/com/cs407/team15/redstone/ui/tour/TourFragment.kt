@@ -20,15 +20,22 @@ import com.google.android.gms.maps.SupportMapFragment
 import android.util.Log
 import android.widget.Button
 import android.widget.Toast
+import com.cs407.team15.redstone.ui.location.LocationPage
 import com.google.android.gms.maps.model.*
+import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import kotlinx.android.synthetic.main.location_display.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.launch
 
 
-class TourFragment : Fragment(), OnMapReadyCallback{
+
+
+
+class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener{
+
 
     var isAddLocationClicked = false
     private lateinit var mMap: GoogleMap
@@ -59,15 +66,33 @@ class TourFragment : Fragment(), OnMapReadyCallback{
             }
         }
     }
+    override fun onMarkerClick(marker:Marker?):Boolean{
+        val frag = fragmentManager!!.beginTransaction()
+        val bundle = Bundle()
+        bundle.putString("title",marker?.title)
+        val loc=LocationPage()
+        loc.arguments=bundle
+        frag.replace((view!!.parent as ViewGroup).id, loc)
+       // frag.addToBackStack(null)
+        frag.commit()
+
+        return false
+    }
     override fun onMapReady(googleMap: GoogleMap) {
+
         mMap = googleMap
         mMap.uiSettings.isZoomControlsEnabled=true
         mMap.setMinZoomPreference(14f)
-        val purdue = LatLng(40.4237,-86.9212)
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(purdue))
+
+        FirebaseFirestore.getInstance().collection("schools").document("Purdue").get().addOnSuccessListener(
+            OnSuccessListener {
+                val schoolLoc=it["coordinates"] as GeoPoint
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(schoolLoc.latitude,schoolLoc.longitude)))
+            }
+        )
         mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(activity, R.raw.mapstyle))
         GlobalScope.launch { addAllKnownLocations() }
-
+        mMap.setOnMarkerClickListener(this)
         mMap.setOnMapClickListener(
             object : GoogleMap.OnMapClickListener {
                 override fun onMapClick(location: LatLng?) {
@@ -112,3 +137,4 @@ class TourFragment : Fragment(), OnMapReadyCallback{
         }
     }
 }
+
