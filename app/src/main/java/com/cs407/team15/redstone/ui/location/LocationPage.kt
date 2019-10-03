@@ -16,6 +16,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.android.gms.tasks.OnSuccessListener
+import com.bumptech.glide.Glide
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.location_display.view.*
 
 
@@ -28,8 +30,11 @@ class LocationPage : Fragment() {
         val root = inflater.inflate(R.layout.location_display, container, false)
        val title = arguments?.getCharSequence("title")
         root.loaction_name.text = title
-        //root.location_image
-
+        var locationImage =root.location_image
+        var storage =FirebaseStorage.getInstance()
+        var url = "gs://redstone-7e137.appspot.com/fountain.jpg"//"https://firebasestorage.googleapis.com/v0/b/redstone-7e137.appspot.com/o/fountain.jpg?alt=media&token=1e4f2e63-9484-4768-ab9b-3fc5b478073e"
+        var imageStorage =  storage.getReferenceFromUrl(url)
+        Glide.with(this).load(imageStorage).into(locationImage)
         val locations= FirebaseFirestore.getInstance().collection("locations").get().addOnSuccessListener {locations->
             for (loc in locations.documents){
                 if(loc["name"] as String == title as String){
@@ -38,6 +43,8 @@ class LocationPage : Fragment() {
                 }
 
         } }
+
+
       /*  for (loc in locations.){
 
         }*/
@@ -54,5 +61,13 @@ class LocationPage : Fragment() {
         )
         return root
     }
-
+/*
+* service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+* */
 }
