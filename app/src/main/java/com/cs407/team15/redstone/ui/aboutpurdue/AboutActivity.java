@@ -35,14 +35,39 @@ import com.google.firebase.firestore.FirebaseFirestore;
 public class AboutActivity extends Fragment {
     private FirebaseFirestore db;
     private DocumentReference docRef;
+    String myPurdueUrl="http://www.mypurdue.purdue.edu";
+    String BlackboardUrl="https://mycourses.purdue.edu/";
+    String HomeUrl="http://www.purdue.edu";
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         db = FirebaseFirestore.getInstance();
         docRef = db.collection("schools").document("Purdue");
+
         //super.onCreate(savedInstanceState);
         final ViewGroup container2 = container;
         View view = inflater.inflate(R.layout.fragment_about_purdue,
                 container, false);
+        final TextView info = (TextView) view.findViewById(R.id.aboutparagraph);
+        // connect to firebase and get the about paragraph
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        info.setText((CharSequence)document.get("about"));
+                        setBlackboardUrl(document.get("blackboardUrl").toString());
+                        setHomeUrl(document.get("homeUrl").toString());
+                        setMyPurdueUrl(document.get("myPurdueUrl").toString());
+                        //Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                    } else {
+                        //Log.d(TAG, "No such document");
+                    }
+                } else {
+                    //Log.d(TAG, "get failed with ", task.getException());
+                }
+            }
+        });
         //setContentView(R.layout.fragment_about_purdue);
         Button dismiss, home, blackboard, mypurdue, locations;
         dismiss = (Button) view.findViewById(R.id.dismiss);
@@ -53,19 +78,19 @@ public class AboutActivity extends Fragment {
         mypurdue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.mypurdue.purdue.edu")));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(myPurdueUrl)));
             }
         });
         blackboard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.mycourses.purdue.edu")));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(BlackboardUrl)));
             }
         });
         home.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.purdue.edu")));
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(HomeUrl)));
             }
         });
         dismiss.setOnClickListener(new View.OnClickListener() {
@@ -84,24 +109,19 @@ public class AboutActivity extends Fragment {
                 transaction.commit();
             }
         });
-        final TextView info = (TextView) view.findViewById(R.id.aboutparagraph);
-        // connect to firebase and get the about paragraph
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        info.setText((CharSequence)document.get("about"));
-                        //Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                    } else {
-                        //Log.d(TAG, "No such document");
-                    }
-                } else {
-                    //Log.d(TAG, "get failed with ", task.getException());
-                }
-            }
-        });
+
         return view;
+    }
+
+    public void setMyPurdueUrl(String myPurdueUrl) {
+        this.myPurdueUrl = myPurdueUrl;
+    }
+
+    public void setHomeUrl(String homeUrl) {
+        HomeUrl = homeUrl;
+    }
+
+    public void setBlackboardUrl(String blackboardUrl) {
+        BlackboardUrl = blackboardUrl;
     }
 }

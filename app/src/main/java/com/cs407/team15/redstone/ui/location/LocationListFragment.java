@@ -9,6 +9,8 @@ import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,9 +34,12 @@ public class LocationListFragment extends Fragment implements RecyclerAdapter.It
     private DocumentReference docRef;
     private ArrayList<String> locList;
     private View view;
+    ViewGroup container2;
+    RecyclerAdapter adapter;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         db = FirebaseFirestore.getInstance();
+        container2 = container;
         //col = db.collection("locations");
         view = inflater.inflate(R.layout.fragment_location_list,
                 container, false);
@@ -78,7 +83,7 @@ public class LocationListFragment extends Fragment implements RecyclerAdapter.It
     public void fillRecycleViewer(ArrayList<String> list) {
         RecyclerView recyclerView = view.findViewById(R.id.locationlist);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        RecyclerAdapter adapter = new RecyclerAdapter(getContext(), list);
+        adapter = new RecyclerAdapter(getContext(), list);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
         view.invalidate();
@@ -90,5 +95,15 @@ public class LocationListFragment extends Fragment implements RecyclerAdapter.It
     @Override
     public void onItemClick(View view, int position) {
         //redirect to location page
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        LocationPage lp = new LocationPage();
+        Bundle bundle = new Bundle();
+        RecyclerView recycle = view.findViewById(R.id.locationlist);
+        bundle.putString("title", adapter.getItem(position));
+        lp.setArguments(bundle);
+        ft.replace(container2.getId(), lp);
+        ft.addToBackStack(null);
+        ft.commit();
     }
 }
