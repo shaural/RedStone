@@ -7,15 +7,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.ui.authentication.LoginActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.android.synthetic.main.fragment_settings.*
 
 class SettingsFragment : Fragment() {
 
     private lateinit var settingsViewModel: SettingsViewModel
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,12 +57,55 @@ class SettingsFragment : Fragment() {
                 startActivity(intent)
             }
 
-            builder.setNegativeButton("No"){dialog,which ->
+            builder.setNegativeButton("NO"){dialog,which ->
                 Toast.makeText(context,"Account not deleted",Toast.LENGTH_SHORT).show()
             }
 
             val dialog: AlertDialog = builder.create()
             dialog.show()
+        }
+
+
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            val email = user.email.toString()
+            val collectionref = FirebaseFirestore.getInstance().collection("users")
+            val emailDoc = collectionref.document(email)
+
+            var usernameRetrieved = ""
+            val usernameText = getView()!!.findViewById<EditText>(R.id.username_text)
+            emailDoc.get().addOnSuccessListener { documentSnapshot ->
+                    if (documentSnapshot != null) {
+                        usernameRetrieved = documentSnapshot!!.get("username").toString()
+                        usernameText.setText(usernameRetrieved)
+                    }else {
+                        usernameText.setText("No current username")
+                        Toast.makeText(context, "No information found", Toast.LENGTH_SHORT)
+                    }
+                }
+
+            val updateButton = getView()!!.findViewById(R.id.update_button) as Button
+
+            updateButton.setOnClickListener {
+                val builder = AlertDialog.Builder(context)
+
+                builder.setTitle("Update Profile")
+                builder.setMessage("Are you sure you want to update your profile?")
+
+                builder.setPositiveButton("YES") { dialog, which ->
+                    val newUsername = usernameText.text.toString()
+                    emailDoc.update("username", newUsername)
+                    usernameText.setText(newUsername)
+                    Toast.makeText(context, "Settings Updated", Toast.LENGTH_SHORT).show()
+                }
+
+                builder.setNegativeButton("NO") { dialog, which ->
+                    Toast.makeText(context, "Settings Not Updated", Toast.LENGTH_SHORT).show()
+                }
+
+                val dialog: AlertDialog = builder.create()
+                dialog.show()
+            }
         }
     }
 }
