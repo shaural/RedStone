@@ -6,6 +6,11 @@ public class User {
     public String email;
     public String username;
     public int login_attempt;
+    public int userLikes;
+    public int userDislikes;
+    public int recievedDislikes;
+    public int recievedLikes;
+    public int userType;
 
     public User() {
 
