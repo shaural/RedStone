@@ -8,6 +8,8 @@
     <string name="action_settings">Settings</string>
     <string name="action_signout">Sign out</string>
 
+
+
     <string name="menu_home">Home</string>
     <string name="menu_aboutpurdue">About Purdue</string>
     <string name="menu_tour">Tour</string>
@@ -18,14 +20,13 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="aboutLabel">About Purdue</string>
 
-    <!-- Firebase Authentication -->
+    <!-- Authentication -->
     <string name="email">Email</string>
     <string name="password">Password</string>
-
+    <string name="username">Username</string>
     <string name="signin">Sign in</string>
     <string name="success_login">Success Sign in</string>
     <string name="failed_login">Failed Sign in</string>
-
     <string name="signup">Sign up</string>
     <string name="success_signup">Welcome</string>
     <string name="failed_signup">Failed Sign up</string>
@@ -34,4 +35,24 @@
     <string name="X">X</string>
     <string name="aboutinfo">Purdue University is a public research university in West Lafayette, Indiana, and the flagship campus of the Purdue University system.[6] The university was founded in 1869 after Lafayette businessman John Purdue donated land and money to establish a college of science, technology, and agriculture in his name.[7] The first classes were held on September 16, 1874, with six instructors and 39 students.[7]  The main campus in West Lafayette offers more than 200 majors for undergraduates, over 69 masters and doctoral programs, and professional degrees in pharmacy and veterinary medicine. In addition, Purdue has 18 intercollegiate sports teams and more than 900 student organizations. Purdue is a member of the Big Ten Conference and enrolls the second largest student body of any university in Indiana, as well as the fourth largest foreign student population of any university in the United States.</string>
     <string name="purduehome">Purdue Homepage</string>
+    <string name="lbl_forgot_password">Forgot password?</string>
+    <string name="forgot_password_msg">We just need your registered Email Id to sent you password reset instructions.</string>
+    <string name="title_activity_reset_password">ResetPasswordActivity</string>
+    <string name="btn_forgot_password">Forgot your password?</string>
+    <string name="btn_reset_password">Reset Password</string>
+    <string name="btn_back"><![CDATA[<< Back]]></string>
+
+    <string name="continue_to_sign_up">Continue to Sign Up</string>
+    <string name="delete_account">Delete Account</string>
+
+    <!-- Location -->
+    <string name="add_location">Add Location</string>
+    <string name="user_type">User Type</string>
+    <string name="likes">Recived Likes</string>
+    <string name="dislikes">Recived Dislikes</string>
+    <string name="netlikes">Recieved Net Likes</string>
+    <string name="user_likes">User Likes</string>
+    <string name="user_dislikes">User Dislikes</string>
+    <string name="user_netlikes">User Net Likes</string>
+
 </resources>

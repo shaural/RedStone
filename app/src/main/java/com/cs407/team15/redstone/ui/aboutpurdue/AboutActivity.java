@@ -66,7 +66,7 @@ public class AboutActivity extends Fragment {
         dismiss.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().finish();
+                getActivity().onBackPressed();
             }
         });
         final TextView info = (TextView) view.findViewById(R.id.aboutparagraph);

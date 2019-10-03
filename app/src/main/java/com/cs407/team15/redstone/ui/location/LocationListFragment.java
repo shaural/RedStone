@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -30,36 +31,60 @@ public class LocationListFragment extends Fragment implements RecyclerAdapter.It
     private CollectionReference col;
     private DocumentReference docRef;
     private ArrayList<String> locList;
+    private View view;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         db = FirebaseFirestore.getInstance();
-        col = db.collection("locations");
-        View view = inflater.inflate(R.layout.fragment_location_list,
+        //col = db.collection("locations");
+        view = inflater.inflate(R.layout.fragment_location_list,
                 container, false);
-        col.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        Button dismiss = (Button) view.findViewById(R.id.loclistdismiss);
+        dismiss.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    List<String> list = new ArrayList<>();
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        list.add((String)document.get("name"));
-                    }
-                    listTransfer(list);
-                    Log.d(TAG, list.toString());
-                } else {
-                    Log.d(TAG, "Error getting documents: ", task.getException());
-                }
+            public void onClick(View v) {
+                getActivity().onBackPressed();
             }
         });
-        RecyclerView recyclerView = view.findViewById(R.id.locationlist);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        RecyclerAdapter adapter = new RecyclerAdapter(getContext(), locList);
-        adapter.setClickListener(this);
-        recyclerView.setAdapter(adapter);
+        db.collection("locations")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            ArrayList<String> list = new ArrayList<>();
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                if (document.exists()) {
+                                    Log.d(TAG, document.getId() + " => " + document.getData());
+                                    list.add(document.get("name").toString());
+                                }
+                                else {
+                                    Log.d("michael", "no document exists");
+                                }
+                            }
+                            fillRecycleViewer(list);
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+//        RecyclerView recyclerView = view.findViewById(R.id.locationlist);
+//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+//        RecyclerAdapter adapter = new RecyclerAdapter(getContext(), locList);
+//        adapter.setClickListener(this);
+//        recyclerView.setAdapter(adapter);
         return view;
     }
-    public void listTransfer(List<String> list) {
-        locList = (ArrayList)list;
+
+    public void fillRecycleViewer(ArrayList<String> list) {
+        RecyclerView recyclerView = view.findViewById(R.id.locationlist);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        RecyclerAdapter adapter = new RecyclerAdapter(getContext(), list);
+        adapter.setClickListener(this);
+        recyclerView.setAdapter(adapter);
+        view.invalidate();
+    }
+    public void listTransfer(ArrayList<String> list) {
+        locList = list;
     }
 
     @Override

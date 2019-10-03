@@ -13,9 +13,15 @@
 
     <fragment
         android:id="@+id/nav_aboutpurdue"
-        android:name="com.cs407.team15.redstone.ui.aboutpurdue.AboutPurdueFragment"
+        android:name="com.cs407.team15.redstone.ui.aboutpurdue.AboutActivity"
         android:label="@string/menu_aboutpurdue"
         tools:layout="@layout/fragment_about_purdue" />
+
+    <fragment
+        android:id="@+id/nav_locations"
+        android:name="com.cs407.team15.redstone.ui.location.LocationListFragment"
+        android:label="Locations"
+        tools:layout="@layout/fragment_location_list" />
 
     <fragment
         android:id="@+id/nav_tour"
@@ -34,5 +40,11 @@
         android:name="com.cs407.team15.redstone.ui.profile.ProfileFragment"
         android:label="@string/menu_profile"
         tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.cs407.team15.redstone.ui.settings.SettingsFragment"
+        android:label="Settings"
+        tools:layout="@layout/fragment_settings" />
 
 </navigation>

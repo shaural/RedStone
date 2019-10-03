@@ -9,15 +9,22 @@
     tools:context=".ui.authentication.LoginActivity"
     android:id="@+id/layout_main">
 
+    <ImageView
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="10dp"
+        android:src="@mipmap/ic_launcher" />
 
     <TextView
         android:id="@+id/tv_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/email"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="25dp"
         android:layout_marginLeft="50dp"
-        android:layout_marginRight="50dp" />
+        android:layout_marginRight="50dp"
+        android:textColor="@color/common_google_signin_btn_text_light"/>
 
     <EditText
         android:id="@+id/et_eamil"
@@ -27,7 +34,9 @@
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
         android:inputType="textEmailAddress"
-        android:hint="E-mail"/>
+        android:hint="E-mail"
+        android:textColor="@color/common_google_signin_btn_text_light"
+        android:textColorHint="@color/common_google_signin_btn_text_light"/>
 
     <TextView
         android:id="@+id/tv_password"
@@ -37,7 +46,8 @@
         android:text="@string/password"
         android:layout_centerInParent="true"
         android:layout_marginLeft="50dp"
-        android:layout_marginRight="50dp"/>
+        android:layout_marginRight="50dp"
+        android:textColor="@color/common_google_signin_btn_text_light"/>
 
     <EditText
         android:id="@+id/et_password"
@@ -48,7 +58,9 @@
         android:layout_marginRight="50dp"
         android:inputType="textPassword"
         android:ems="10"
-        android:hint="Password"/>
+        android:hint="Password"
+        android:textColor="@color/common_google_signin_btn_text_light"
+        android:textColorHint="@color/common_google_signin_btn_text_light"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -86,22 +98,14 @@
         android:textAllCaps="false"
         android:id="@+id/btn_forgot"
         android:background="@null"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/colorAccent"
         android:layout_marginBottom="8dp"
         />
 
-    <TextView
-        android:layout_width="match_parent"
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="OR"
-        android:gravity="center"
-        android:textColor="@color/colorPrimary"/>
-
-    <com.google.android.gms.common.SignInButton
-        android:id="@+id/btn_google_signin"
-        android:layout_width="300dp"
-        android:layout_height="55dp"
-        android:layout_marginTop="15dp"
-        />
+        android:visibility="gone" />
 
 </LinearLayout>

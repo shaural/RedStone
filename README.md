@@ -1,3 +1,2 @@
-### Team 15 ReadStone
-
-hello world.
+# RedStone
+AR Android tour guide for Purdue University. Developed for Senior Design.

@@ -13,17 +13,25 @@
             android:icon="@drawable/ic_menu_gallery"
             android:title="@string/menu_aboutpurdue" />
         <item
+            android:id="@+id/nav_locations"
+            android:icon="@drawable/marker"
+            android:title="Locations" />
+        <item
             android:id="@+id/nav_tour"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/menu_tour" />
         <item
             android:id="@+id/nav_ar"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_map_black_24dp"
             android:title="@string/menu_ar" />
         <item
             android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_menu_manage"
+            android:icon="@drawable/ic_account_box_black_24dp"
             android:title="@string/menu_profile" />
+        <item
+            android:id="@+id/nav_settings"
+            android:icon="@drawable/ic_menu_manage"
+            android:title="Settings" />
     </group>
 
 </menu>
