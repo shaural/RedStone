@@ -69,7 +69,6 @@ public class HomeFragment extends Fragment implements NoticesAdapter.OnNoticeLis
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-        mAdapter = new NoticesAdapter(getActivity(), noticesArrayList);
         recyclerView.setAdapter(mAdapter);
 
         return v;
