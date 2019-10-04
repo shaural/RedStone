@@ -258,6 +258,7 @@ public class RegisterActivity extends AppCompatActivity {
                             member.recievedDislikes = 0;
                             member.recievedLikes =0;
                             member.userType = 0;
+                            member.status = "general";
 
                             Log.e("Token", refreshedToken);
                             userref.document(user.getEmail()).set(member);

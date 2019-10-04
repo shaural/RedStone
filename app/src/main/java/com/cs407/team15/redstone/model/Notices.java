@@ -33,14 +33,15 @@ public class Notices implements Parcelable {
         content = in.readString();
         date = in.readString();
         notice_id = in.readString();
+
     }
 
-    public static void submitNotice(String writer, String title, String content) {
+    public static void submitNotice(String writer, String title, String content, String locationSubmitter) {
         Notices notice = new Notices(writer, title, content,
                 new SimpleDateFormat("yyyy-MM-dd").format(new Date()),
                 UUID.randomUUID().toString());
         FirebaseFirestore.getInstance().collection("users")
-                .document(FirebaseAuth.getInstance().getCurrentUser().getEmail())
+                .document(locationSubmitter)
                 .collection("notices").add(notice);
     }
 
