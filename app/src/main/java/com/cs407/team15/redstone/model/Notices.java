@@ -33,6 +33,7 @@ public class Notices implements Parcelable {
         content = in.readString();
         date = in.readString();
         notice_id = in.readString();
+
     }
 
     public static void submitNotice(String writer, String title, String content, String locationSubmitter) {

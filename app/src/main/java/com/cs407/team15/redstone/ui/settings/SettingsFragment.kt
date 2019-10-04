@@ -50,8 +50,8 @@ class SettingsFragment : Fragment() {
             builder.setMessage("Are you sure you want to delete your account?")
 
             builder.setPositiveButton("YES"){dialog, which ->
-                FirebaseAuth.getInstance().signOut()
                 FirebaseAuth.getInstance().currentUser?.delete()
+                FirebaseAuth.getInstance().signOut()
                 Toast.makeText(context,"Account deleted",Toast.LENGTH_SHORT).show()
                 val intent = Intent(context, LoginActivity::class.java)
                 startActivity(intent)
