@@ -3,6 +3,13 @@ package com.cs407.team15.redstone.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.UUID;
+
 public class Notices implements Parcelable {
     private String writer;
     private String title;
@@ -26,6 +33,16 @@ public class Notices implements Parcelable {
         content = in.readString();
         date = in.readString();
         notice_id = in.readString();
+
+    }
+
+    public static void submitNotice(String writer, String title, String content, String locationSubmitter) {
+        Notices notice = new Notices(writer, title, content,
+                new SimpleDateFormat("yyyy-MM-dd").format(new Date()),
+                UUID.randomUUID().toString());
+        FirebaseFirestore.getInstance().collection("users")
+                .document(locationSubmitter)
+                .collection("notices").add(notice);
     }
 
     public static final Creator<Notices> CREATOR = new Creator<Notices>() {
