@@ -88,17 +88,17 @@ class LocationPage : Fragment(), CoroutineScope {
                             //coordinates, timestamp,userid, name, description,image_src
 
 //                            //sets image of location if there is a image
-//                            var locationImage = root.location_image
-//                            var url = loc["image_src"] as String?
-//                            if (url != null) {
-//                                var storage = FirebaseStorage.getInstance()
-//                                var imageStorage = storage.getReferenceFromUrl(url)
-//                                Glide.with(this).load(imageStorage).into(locationImage)
-//                            } else {
-//                                locationImage.setImageResource(R.drawable.background_bell_tower)
-//                            }
                             var locationImage = root.location_image
-                            locationImage.setImageResource(R.drawable.background_bell_tower)
+                            var url = loc["image_src"] as String?
+                            if (url != null) {
+                                var storage = FirebaseStorage.getInstance()
+                                var imageStorage = storage.getReferenceFromUrl(url)
+                                Glide.with(view!!.context).load(imageStorage).into(locationImage)
+                            } else {
+                                locationImage.setImageResource(R.drawable.background_bell_tower)
+                            }
+//                            var locationImage = root.location_image
+//                            locationImage.setImageResource(R.drawable.background_bell_tower)
 
                         }
 
