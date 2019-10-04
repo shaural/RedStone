@@ -22,6 +22,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
@@ -143,7 +144,9 @@ public class LoginActivity extends AppCompatActivity {
                         }
 
                     } else {
-                        Log.d(TAG, "No User document");
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(getApplicationContext(), "User information doesn't exist", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "No User document");
                     }
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
@@ -189,6 +192,7 @@ public class LoginActivity extends AppCompatActivity {
                                 finish();
                             } else {
                                 Log.e(TAG, "signInWithEmail:success:emailNotVerified");
+                                progressBar.setVisibility(View.GONE);
                                 Toast.makeText(getApplicationContext(), "Please verify your email", Toast.LENGTH_SHORT).show();
                             }
 
@@ -216,6 +220,8 @@ public class LoginActivity extends AppCompatActivity {
 
                         } else {
                             // increase sign in attempts
+                            Log.e(TAG, "signInWithEmail:failure", task.getException());
+
                             db.collection("users").document(email).get()
                                     .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                         @Override
@@ -225,13 +231,17 @@ public class LoginActivity extends AppCompatActivity {
                                             me.login_attempt++;
                                             document.getReference().set(me);
                                         }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.e(TAG, "User not found", e);
+                                        }
                                     });
-
-                            Log.e(TAG, "signInWithEmail:failure", task.getException());
-                            progressBar.setVisibility(View.GONE);
                             Toast.makeText(getApplicationContext(), "Authentication failed.", Toast.LENGTH_SHORT).show();
-
+                            progressBar.setVisibility(View.GONE);
                         }
+
                     }
                 });
     }
