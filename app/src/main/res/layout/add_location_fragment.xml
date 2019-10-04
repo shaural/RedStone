@@ -8,9 +8,22 @@
     android:orientation="vertical">
 
 
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_marginTop="50dp"
+            android:layout_width="match_parent"
+            android:padding="10dp"
+            android:textAlignment="center"
+            android:layout_height="wrap_content"
+            android:textSize="24dp"
+            android:text="Add a new Location"/>
+
         <TextView
             android:id="@+id/tv_loc_name"
+            android:layout_marginTop="150dp"
             android:layout_width="wrap_content"
+            android:padding="10dp"
             android:layout_height="wrap_content"
             android:text="Location Name:"/>
 
@@ -23,6 +36,7 @@
 
         <TextView
             android:id="@+id/tv_about"
+            android:padding="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="About:" />
@@ -38,5 +52,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Add Location" />
+<!--    <Button-->
+<!--        android:id="@+id/btn_back"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Cancel" />-->
 
 </LinearLayout>

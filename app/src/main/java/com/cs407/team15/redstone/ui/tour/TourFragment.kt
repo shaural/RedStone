@@ -40,6 +40,7 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
     var isAddLocationClicked = false
     private lateinit var mMap: GoogleMap
     private lateinit var tourViewModel: TourViewModel
+    private lateinit var add_location_btn: Button
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -99,6 +100,7 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
                     //gets Latitude & Longitude where user Clicked
                     if (isAddLocationClicked) {
                         isAddLocationClicked = false
+                        add_location_btn.setBackgroundColor(resources.getColor(R.color.btn_def))
                         val builder = AlertDialog.Builder(context)
                         builder.setTitle("Add Location")
                         builder.setMessage("Are you sure you want to add the location at the coordinates: ${location}?")
@@ -129,11 +131,12 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val add_location_btn = getView()!!.findViewById(R.id.add_location_button) as Button
+        add_location_btn = getView()!!.findViewById(R.id.add_location_button) as Button
 
         add_location_btn.setOnClickListener{
             Toast.makeText(context, "Click on the map where you would like to add your location.", Toast.LENGTH_LONG).show()
             isAddLocationClicked = true
+            add_location_btn.setBackgroundColor(resources.getColor(R.color.GREEN))
         }
     }
 }

@@ -22,6 +22,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
@@ -143,7 +144,9 @@ public class LoginActivity extends AppCompatActivity {
                         }
 
                     } else {
-                        Log.d(TAG, "No User document");
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(getApplicationContext(), "User information doesn't exist", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "No User document");
                     }
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
@@ -168,40 +171,57 @@ public class LoginActivity extends AppCompatActivity {
                              * Email verification
                              * comment this for test
                              */
-//                            if(user.isEmailVerified()){
-//                                Log.e(TAG, "signInWithEmail:success:emailVerified");
-//                                Toast.makeText(getApplicationContext(), "Welcome!", Toast.LENGTH_SHORT).show();
-//                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
-//                                finish();
-//                            } else {
-//                                Log.e(TAG, "signInWithEmail:success:emailNotVerified");
-//                                Toast.makeText(getApplicationContext(), "Please verify your email", Toast.LENGTH_SHORT).show();
-//                            }
+                            if(user.isEmailVerified()){
+                                Log.e(TAG, "signInWithEmail:success:emailVerified");
+
+                                // sign in attempts init
+                                db.collection("users").document(user.getEmail()).get()
+                                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                            @Override
+                                            public void onSuccess(DocumentSnapshot document) {
+                                                User me = document.toObject(User.class);
+                                                me.login_attempt = 0;
+                                                document.getReference().set(me);
+                                            }
+                                        });
+
+                                progressBar.setVisibility(View.GONE);
+
+                                Toast.makeText(getApplicationContext(), "Welcome!", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                                finish();
+                            } else {
+                                Log.e(TAG, "signInWithEmail:success:emailNotVerified");
+                                progressBar.setVisibility(View.GONE);
+                                Toast.makeText(getApplicationContext(), "Please verify your email", Toast.LENGTH_SHORT).show();
+                            }
 
                             /**
                              * For test
                              */
-                            Log.e(TAG, "signInWithEmail:success:emailVerified");
-
-                            // sign in attempts init
-                            db.collection("users").document(user.getEmail()).get()
-                                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                        @Override
-                                        public void onSuccess(DocumentSnapshot document) {
-                                            User me = document.toObject(User.class);
-                                            me.login_attempt = 0;
-                                            document.getReference().set(me);
-                                        }
-                                    });
-
-                            progressBar.setVisibility(View.GONE);
-
-                            Toast.makeText(getApplicationContext(), "Welcome! "+user.getEmail(), Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                            finish();
+//                            Log.e(TAG, "signInWithEmail:success:emailVerified");
+//
+//                            // sign in attempts init
+//                            db.collection("users").document(user.getEmail()).get()
+//                                    .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//                                        @Override
+//                                        public void onSuccess(DocumentSnapshot document) {
+//                                            User me = document.toObject(User.class);
+//                                            me.login_attempt = 0;
+//                                            document.getReference().set(me);
+//                                        }
+//                                    });
+//
+//                            progressBar.setVisibility(View.GONE);
+//
+//                            Toast.makeText(getApplicationContext(), "Welcome! "+user.getEmail(), Toast.LENGTH_SHORT).show();
+//                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+//                            finish();
 
                         } else {
                             // increase sign in attempts
+                            Log.e(TAG, "signInWithEmail:failure", task.getException());
+
                             db.collection("users").document(email).get()
                                     .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                         @Override
@@ -211,13 +231,17 @@ public class LoginActivity extends AppCompatActivity {
                                             me.login_attempt++;
                                             document.getReference().set(me);
                                         }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.e(TAG, "User not found", e);
+                                        }
                                     });
-
-                            Log.e(TAG, "signInWithEmail:failure", task.getException());
-                            progressBar.setVisibility(View.GONE);
                             Toast.makeText(getApplicationContext(), "Authentication failed.", Toast.LENGTH_SHORT).show();
-
+                            progressBar.setVisibility(View.GONE);
                         }
+
                     }
                 });
     }
@@ -228,8 +252,8 @@ public class LoginActivity extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
-//        if (currentUser != null && currentUser.isEmailVerified()) {
-        if (currentUser != null) {
+        if (currentUser != null && currentUser.isEmailVerified()) {
+//        if (currentUser != null) {
             Log.e(TAG, "ON START - User info detected.");
             startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();

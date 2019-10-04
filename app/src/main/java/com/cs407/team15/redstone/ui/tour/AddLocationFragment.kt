@@ -64,6 +64,10 @@ class AddLocationFragment : Fragment() {
                 this.activity!!.supportFragmentManager.popBackStack()
             }
         }
+//        val btn_back = getView()!!.findViewById(R.id.btn_add_location) as Button
+//        btn_back.setOnClickListener {
+//            this.activity!!.supportFragmentManager.popBackStack()
+//        }
 
     }
 
