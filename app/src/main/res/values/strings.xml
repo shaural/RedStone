@@ -9,7 +9,6 @@
     <string name="action_signout">Sign out</string>
 
 
-
     <string name="menu_home">Home</string>
     <string name="menu_aboutpurdue">About Purdue</string>
     <string name="menu_tour">Tour</string>
@@ -38,7 +37,7 @@
 
     <string name="continue_to_sign_up">Continue to Sign Up</string>
     <string name="delete_account">Delete Account</string>
-  
+
     <!-- Location -->
     <string name="add_location">Add Location</string>
     <string name="user_type">User Type</string>

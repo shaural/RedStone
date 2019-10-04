@@ -37,8 +37,14 @@ class LocationPage : Fragment() {
         val locations= FirebaseFirestore.getInstance().collection("locations").get().addOnSuccessListener {locations->
             for (loc in locations.documents){
                 if(loc["name"] as String == title as String){
-                   root.location_description.text=loc["description"] as String
+                   root.location_description.text= "Tags: " + loc["description"] as String
                     //coordinates, timestamp,userid, name, description,image_src
+
+                    if (loc["tags"]==null){
+                        root.tagsView.text="No tags to display"
+                    }else {
+                        root.tagsView.text=loc["tags"] as String
+                    }
 
                     //sets image of location if there is a image
                     var locationImage =root.location_image
@@ -53,6 +59,12 @@ class LocationPage : Fragment() {
                 }
 
         } }
+
+        //Adding tags functionality
+        val addTagsButton = root.add_tag_button
+        addTagsButton.setOnClickListener({
+
+        })
 
 
       /*  for (loc in locations.){
