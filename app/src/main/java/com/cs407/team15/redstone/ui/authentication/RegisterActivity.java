@@ -234,17 +234,17 @@ public class RegisterActivity extends AppCompatActivity {
                              * Email verification
                              * comment for test
                              */
-//                            user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                @Override
-//                                public void onComplete(@NonNull Task<Void> task) {
-//                                    // Email verification
-//                                    if (task.isSuccessful()) {
-//                                        Toast.makeText(getApplicationContext(), "Verification Email is sent", Toast.LENGTH_SHORT).show();
-//                                    } else {
-//                                        Toast.makeText(getApplicationContext(), "Failed to send verification email", Toast.LENGTH_SHORT).show();
-//                                    }
-//                                }
-//                            });
+                            user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    // Email verification
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(getApplicationContext(), "Verification Email is sent", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "Failed to send verification email", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
 
                             String refreshedToken = FirebaseInstanceId.getInstance().getId();
                             User member = new User();
