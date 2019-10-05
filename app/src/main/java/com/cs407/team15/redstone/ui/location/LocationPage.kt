@@ -48,40 +48,20 @@ class LocationPage : Fragment() {
             for (loc in locations.documents) {
                 if (loc["name"] as String == title as String) {
 
-                    root.location_description.text = "Tags: " + loc["description"] as String
+                    root.location_description.text = "Description: " + loc["description"] as String
                     //coordinates, timestamp,userid, name, description,image_src
 
-                    //Displaying tags for the location
-                    if (loc["tags"] == null) {
-                        root.tagsView.text = "No tags to display"
-                    } else {
-                        var addingTagsArray = arrayOfNulls<String>(addingTagsArrayList.size)
-                        addingTagsArrayList.toArray(addingTagsArray)
+                    var buil = StringBuilder()
+                    val ref = FirebaseFirestore.getInstance().collection("locations").document(loc.id).collection("tags")
+                    ref.get().addOnSuccessListener { tagsL->
 
-
-                        var builderS = StringBuilder()
-                        for (i in addingTagsArray){
-                            if (i == addingTagsArray.last()){
-                                builderS.append(""+ i)
-                            } else {
-                                builderS.append("" + i + ", ")
-                            }
+                        for (t in tagsL.documents){
+                            buil.append(t["name"] as String)
+                            buil.append(" ")
                         }
-                        var tagInput = builderS.toString()
-                        println(tagInput)
-
-                        //var splitTagArray1: List<String> = Arrays.asList(addingTagsArray)
-
-                        var splitTagArray: Array<String> = tagInput.split(",").toTypedArray()
-                        //var tagToPush: List<String> = Arrays.asList()
-
-
-
-                        root.tagsView.text = loc["tags"] as String
-                        tagArray = loc["tags"] as ArrayList<String>
+                        root.tagsView.text = "Tags: " + buil.toString()
                     }
 
-                    //sets image of location if there is a image
                     var locationImage = root.location_image
                     var url = loc["image_src"] as String?
                     if (url != null) {
@@ -190,22 +170,18 @@ class LocationPage : Fragment() {
                                 builderS.append("" + i + ", ")
                             }
                         }
-                        var tagInput = builderS.toString()
-                        println(tagInput)
 
-                        //var splitTagArray1: List<String> = Arrays.asList(addingTagsArray)
-
-                        var splitTagArray: Array<String> = tagInput.split(",").toTypedArray()
-                        //var tagToPush: List<String> = Arrays.asList()
-
-                        val updates : MutableMap<String, Any> = HashMap()
-                        updates.put("tags", splitTagArray)
 
                         val addTagToLocation =
                             FirebaseFirestore.getInstance().collection("locations").get().addOnSuccessListener { locations ->
                                 for (loc in locations.documents){
                                     if (loc["name"] as String == title as String){
-                                        FirebaseFirestore.getInstance().collection("locations").document(loc.id).set(updates)
+                                        for (i in addingTagsArray){
+                                            val tagInputs = hashMapOf(
+                                                "name" to i as String
+                                            )
+                                            FirebaseFirestore.getInstance().collection("locations").document(loc.id).collection("tags").add(tagInputs)
+                                        }
                                     }
                                 }
                             }
