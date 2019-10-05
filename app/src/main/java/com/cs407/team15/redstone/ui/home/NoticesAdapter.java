@@ -33,16 +33,20 @@ public class NoticesAdapter extends RecyclerView.Adapter<NoticesAdapter.ViewHold
     private ArrayList<Notices> noticeList;
     private RecyclerView recyclerView;
 
-    public NoticesAdapter(Context context, ArrayList<Notices> noticeList) {
+    private OnNoticeListener mOnNoticeListener;
+
+    public NoticesAdapter(Context context, ArrayList<Notices> noticeList, OnNoticeListener onNoticeListener) {
         this.context = context;
         this.noticeList = noticeList;
+        this.mOnNoticeListener = onNoticeListener;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.notice_recycle_view_item,null);
-        ViewHolder viewHolder = new ViewHolder(v);
-        return viewHolder;
+
+        return new ViewHolder(v, mOnNoticeListener);
+
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -80,9 +84,8 @@ public class NoticesAdapter extends RecyclerView.Adapter<NoticesAdapter.ViewHold
                         .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            task.getResult().getDocuments().get(0).getReference()
-                                    .update("is_dismissed", true);
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            task.getResult().getDocuments().get(0).getReference().delete();
                         }
                     }
                 });
@@ -98,22 +101,35 @@ public class NoticesAdapter extends RecyclerView.Adapter<NoticesAdapter.ViewHold
     }
 
     /** item layout **/
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         TextView tv_title;
         TextView tv_date;
         TextView tv_content;
         TextView tv_writer;
         CardView cv;
 
-        public ViewHolder(View v) {
+        OnNoticeListener onNoticeListener;
+
+        public ViewHolder(View v, OnNoticeListener onNoticeListener) {
             super(v);
             tv_title = (TextView) v.findViewById(R.id.tv_title);
             tv_date = (TextView) v.findViewById(R.id.tv_date);
             tv_content = (TextView) v.findViewById(R.id.tv_content);
             tv_writer = (TextView) v.findViewById(R.id.tv_writer);
             cv = (CardView) v.findViewById(R.id.cv);
+
+            this.onNoticeListener = onNoticeListener;
+            v.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            onNoticeListener.onNoticeClick(getAdapterPosition());
         }
     }
 
+    public interface OnNoticeListener{
+        void onNoticeClick(int position);
+    }
 
 }

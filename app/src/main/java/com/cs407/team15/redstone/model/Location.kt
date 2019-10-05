@@ -75,8 +75,10 @@ class Location(val coordinates: GeoPoint, val description: String, val name: Str
                         val locationCreator = location.get(USER_ID) as String
                         val locationName = location.get(NAME) as String
                         val message = "$locationName has been removed due to receiving too many flags."
+                      
                         val notice = hashMapOf(MESSAGE to message, IS_DISMISSED to false)
                         Notices.submitNotice("System", "Location Removed", message, locationCreator)
+
                         // Delete all of the location's flags and then the location itself
                         val locationFlags = location.reference.collection(FLAGGING_USERS).get().await().documents
                         for (locationFlag in locationFlags) {

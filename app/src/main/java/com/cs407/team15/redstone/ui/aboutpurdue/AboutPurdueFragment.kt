@@ -22,7 +22,7 @@ class AboutPurdueFragment : Fragment() {
         aboutPurdueViewModel =
             ViewModelProviders.of(this).get(AboutPurdueViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_about_purdue, container, false)
-        val textView: TextView = root.findViewById(R.id.text_about_purdue)
+        val textView: TextView = root.findViewById(R.id.aboutparagraph);
         aboutPurdueViewModel.text.observe(this, Observer {
             textView.text = it
         })

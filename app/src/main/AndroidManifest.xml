@@ -13,7 +13,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".TagsActivity"></activity>
+
+        <activity android:name=".ui.home.NoticeActivity"></activity>
+
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -32,7 +36,8 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
+
     </application>
 
 </manifest>
