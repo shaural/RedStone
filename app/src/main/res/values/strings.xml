@@ -56,5 +56,8 @@
     <string name="user_dislikes">User Dislikes</string>
     <string name="user_netlikes">User Net Likes</string>
 
+    <!-- Tours -->
+    <string name="tour_search_hint">Search tours by name</string>
+
     <string name="back">Back</string>
 </resources>

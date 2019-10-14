@@ -4,12 +4,12 @@
     android:layout_height="match_parent">
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/searchField"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
-        android:inputType="textPersonName"
-        android:text="@string/view_tours" />
+        android:hint="@string/tour_search_hint"
+        android:inputType="textPersonName" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tourList"

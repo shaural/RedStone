@@ -1,5 +1,6 @@
 package com.cs407.team15.redstone.model
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ServerTimestamp
@@ -41,6 +42,20 @@ class Tour(val name: String, val type: String, val user_id: String, val location
             val tags = tagDocuments.map {tagDocument -> tagDocument.getString(TAG_ID) as String}
                 .sortedBy {tag_id -> tag_id.toUpperCase()}
             return Tour(name, type, user_id, locations, tags)
+        }
+
+        // Returns whether or not a particular user is allowed to see a particular tour
+        fun canUserViewTour(tour: Tour, user_id: String): Boolean {
+            /* TODO: Perform meaningful filtering once categories of tours and way of storing users who can
+             * see the particular tour are finalized
+             */
+            return true
+        }
+
+        // Assumes that a user is logged in and returns whether the current user is allowed to see
+        // a particular tour
+        fun canCurrentUserViewTour(tour: Tour): Boolean {
+            return canUserViewTour(tour, FirebaseAuth.getInstance().currentUser!!.email as String)
         }
 
         // Get all tours, sorted alphabetically by name

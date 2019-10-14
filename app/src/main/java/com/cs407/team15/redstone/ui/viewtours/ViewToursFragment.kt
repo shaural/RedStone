@@ -1,21 +1,20 @@
 package com.cs407.team15.redstone.ui.viewtours
 
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Tour
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 /**
  * A simple [Fragment] subclass.
@@ -25,11 +24,12 @@ import kotlinx.coroutines.tasks.await
  * Use the [ViewToursFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener {
-    var tours: MutableList<Tour> = mutableListOf()
+class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWatcher {
+
+    // Contains all the tours which the user is allowed to see
+    var allTours: MutableList<Tour> = mutableListOf()
 
     override fun onItemClick(view: View, position: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onCreateView(
@@ -40,40 +40,45 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener {
         return inflater.inflate(R.layout.fragment_view_tours, container, false)
     }
 
-    fun fillRecyclerView(list: List<String>) {
+    override fun onStart() {
+        super.onStart()
+        val searchField = view!!.findViewById<EditText>(R.id.searchField)
+        searchField.addTextChangedListener(this)
+    }
+
+    // Only to be used first time that tourNames of tours to be displayed is set, in order to set up
+    // the view. For subsequent updates, use setVisibleTourNames()
+    fun setupRecyclerView(tourNames: List<String>) {
         val recyclerView = view!!.findViewById<RecyclerView>(R.id.tourList)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        val adapter = RecyclerAdapter(context as Context, list)
+        val adapter = RecyclerAdapter(context as Context, tourNames)
+        adapter.setClickListener(this)
+        recyclerView.adapter = adapter
+        getView()!!.invalidate()
+    }
+
+    fun setVisibleTourNames(tourNames: List<String>) {
+        val recyclerView = view!!.findViewById<RecyclerView>(R.id.tourList)
+        val adapter = RecyclerAdapter(context as Context, tourNames)
         adapter.setClickListener(this)
         recyclerView.adapter = adapter
         getView()!!.invalidate()
     }
 
     suspend fun getAndDisplayTourData() {
-        tours.addAll(0, Tour.getAllTours())
-        activity!!.runOnUiThread { fillRecyclerView(tours.map { tour -> tour.name }) }
+        // Filter out tours that the user is not allowed to see here, so that nowhere else on the
+        // page will need to handle this filtering
+        allTours.addAll(0, Tour.getAllTours().filter {tour -> Tour.canCurrentUserViewTour(tour)} )
+        activity!!.runOnUiThread { setupRecyclerView(allTours.map { tour -> tour.name }) }
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    fun onButtonPressed(uri: Uri) {
-
+    // When the search field gets edited, re-
+    override fun afterTextChanged(s: Editable?) {
+        val filterValue = s.toString().toUpperCase()
+        setVisibleTourNames(allTours.filter { tour -> tour.name.contains(filterValue, ignoreCase = true)}
+            .map {tour -> tour.name})
     }
+    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+    override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ViewToursFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ViewToursFragment().apply {
-                arguments = Bundle().apply {
-                }
-            }
-    }
 }
