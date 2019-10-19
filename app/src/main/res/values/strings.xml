@@ -58,6 +58,7 @@
 
     <!-- Tours -->
     <string name="tour_search_hint">Search tours by name</string>
+    <string name="tour_tag_search_hint">Search tours by tag</string>
 
     <string name="back">Back</string>
 </resources>

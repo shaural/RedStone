@@ -21,25 +21,26 @@ class Tour(val name: String, val type: String, val user_id: String, val location
         // Get the single tour with the specified name, or null if no such tour with that name
         // exists
         suspend fun getTourByName(name: String): Tour? {
-            val tourDocument = FirebaseFirestore.getInstance().collection(TOURS).whereEqualTo(NAME, name).get().await().first()
+            val db = FirebaseFirestore.getInstance()
+            val tourDocument = db.collection(TOURS).whereEqualTo(NAME, name).get().await().first()
             if (!tourDocument.exists()) {
                 return null
             }
-            val name = tourDocument.getString(NAME) as String
+            val tour_id = tourDocument.id
             val type = tourDocument.getString(TYPE) as String
             val user_id = tourDocument.getString(USER_ID) as String
             // Location ids for a tour are stored as pairs of location id and position.
             // Fetch the documents, sort by the position, then pull out just the location ids
-            val locationDocuments = FirebaseFirestore.getInstance().collection(TOURS).document(name)
+            val locationDocuments = db.collection(TOURS).document(tour_id)
                 .collection(LOCATIONS).get().await().documents
             val locationPairs = locationDocuments.map {locationDocument ->
                 Pair(locationDocument.getLong(POSITION), locationDocument.getString(LOCATION_ID) as String) }
             val locations = locationPairs.sortedBy { locationPair -> locationPair.first }
                 .map { locationPair -> locationPair.second }
             // Fetch the tag ids for the tour and sort for consistency
-            val tagDocuments = FirebaseFirestore.getInstance().collection(TOURS).document(name)
-                .collection(TAGS).get().await().documents
-            val tags = tagDocuments.map {tagDocument -> tagDocument.getString(TAG_ID) as String}
+            val tagDocuments = db.collection(TOURS).document(tour_id).collection(TAGS).get().await().documents
+            val tags = tagDocuments.map {tagDocument -> tagDocument.getString(TAG_ID) as String }
+                .map { tag_id -> db.collection(TAGS).document(tag_id).get().await().getString(NAME) as String }
                 .sortedBy {tag_id -> tag_id.toUpperCase()}
             return Tour(name, type, user_id, locations, tags)
         }
