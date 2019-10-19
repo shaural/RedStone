@@ -12,6 +12,7 @@
     <string name="menu_home">Home</string>
     <string name="menu_aboutpurdue">About Purdue</string>
     <string name="menu_tour">Tour</string>
+    <string name="menu_view_tours">View Tours</string>
     <string name="menu_ar">Free Roam</string>
     <string name="menu_profile">Profile</string>
 
@@ -40,6 +41,7 @@
     <string name="btn_forgot_password">Forgot your password?</string>
     <string name="btn_reset_password">Reset Password</string>
     <string name="btn_back"><![CDATA[<< Back]]></string>
+    <string name="view_tours">View Tours</string>
 
     <string name="continue_to_sign_up">Continue to Sign Up</string>
     <string name="delete_account">Delete Account</string>
@@ -53,6 +55,10 @@
     <string name="user_likes">User Likes</string>
     <string name="user_dislikes">User Dislikes</string>
     <string name="user_netlikes">User Net Likes</string>
+
+    <!-- Tours -->
+    <string name="tour_search_hint">Search tours by name</string>
+    <string name="tour_tag_search_hint">Search tours by tag</string>
 
     <string name="back">Back</string>
 </resources>
