@@ -54,5 +54,14 @@
     <string name="user_dislikes">User Dislikes</string>
     <string name="user_netlikes">User Net Likes</string>
 
+    <!-- addTour -->
     <string name="back">Back</string>
+    <string name="add_newtour">Add NewTour</string>
+    <string name="create_tour">Create Tour</string>
+    <string name="title">Title</string>
+    <string name="create_your_tour">Create Your Tour</string>
+    <string name="private_tour">Private Tour</string>
+    <string name="private_mode">Private Mode</string>
+    <string name="tags">Tags</string>
+    <string name="locations">Locations</string>
 </resources>
