@@ -60,5 +60,14 @@
     <string name="tour_search_hint">Search tours by name</string>
     <string name="tour_tag_search_hint">Search tours by tag</string>
 
+    <!-- addTour -->
     <string name="back">Back</string>
+    <string name="add_newtour">Add NewTour</string>
+    <string name="create_tour">Create Tour</string>
+    <string name="title">Title</string>
+    <string name="create_your_tour">Create Your Tour</string>
+    <string name="private_tour">Private Tour</string>
+    <string name="private_mode">Private Mode</string>
+    <string name="tags">Tags</string>
+    <string name="locations">Locations</string>
 </resources>
