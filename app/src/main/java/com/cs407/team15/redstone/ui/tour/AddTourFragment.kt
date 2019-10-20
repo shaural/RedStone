@@ -57,15 +57,13 @@ class AddTourFragment : Fragment(){
             locationSpinner.adapter = spinnerAdapter
             locationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-
+                    locationsOnTour.add(allLocations[position])
+                    locationsAdapter!!.notifyDataSetChanged()
                 }
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
             (locationSpinner as SearchableSpinner).setTitle(getString(R.string.add_location_to_tour))
             locationSpinner.invalidate()
-            // Temporarya and for testing only!!
-            locationsOnTour.add(allLocations[0])
-            locationsAdapter!!.notifyDataSetChanged()
         }
     }
 }

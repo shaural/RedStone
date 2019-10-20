@@ -5,22 +5,46 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Location
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 
 class LocationsAdapter(val context: Context, val tourLocationNames: MutableList<Location>) :
     RecyclerView.Adapter<LocationsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val v = LayoutInflater.from(parent.context)
-            .inflate(R.layout.location_recycle_view_item, null)
+            .inflate(R.layout.location_recycle_view_item, parent, false)
 
         return ViewHolder(v)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.locationNameLabel.text = tourLocationNames[position].name
+    }
+
+    override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
+        val swipeCallback = object :
+            ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder
+            ): Boolean {
+                return false
+            }
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                tourLocationNames.removeAt(position)
+                notifyItemRemoved(position)
+                notifyItemRangeChanged(position, tourLocationNames.size)
+            }
+        }
+        val itemTouchHelper = ItemTouchHelper(swipeCallback)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
     override fun getItemCount(): Int {
