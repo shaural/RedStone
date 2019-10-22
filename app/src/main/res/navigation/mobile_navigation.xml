@@ -30,6 +30,13 @@
         tools:layout="@layout/fragment_tour" />
 
     <fragment
+        android:id="@id/nav_view_tours"
+        android:name="com.cs407.team15.redstone.ui.viewtours.ViewToursFragment"
+        android:label="@string/menu_view_tours"
+        tools:layout="@layout/fragment_view_tours"
+        />
+
+    <fragment
         android:id="@+id/nav_ar"
         android:name="com.cs407.team15.redstone.ui.ar.ARFragment"
         android:label="@string/menu_ar"
