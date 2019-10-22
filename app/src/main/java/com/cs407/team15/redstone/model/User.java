@@ -12,6 +12,7 @@ public class User {
     public int recievedDislikes;
     public int recievedLikes;
     public int userType;
+    public boolean isHammerUser;
 
     public User() {
 

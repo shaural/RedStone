@@ -56,6 +56,7 @@ class ProfileFragment : Fragment() {
             root.recieved_like.text=user.recievedLikes.toString()
             root.recieved_dislike.text=user.recievedDislikes.toString()
             root.recieved_net_likes.text=(user.recievedLikes-user.recievedDislikes).toString()
+            root.is_hammer_user.text=user.isHammerUser.toString()
             }
 
 
