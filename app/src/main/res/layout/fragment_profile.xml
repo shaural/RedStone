@@ -206,6 +206,24 @@
                 android:textAlignment="textEnd"
                 android:textSize="18sp" />
         </TableRow>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/usertourtext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="View Your Tours"
+                android:textSize="18sp" />
+            <TextView
+                android:id="@+id/usercommentstext"
+                android:layout_width="257dp"
+                android:layout_height="match_parent"
+                android:textAlignment="textStart"
+                android:text="View Your Comments"
+                android:textSize="18sp" />
+        </TableRow>
 
     </TableLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
