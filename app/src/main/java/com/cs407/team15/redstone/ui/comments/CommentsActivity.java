@@ -5,6 +5,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -21,7 +22,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.HashMap;
 
 public class CommentsActivity extends AppCompatActivity {
-
+    String TAG = getClass().toString();
     EditText addcomment;
     ImageView image_profile;
     TextView post;
@@ -59,6 +60,9 @@ public class CommentsActivity extends AppCompatActivity {
         postid = intent.getStringExtra("postid");
         publisherid = intent.getStringExtra("publisherid");
         path = intent.getStringExtra("path");
+        Log.e(TAG, "PATH:" + path);
+        Log.e(TAG, "Author:"+ publisherid);
+        Log.e(TAG, "Postid: "+ postid);
 
         post.setOnClickListener(new View.OnClickListener() {
             @Override
