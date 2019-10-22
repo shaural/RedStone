@@ -13,7 +13,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.home.NoticeActivity"></activity>
+        <activity android:name=".ui.comments.CommentsActivity"></activity>
+        <activity android:name=".ui.home.NoticeActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
