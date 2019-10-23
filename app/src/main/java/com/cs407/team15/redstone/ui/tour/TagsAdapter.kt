@@ -8,10 +8,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.R
-import com.cs407.team15.redstone.model.Location
 
-class LocationsAdapter(val context: Context, val tourLocationNames: MutableList<Location>) :
-    RecyclerView.Adapter<LocationsAdapter.ViewHolder>() {
+class TagsAdapter(val context: Context, val tagNames: MutableList<String>) :
+    RecyclerView.Adapter<TagsAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val v = LayoutInflater.from(parent.context)
@@ -21,7 +20,7 @@ class LocationsAdapter(val context: Context, val tourLocationNames: MutableList<
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.locationNameLabel.text = tourLocationNames[position].name
+        holder.tagNameLabel.text = tagNames[position]
     }
 
     override fun onAttachedToRecyclerView(recyclerView: RecyclerView) {
@@ -33,9 +32,9 @@ class LocationsAdapter(val context: Context, val tourLocationNames: MutableList<
             }
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
-                tourLocationNames.removeAt(position)
+                tagNames.removeAt(position)
                 notifyItemRemoved(position)
-                notifyItemRangeChanged(position, tourLocationNames.size)
+                notifyItemRangeChanged(position, tagNames.size)
             }
         }
         val itemTouchHelper = ItemTouchHelper(swipeCallback)
@@ -43,10 +42,10 @@ class LocationsAdapter(val context: Context, val tourLocationNames: MutableList<
     }
 
     override fun getItemCount(): Int {
-        return tourLocationNames.size
+        return tagNames.size
     }
 
     class ViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
-        val locationNameLabel = view.findViewById<TextView>(R.id.basicLabel)
+        val tagNameLabel = view.findViewById<TextView>(R.id.basicLabel)
     }
 }

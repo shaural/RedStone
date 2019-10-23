@@ -5,7 +5,7 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/locationNameLabel"
+        android:id="@+id/basicLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/back"
@@ -13,7 +13,7 @@
         android:paddingTop="3dp"
         android:paddingRight="3dp"
         android:paddingBottom="3dp"
-        android:text="Location Name"
+        android:text="Basic text"
         android:textAlignment="textStart"
         android:textColor="@android:color/secondary_text_light"
         android:textSize="18sp" />
