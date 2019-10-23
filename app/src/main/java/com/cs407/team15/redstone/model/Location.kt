@@ -12,8 +12,8 @@ import kotlinx.coroutines.tasks.await
 import java.io.FileReader
 import kotlin.reflect.KClass
 
-class Location(val coordinates: GeoPoint, val description: String, val name: String,
-               val user_id: String, val timestamp: ServerTimestamp) {
+data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
+                    val description: String = "", val name: String = "", val user_id: String = "") {
 
     companion object {
         const val LOCATIONS = "locations"
@@ -133,6 +133,17 @@ class Location(val coordinates: GeoPoint, val description: String, val name: Str
             catch (e: FirebaseException) {
                 false
             }
+        }
+
+
+        // Get all tours, sorted alphabetically by name
+        suspend fun getAllTours(): List<Location> {
+            // Get all tour documents
+            return FirebaseFirestore.getInstance().collection(LOCATIONS).get().await().documents
+                // Build a Location from each location document
+                .map { locationDocument -> locationDocument.toObject(Location::class.java) as Location }
+                // Sort alphabetically by tour name, ignoring case
+                .sortedBy { location -> location.name.toUpperCase() }
         }
     }
 }

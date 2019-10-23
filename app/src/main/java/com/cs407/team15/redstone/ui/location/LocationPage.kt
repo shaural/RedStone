@@ -1,6 +1,7 @@
 package com.cs407.team15.redstone.ui.location
 
 import android.app.ActionBar
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,6 +10,7 @@ import androidx.fragment.app.Fragment
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import com.cs407.team15.redstone.MainActivity
 import com.cs407.team15.redstone.R
@@ -21,6 +23,9 @@ import com.google.firebase.database.ValueEventListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.bumptech.glide.Glide
 import com.cs407.team15.redstone.model.Location
+import com.cs407.team15.redstone.ui.comments.CommentsActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.location_display.view.*
@@ -30,8 +35,11 @@ import kotlin.coroutines.CoroutineContext
 
 class LocationPage : Fragment(), CoroutineScope {
     lateinit var location_id: String
+    lateinit var publisher_id: String
     lateinit var btn_flag: Button
     var isFlagged: Boolean = false
+
+    lateinit var uid: String
 
     private lateinit var mJob: Job
     override val coroutineContext: CoroutineContext
@@ -70,6 +78,14 @@ class LocationPage : Fragment(), CoroutineScope {
         mJob = Job()
         val root = inflater.inflate(R.layout.location_display, container, false)
         btn_flag = root.btn_flag
+        val user = FirebaseAuth.getInstance().currentUser
+
+        user?.let{
+            uid = user.uid
+        }
+
+
+
         launch {
             val title = arguments?.getCharSequence("title")
             root.loaction_name.text = title
@@ -80,6 +96,7 @@ class LocationPage : Fragment(), CoroutineScope {
                     for (loc in locations.documents) {
                         if (loc["name"] as String == title as String) {
                             location_id = loc.id
+                            publisher_id = loc["user_id"] as String
                             GlobalScope.launch(Dispatchers.IO + handler) {
                                 corout(true)
                             }
@@ -112,6 +129,20 @@ class LocationPage : Fragment(), CoroutineScope {
                     activity?.onBackPressed()
                 }
             )
+
+            /*
+            *   Intent to Comments Activity
+            *   put path, postid, publisherid
+            *   to track comments
+            */
+            var allcomments = root.tv_comments
+            allcomments.setOnClickListener {
+                val intent = Intent (getActivity(), CommentsActivity::class.java)
+                intent.putExtra("path", "location")
+                intent.putExtra("postid", location_id)
+                intent.putExtra("publisherid", publisher_id)
+                startActivity(intent)
+            }
         }
         return root
     }
