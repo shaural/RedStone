@@ -1,102 +1,112 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-
-    <TextView
-        android:id="@+id/loaction_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Location"
-        android:textAlignment="center"
-        android:textSize="24dp"/>
-
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    >
     <RelativeLayout
-        android:id="@+id/location_content"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/loaction_name">
+        android:layout_height="match_parent">
 
-        <!-- Need to adjust width/height properly -->
-        <ImageView
-            android:id="@+id/location_image"
-            android:layout_centerHorizontal="true"
-            android:layout_width="281dp"
-            android:layout_height="176dp"
-            android:layout_marginTop="40dp"
-            app:srcCompat="@drawable/background_bell_tower" />
 
         <TextView
-            android:id="@+id/location_description"
-            android:layout_below="@id/location_image"
-            android:layout_margin="25dp"
+            android:id="@+id/loaction_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Description"
-            />
-    </RelativeLayout>
+            android:text="Location"
+            android:textAlignment="center"
+            android:textSize="24dp"/>
 
-    <!-- Like/Comments/Tag etc... -->
-    <RelativeLayout
-        android:id="@+id/buttons"
-        android:layout_below="@id/location_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:id="@+id/btn_comment"
-            app:srcCompat="@drawable/ic_menu_send"
-            />
-
-
-        <androidx.recyclerview.widget.RecyclerView
+        <RelativeLayout
+            android:id="@+id/location_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/recycler_view_comment"
-            android:layout_below="@id/btn_comment"
-            android:layout_marginTop="5dp"
-            tools:itemCount="3"
-            />
+            android:layout_below="@id/loaction_name">
 
-        <TextView
-            android:id="@+id/tv_comments"
-            android:layout_width="wrap_content"
+            <!-- Need to adjust width/height properly -->
+            <ImageView
+                android:id="@+id/location_image"
+                android:layout_centerHorizontal="true"
+                android:layout_width="281dp"
+                android:layout_height="176dp"
+                android:layout_marginTop="40dp"
+                app:srcCompat="@drawable/background_bell_tower" />
+
+            <TextView
+                android:id="@+id/location_description"
+                android:layout_below="@id/location_image"
+                android:layout_margin="25dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Description"
+                />
+        </RelativeLayout>
+
+        <!-- Like/Comments/Tag etc... -->
+        <RelativeLayout
+            android:id="@+id/buttons"
+            android:layout_below="@id/location_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/recycler_view_comment"
-            android:layout_marginTop="10dp"
-            android:layout_marginStart="8dp"
-            android:text="View All ... Comments"/>
+            android:padding="8dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:id="@+id/btn_comment"
+                app:srcCompat="@drawable/ic_menu_send"
+                />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/recycler_view_comment"
+                android:layout_below="@id/btn_comment"
+                android:layout_marginTop="5dp"
+                tools:itemCount="3"
+                />
+
+            <TextView
+                android:id="@+id/tv_comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/recycler_view_comment"
+                android:layout_marginTop="15dp"
+                android:layout_marginStart="8dp"
+                android:text="View All Comments"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/bottom"
+            android:layout_marginTop="30dp"
+            android:layout_below="@id/buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btn_flag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Flag as inappropriate" />
+
+            <Button
+                android:id="@+id/loc_back_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/btn_flag"
+                android:text="@string/back"
+                />
+
+        </RelativeLayout>
+
 
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/bottom"
-        android:layout_below="@id/buttons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/btn_flag"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Flag as inappropriate" />
-
-        <Button
-            android:id="@+id/loc_back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/btn_flag"
-            android:text="@string/back"
-           />
-
-    </RelativeLayout>
-
-
-</RelativeLayout>
+</ScrollView>

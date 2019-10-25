@@ -32,13 +32,18 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
-public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageViewHolder> {
+/**
+ * This is RecyclerView Adapter for Comment Section on any pages
+ * It displays limited number of comments on RecyclerView
+ * Can change the limit number to display comments
+ */
+
+public class CommentSectionAdapter extends RecyclerView.Adapter<CommentSectionAdapter.ImageViewHolder> {
     private String TAG = getClass().toString();
     private Context mContext;
     private List<Comment> mComment;
-    private String postid;
-    private String email;
-    private String path;
+
+    private final int limit = 3;
 
     private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
@@ -47,96 +52,55 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
 
 
 
-    public CommentAdapter(Context context, List<Comment> comments, String postid, String path){
+    public CommentSectionAdapter(Context context, List<Comment> comments){
         mContext = context;
         mComment = comments;
-        this.postid = postid;
-        this.path = path;
     }
 
 
     @NonNull
     @Override
-    public CommentAdapter.ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public CommentSectionAdapter.ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.comment_item, parent, false);
-        return new CommentAdapter.ImageViewHolder(view);
+        return new CommentSectionAdapter.ImageViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final CommentAdapter.ImageViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final CommentSectionAdapter.ImageViewHolder holder, final int position) {
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        email = firebaseUser.getEmail();
         final Comment comment = mComment.get(position);
 
         holder.comment.setText(comment.getComment());
         getUserInfo(holder.image_profile, holder.username, comment.getPublisher());
 
-        /**
-         * On long Click Delete comment dialog pop up
-         */
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                if (comment.getPublisher().equals(firebaseUser.getEmail())) {
 
-                    AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
-                    alertDialog.setTitle("Do you want to delete?");
-                    alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "No",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    dialog.dismiss();
-                                }
-                            });
-                    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Log.e(TAG, "Remove attempt: " + "Comments/"+path+"/"+postid+"/"+comment.getCommentid());
-                                    FirebaseDatabase.getInstance().getReference("Comments").child(path)
-                                            .child(postid).child(comment.getCommentid())
-                                            .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()){
-                                                Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
-                                            }
-                                        }
-                                    });
-                                    dialog.dismiss();
-                                }
-                            });
-                    alertDialog.show();
-                }
-                return true;
-            }
-        });
     }
-
-
 
     @Override
     public int getItemCount() {
-        return mComment.size();
+        if(mComment.size() > limit){
+            return limit;
+        }
+        else
+        {
+            return mComment.size();
+        }
     }
 
     public class ImageViewHolder extends RecyclerView.ViewHolder {
 
         public ImageView image_profile;
         public TextView username, comment;
-        public ProgressBar progressBar;
 
         public ImageViewHolder(View itemView) {
             super(itemView);
-            progressBar = itemView.findViewById((R.id.comment_loading));
             image_profile = itemView.findViewById(R.id.image_profile);
             username = itemView.findViewById(R.id.username);
             comment = itemView.findViewById(R.id.comment);
         }
     }
 
-    /**
-     * To set username
-     */
     private void getUserInfo(final ImageView imageView, final TextView username, String publisherid){
 
         if (publisherid != null) {
