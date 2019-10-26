@@ -22,11 +22,11 @@
             android:title="@string/menu_tour" />
         <item
             android:id="@+id/nav_view_tours"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/ic_menu_view_tours"
             android:title="@string/menu_view_tours" />
         <item
             android:id="@+id/nav_add_tour"
-            android:icon="@drawable/ic_menu_slideshow"
+            android:icon="@drawable/ic_menu_add_tour"
             android:title="@string/menu_add_tour" />
         <item
             android:id="@+id/nav_ar"
