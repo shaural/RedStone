@@ -76,8 +76,10 @@ public class CommentsActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
+
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
+
         commentList = new ArrayList<>();
         commentAdapter = new CommentAdapter(this, commentList, postid, path);
         recyclerView.setAdapter(commentAdapter);
@@ -89,6 +91,7 @@ public class CommentsActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.comment_loading);
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
 
         post.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -102,10 +105,15 @@ public class CommentsActivity extends AppCompatActivity {
         });
 
         progressBar.setVisibility(View.VISIBLE);
+
         readComments();
     }
 
-    private  void addComment() {
+    /**
+     * Add Comment
+     * make a comment object then send to Firebase
+     */
+    private void addComment() {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(path).child(postid);
 
         String commentid = reference.push().getKey();
@@ -121,6 +129,11 @@ public class CommentsActivity extends AppCompatActivity {
         addcomment.setText("");
     }
 
+    /**
+     * Read Comments
+     * Get all data from DB and add them into List
+     * then, notify comment recyclerview adapter
+     */
     private void readComments(){
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(path).child(postid);
 

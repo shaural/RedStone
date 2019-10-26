@@ -1,6 +1,5 @@
 package com.cs407.team15.redstone.ui.location
 
-import android.app.ActionBar
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -8,28 +7,28 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.MainActivity
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.ui.tour.TourFragment
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.bumptech.glide.Glide
+import com.cs407.team15.redstone.model.Comment
 import com.cs407.team15.redstone.model.Location
+import com.cs407.team15.redstone.ui.comments.CommentAdapter
+import com.cs407.team15.redstone.ui.comments.CommentSectionAdapter
 import com.cs407.team15.redstone.ui.comments.CommentsActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.location_display.view.*
 import kotlinx.coroutines.*
+import java.util.ArrayList
 import kotlin.coroutines.CoroutineContext
 
 
@@ -38,8 +37,16 @@ class LocationPage : Fragment(), CoroutineScope {
     lateinit var publisher_id: String
     lateinit var btn_flag: Button
     var isFlagged: Boolean = false
+    var TAG = "LocationPage"
 
     lateinit var uid: String
+    lateinit var recyclerView: RecyclerView
+    lateinit var commentList: ArrayList<Comment>
+    lateinit var viewAllComments: TextView
+    private lateinit var commentAdapter: CommentSectionAdapter
+
+    private lateinit var database: DatabaseReference// ...
+
 
     private lateinit var mJob: Job
     override val coroutineContext: CoroutineContext
@@ -83,8 +90,22 @@ class LocationPage : Fragment(), CoroutineScope {
         user?.let{
             uid = user.uid
         }
+        database = FirebaseDatabase.getInstance().reference
 
+        // Comments recyclerview
+        viewAllComments = root.tv_comments
+        recyclerView = root.recycler_view_comment
+        recyclerView.setHasFixedSize(true)
 
+        val mLayoutManager = LinearLayoutManager(getActivity())
+        recyclerView.layoutManager = mLayoutManager
+
+        commentList = ArrayList<Comment>()
+        commentAdapter = CommentSectionAdapter(getActivity(), commentList)
+        recyclerView.adapter = commentAdapter
+
+        readComments()
+        Log.e("TITLE", arguments?.getCharSequence("title").toString() )
 
         launch {
             val title = arguments?.getCharSequence("title")
@@ -97,6 +118,8 @@ class LocationPage : Fragment(), CoroutineScope {
                         if (loc["name"] as String == title as String) {
                             location_id = loc.id
                             publisher_id = loc["user_id"] as String
+
+
                             GlobalScope.launch(Dispatchers.IO + handler) {
                                 corout(true)
                             }
@@ -123,6 +146,7 @@ class LocationPage : Fragment(), CoroutineScope {
                 }
 
 
+
             val button = root.loc_back_button
             button.setOnClickListener(
                 {
@@ -143,7 +167,48 @@ class LocationPage : Fragment(), CoroutineScope {
                 intent.putExtra("publisherid", publisher_id)
                 startActivity(intent)
             }
+
+
+
         }
         return root
+    }
+
+    /**
+     * Get LocationID then Retrieve data from DB
+     * after getting comments, call comment Adapter
+     */
+    private fun readComments() {
+        val name = arguments?.getCharSequence("title")
+
+        FirebaseFirestore.getInstance().collection("locations").get()
+            .addOnSuccessListener { locations ->
+                for ( location in locations.documents) {
+                    if (location["name"] as String == name as String) {
+                        val locID = location.id
+                        Log.e(TAG, "LocationID: " + locID)
+                        database.child("Comments").child("location").child(locID)
+                            .addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                    commentList.clear()
+                                    // Get Comment
+                                    for (snapshot in dataSnapshot.children) {
+                                        val comment= snapshot.getValue(Comment::class.java)
+                                        Log.e(TAG, "Comment: " + comment!!.getComment())
+                                        commentList.add(comment as Comment)
+                                    }
+                                    commentAdapter.notifyDataSetChanged()
+                                    viewAllComments.setText("View All "+dataSnapshot.getChildrenCount()+" Comments")
+                                }
+
+                                override fun onCancelled(databaseError: DatabaseError) {
+                                }
+                            })
+
+                    }
+
+                }
+            }
+
     }
 }
