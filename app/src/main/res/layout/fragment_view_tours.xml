@@ -30,10 +30,16 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <Switch
+        android:id="@+id/hammerSwitch"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="@string/search_by_hammer_user" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tourList"
         android:layout_width="match_parent"
-        android:layout_height="265dp">
+        android:layout_height="579dp">
 
     </androidx.recyclerview.widget.RecyclerView>
 

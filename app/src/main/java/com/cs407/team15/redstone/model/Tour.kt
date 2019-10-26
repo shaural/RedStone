@@ -6,12 +6,13 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ServerTimestamp
 import kotlinx.coroutines.tasks.await
 
-class Tour(val name: String, val type: String, val user_id: String, val locations: List<String>, val tags: List<String>) {
+class Tour(val name: String, val type: String, val user_id: String, val hammer: Boolean, val locations: List<String>, val tags: List<String>) {
     companion object {
         const val TOURS = "tours"
         const val NAME = "name"
         const val TYPE = "type"
         const val USER_ID = "user_id"
+        const val HAMMER = "hammer"
         const val LOCATIONS = "locations"
         const val TAGS = "tags"
         const val POSITION = "position"
@@ -29,6 +30,7 @@ class Tour(val name: String, val type: String, val user_id: String, val location
             val tour_id = tourDocument.id
             val type = tourDocument.getString(TYPE) as String
             val user_id = tourDocument.getString(USER_ID) as String
+            val hammer = tourDocument.getBoolean(HAMMER) as Boolean
             // Location ids for a tour are stored as pairs of location id and position.
             // Fetch the documents, sort by the position, then pull out just the location ids
             val locationDocuments = db.collection(TOURS).document(tour_id)
@@ -42,7 +44,7 @@ class Tour(val name: String, val type: String, val user_id: String, val location
             val tags = tagDocuments.map {tagDocument -> tagDocument.getString(TAG_ID) as String }
                 .map { tag_id -> db.collection(TAGS).document(tag_id).get().await().getString(NAME) as String }
                 .sortedBy {tag_id -> tag_id.toUpperCase()}
-            return Tour(name, type, user_id, locations, tags)
+            return Tour(name, type, user_id, hammer, locations, tags)
         }
 
         // Returns whether or not a particular user is allowed to see a particular tour
