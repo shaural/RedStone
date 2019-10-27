@@ -54,6 +54,8 @@ dependencies {
 
     // AR
     implementation 'com.google.ar:core:1.12.0'
+    implementation 'com.google.ar.sceneform.ux:sceneform-ux:1.12.0'
+    implementation 'com.google.ar.sceneform:core:1.12.0'
     // Dirty but gives us access to some nice helper classes
     implementation 'com.github.daniel-ostrowski:arcore-android-sdk:master-SNAPSHOT'
 
