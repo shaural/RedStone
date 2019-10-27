@@ -21,6 +21,11 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="aboutLabel">About Purdue</string>
 
+    <!-- Free Roam -->
+    <string name="camera_request">AR functionality requires camera. Give permission in settings</string>
+    <string name="camera_missing">It seems that another app is using the camera. Please restart this app</string>
+    <string name="gpsfar_request">Please install Google Play Services for AR from the Play Store and restart the app</string>
+
     <!-- Authentication -->
     <string name="email">Email</string>
     <string name="password">Password</string>

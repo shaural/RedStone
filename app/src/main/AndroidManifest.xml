@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.cs407.team15.redstone">
+
     <!-- Permission Here -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera.ar" />
 
     <application
         android:allowBackup="true"
@@ -19,6 +23,7 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCFvgJwTQKi42b9Hmj6R_Zo9OY-FoUfRWQ" />
+        <meta-data android:name="com.google.ar.core" android:value="required" />
 
         <activity android:name=".ui.onboarding.OBActivity">
             <intent-filter>
