@@ -22,10 +22,7 @@
     <string name="aboutLabel">About Purdue</string>
 
     <!-- Free Roam -->
-    <string name="camera_request">AR functionality requires camera. Give permission in settings</string>
-    <string name="camera_missing">It seems that another app is using the camera. Please restart this app</string>
-    <string name="gpsfar_request">Please install Google Play Services for AR from the Play Store and restart this app</string>
-    <string name="graphics_failure">A graphics library error occurred. Please restart this app</string>
+    <string name="opengl_not_supported">This app requires OpenGL ES 3.0 or later</string>
 
     <!-- Authentication -->
     <string name="email">Email</string>
