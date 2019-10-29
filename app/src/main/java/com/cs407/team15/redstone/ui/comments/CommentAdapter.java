@@ -27,6 +27,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -39,7 +40,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     private String TAG = getClass().toString();
     private Context mContext;
     private List<Comment> mComment;
-    private String postid;
+    private String postid; // Location ID
     private String email;
     private String path;
 
@@ -86,6 +87,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                 if (holder.like.getTag().equals("like")) {
                     FirebaseDatabase.getInstance().getReference("Likes").child(path).child(comment.getCommentid())
                             .child(firebaseUser.getUid()).setValue(true);
+
                 } else {
                     FirebaseDatabase.getInstance().getReference("Likes").child(path).child(comment.getCommentid())
                             .child(firebaseUser.getUid()).removeValue();
@@ -192,11 +194,12 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     /**
      * Like
      */
-    private void isLiked(final String postid, final ImageView imageView){
+    private void isLiked(final String commentid, final ImageView imageView){
 
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Likes").child(path).child(postid);
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Likes").child(path).child(commentid);
+
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -217,15 +220,37 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     }
 
     /**
-     * Count
+     * Count and update the number of likes
      */
-    private void getLikesCount(String postid, final TextView likes){
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Likes").child(path).child(postid);
+    private void getLikesCount(String commentid, final TextView likes){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Likes").child(path).child(commentid);
+        final String cid = commentid; // comment id
 
         reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                final long cnt = dataSnapshot.getChildrenCount();
                 likes.setText(dataSnapshot.getChildrenCount()+" ");
+
+                // Update likes count
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Comments")
+                        .child(path).child(postid);
+                Query commentQuery = ref.orderByChild("commentid").equalTo(cid);
+                commentQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                            Comment comment = singleSnapshot.getValue(Comment.class);
+                            comment.setLike(cnt);
+                            FirebaseDatabase.getInstance().getReference("Comments")
+                                    .child(path).child(postid).child(cid).setValue(comment);
+                        }
+                    }
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        Log.e(TAG, "onCancelled", databaseError.toException());
+                    }
+                });
             }
 
             @Override

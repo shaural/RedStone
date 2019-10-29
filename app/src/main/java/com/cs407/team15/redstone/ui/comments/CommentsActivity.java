@@ -24,9 +24,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -67,7 +70,7 @@ public class CommentsActivity extends AppCompatActivity {
         });
 
         Intent intent = getIntent();
-        postid = intent.getStringExtra("postid");
+        postid = intent.getStringExtra("postid"); // location ID
         publisherid = intent.getStringExtra("publisherid");
         path = intent.getStringExtra("path");
         Log.e(TAG, "PATH:" + path);
@@ -106,7 +109,8 @@ public class CommentsActivity extends AppCompatActivity {
 
         progressBar.setVisibility(View.VISIBLE);
 
-        readComments();
+        //readComments();
+        sortCommentsByLikes();
     }
 
     /**
@@ -116,7 +120,9 @@ public class CommentsActivity extends AppCompatActivity {
     private void addComment() {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(path).child(postid);
 
-        String commentid = reference.push().getKey();
+        String commentid = reference.push().getKey(); // Comment ID
+        Long tsLong = System.currentTimeMillis()/1000; // Timestamp
+        String ts = tsLong.toString();
 
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("comment", addcomment.getText().toString());
@@ -124,6 +130,7 @@ public class CommentsActivity extends AppCompatActivity {
         hashMap.put("path", path);
         hashMap.put("commentid", commentid);
         hashMap.put("like", 0);
+        hashMap.put("timestamp", ts);
 
         reference.child(commentid).setValue(hashMap);
 
@@ -134,11 +141,13 @@ public class CommentsActivity extends AppCompatActivity {
      * Read Comments
      * Get all data from DB and add them into List
      * then, notify comment recyclerview adapter
+     * By default, ordered by timestamp
      */
     private void readComments(){
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(path).child(postid);
+        Query sortQuery = reference.orderByChild("timestamp");
 
-        reference.addValueEventListener(new ValueEventListener() {
+        sortQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 progressBar.setVisibility(View.VISIBLE);
@@ -160,4 +169,55 @@ public class CommentsActivity extends AppCompatActivity {
         });
 
     }
+
+    /**
+     * Sort Comments
+     */
+    private void sortCommentsByLikes(){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(path).child(postid);
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                progressBar.setVisibility(View.VISIBLE);
+                commentList.clear();
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    Comment comment = snapshot.getValue(Comment.class);
+                    commentList.add(0,comment); // reverse
+                }
+
+                Collections.sort(commentList, cmpLikeThenTimestamp);
+
+                commentAdapter.notifyDataSetChanged();
+                progressBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                progressBar.setVisibility(View.GONE);
+            }
+        });
+
+    }
+
+    /**
+     * Compare class
+     * Dsc Likes then Asc Timestamp
+     */
+    Comparator<Comment> cmpLikeThenTimestamp = new Comparator<Comment>() {
+        @Override
+        public int compare(Comment item1, Comment item2) {
+            int ret ;
+
+            if (item1.getLike() < item2.getLike()) {
+                ret = 1;
+            } else if (item1.getLike() == item2.getLike()) {
+                ret = item1.getTimestamp().compareTo(item2.getTimestamp()) ;
+            } else {
+                ret = -1;
+            }
+
+            return ret ;
+        }
+    } ;
 }

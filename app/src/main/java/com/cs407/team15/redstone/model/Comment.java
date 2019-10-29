@@ -5,7 +5,8 @@ public class Comment {
     private String publisher;
     private String commentid;
     private String path;
-    private int like;
+    private long like;
+    private String timestamp;
 
     public Comment(String comment, String publisher, String commentid, String path) {
         this.comment = comment;
@@ -25,11 +26,11 @@ public class Comment {
     public Comment() {
     }
 
-    public int getLike() {
+    public long getLike() {
         return like;
     }
 
-    public void setLike(int like) {
+    public void setLike(long like) {
         this.like = like;
     }
 
@@ -55,5 +56,13 @@ public class Comment {
 
     public void setCommentid(String commentid) {
         this.commentid = commentid;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 }
