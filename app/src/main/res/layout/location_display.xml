@@ -56,10 +56,11 @@
             android:padding="8dp">
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_margin="5dp"
                 android:id="@+id/btn_comment"
-                app:srcCompat="@drawable/ic_menu_send"
+                app:srcCompat="@drawable/ic_comment_img"
                 />
 
 
@@ -69,6 +70,7 @@
                 android:id="@+id/recycler_view_comment"
                 android:layout_below="@id/btn_comment"
                 android:layout_marginTop="5dp"
+                android:layout_marginStart="5dp"
                 tools:itemCount="3"
                 />
 

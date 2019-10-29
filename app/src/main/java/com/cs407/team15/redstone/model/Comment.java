@@ -5,6 +5,7 @@ public class Comment {
     private String publisher;
     private String commentid;
     private String path;
+    private int like;
 
     public Comment(String comment, String publisher, String commentid, String path) {
         this.comment = comment;
@@ -22,6 +23,14 @@ public class Comment {
     }
 
     public Comment() {
+    }
+
+    public int getLike() {
+        return like;
+    }
+
+    public void setLike(int like) {
+        this.like = like;
     }
 
     public String getComment() {

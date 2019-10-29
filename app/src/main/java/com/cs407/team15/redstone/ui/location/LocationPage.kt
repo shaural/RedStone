@@ -104,7 +104,6 @@ class LocationPage : Fragment(), CoroutineScope {
         commentAdapter = CommentSectionAdapter(getActivity(), commentList)
         recyclerView.adapter = commentAdapter
 
-        readComments()
         Log.e("TITLE", arguments?.getCharSequence("title").toString() )
 
         launch {
@@ -171,7 +170,13 @@ class LocationPage : Fragment(), CoroutineScope {
 
 
         }
+
         return root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        readComments()
     }
 
     /**

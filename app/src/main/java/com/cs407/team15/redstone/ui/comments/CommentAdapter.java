@@ -23,8 +23,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -71,6 +74,24 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
 
         holder.comment.setText(comment.getComment());
         getUserInfo(holder.image_profile, holder.username, comment.getPublisher());
+        isLiked(comment.getCommentid(), holder.like);
+        getLikesCount(comment.getCommentid(), holder.like_count);
+
+        /**
+         * On Click like the comment
+         */
+        holder.like.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (holder.like.getTag().equals("like")) {
+                    FirebaseDatabase.getInstance().getReference("Likes").child(path).child(comment.getCommentid())
+                            .child(firebaseUser.getUid()).setValue(true);
+                } else {
+                    FirebaseDatabase.getInstance().getReference("Likes").child(path).child(comment.getCommentid())
+                            .child(firebaseUser.getUid()).removeValue();
+                }
+            }
+        });
 
         /**
          * On long Click Delete comment dialog pop up
@@ -121,8 +142,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
 
     public class ImageViewHolder extends RecyclerView.ViewHolder {
 
-        public ImageView image_profile;
-        public TextView username, comment;
+        public ImageView image_profile, like;
+        public TextView username, comment, like_count;
         public ProgressBar progressBar;
 
         public ImageViewHolder(View itemView) {
@@ -131,6 +152,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             image_profile = itemView.findViewById(R.id.image_profile);
             username = itemView.findViewById(R.id.username);
             comment = itemView.findViewById(R.id.comment);
+            like_count = itemView.findViewById(R.id.tv_total);
+            like = itemView.findViewById(R.id.btn_like);
+
         }
     }
 
@@ -164,5 +188,53 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
 
 
     }
+
+    /**
+     * Like
+     */
+    private void isLiked(final String postid, final ImageView imageView){
+
+        final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Likes").child(path).child(postid);
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.child(firebaseUser.getUid()).exists()){
+                    imageView.setImageResource(R.drawable.ic_liked);
+                    imageView.setTag("liked");
+                } else{
+                    imageView.setImageResource(R.drawable.ic_like);
+                    imageView.setTag("like");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    /**
+     * Count
+     */
+    private void getLikesCount(String postid, final TextView likes){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Likes").child(path).child(postid);
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                likes.setText(dataSnapshot.getChildrenCount()+" ");
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
 
 }
