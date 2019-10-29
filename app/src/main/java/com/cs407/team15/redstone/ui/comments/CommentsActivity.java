@@ -1,13 +1,16 @@
 package com.cs407.team15.redstone.ui.comments;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.AppCompatButton;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -40,7 +43,7 @@ public class CommentsActivity extends AppCompatActivity {
     private CommentAdapter commentAdapter;
     private List<Comment> commentList;
     private ProgressBar progressBar;
-
+    private AppCompatButton sort;
 
     EditText addcomment;
     ImageView image_profile;
@@ -92,10 +95,18 @@ public class CommentsActivity extends AppCompatActivity {
         addcomment = findViewById(R.id.add_comment);
         image_profile = findViewById(R.id.image_profile);
         progressBar = findViewById(R.id.comment_loading);
+        sort = findViewById(R.id.btn_sort);
+
+        progressBar.setVisibility(View.VISIBLE);
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
 
+        setListener();
+        sortCommentsByLikes(); // default
+    }
+
+    private void setListener() {
         post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,10 +118,36 @@ public class CommentsActivity extends AppCompatActivity {
             }
         });
 
-        progressBar.setVisibility(View.VISIBLE);
+        sort.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Creating the instance of PopupMenu
+                PopupMenu popup = new PopupMenu(CommentsActivity.this, sort);
+                //Inflating the Popup using xml file
+                popup.getMenuInflater()
+                        .inflate(R.menu.sort_menu, popup.getMenu());
 
-        //readComments();
-        sortCommentsByLikes();
+                //registering popup with OnMenuItemClickListener
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.sort_recent:
+                                Log.e(TAG, "Sort by Timestamp");
+                                readComments();
+                                return true;
+                            case R.id.sort_like:
+                                Log.e(TAG, "Sort by Likes");
+                                sortCommentsByLikes();
+                                return true;
+                            default:
+                                return true;
+                        }
+                    }
+                });
+
+                popup.show(); //showing popup menu
+            }
+        }); //closing the setOnClickListener method
     }
 
     /**
