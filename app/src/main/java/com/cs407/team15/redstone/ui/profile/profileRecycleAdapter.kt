@@ -48,38 +48,8 @@ class profileRecycleAdapter(private val myDataset: ArrayList<Array<String>>) :
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
 
-        Log.v("hey",myDataset.get(position)[2])
-        holder.start.text=myDataset.get(position)[3]
-        holder.title.text=myDataset.get(position)[0]
-        if( holder.start.text.isBlank()){
-           holder.hammer.isVisible=false
-            holder.privateTour.isVisible=false
-            holder.share.isVisible = false
-            holder.edit.isVisible=false
-            return
-        }
-        if(myDataset.get(position)[1]=="personal"){
-            holder.privateTour.setImageResource(R.drawable.ic_private_tour_24dp)
-        }else if(myDataset.get(position)[1]=="draft"){
-            holder.privateTour.setImageResource(R.drawable.ic_private_tour_24dp)
-
-        }
-        else{
-            holder.privateTour.isVisible=false
-        }
-        if(myDataset.get(position)[2]=="true"){
-            holder.hammer.isVisible=false
-        }else{
-            holder.hammer.setImageResource(R.drawable.ic_hammer)
-
-        }
-
-        holder.share.setOnClickListener({
-
-        })
     }
 
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = myDataset.size
-
 }
