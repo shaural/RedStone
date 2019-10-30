@@ -86,4 +86,5 @@
 
     <!-- Comments -->
     <string name="sort_btn">Sort</string>
+    <string name="save_tour">Save Tour</string>
 </resources>
