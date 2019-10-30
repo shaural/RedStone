@@ -76,4 +76,5 @@
     <string name="add_location_to_tour">Add Location to Tour</string>
     <string name="select_location">Select a location...</string>
     <string name="search_by_hammer_user">Search by Hammer User</string>
+    <string name="save_tour">Save Tour</string>
 </resources>
