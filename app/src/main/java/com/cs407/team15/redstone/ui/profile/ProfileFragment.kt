@@ -5,6 +5,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,9 +18,11 @@ import com.cs407.team15.redstone.ui.authentication.LoginActivity
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_profile.view.*
 import com.cs407.team15.redstone.ui.tour.AddTourFragment
 
+import kotlinx.coroutines.tasks.await
 
 class ProfileFragment : Fragment() {
 
@@ -45,6 +49,11 @@ class ProfileFragment : Fragment() {
        // val shareRecyclerView = root.findViewById<RecyclerView>(R.id.shared_recycle)
        // shareRecyclerView.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL,false)
             //  shareRecyclerView.adapter=shareRecycleAdapter(privateTourData,null,this)
+
+
+      val recyclerView = root.findViewById<RecyclerView>(R.id.profile_tour_recycle_view)
+        recyclerView.layoutManager =LinearLayoutManager(activity,LinearLayoutManager.VERTICAL,false)
+        recyclerView.adapter=profileRecycleAdapter(Data)
 
 
         val auth = FirebaseAuth.getInstance()
