@@ -50,11 +50,6 @@ class ProfileFragment : Fragment() {
         recyclerView.adapter=profileRecycleAdapter(Data)
 
 
-      val recyclerView = root.findViewById<RecyclerView>(R.id.profile_tour_recycle_view)
-        recyclerView.layoutManager =LinearLayoutManager(activity,LinearLayoutManager.VERTICAL,false)
-        recyclerView.adapter=profileRecycleAdapter(Data)
-
-
         val auth = FirebaseAuth.getInstance()
         val current =auth.currentUser
         val emailProfile= current?.email
