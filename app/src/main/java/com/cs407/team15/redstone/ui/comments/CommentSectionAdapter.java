@@ -61,7 +61,7 @@ public class CommentSectionAdapter extends RecyclerView.Adapter<CommentSectionAd
     @NonNull
     @Override
     public CommentSectionAdapter.ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.comment_item, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.comment_item_section, parent, false);
         return new CommentSectionAdapter.ImageViewHolder(view);
     }
 
