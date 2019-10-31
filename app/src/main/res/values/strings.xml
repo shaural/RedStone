@@ -14,7 +14,8 @@
     <string name="menu_tour">Tour</string>
     <string name="menu_add_tour">Add Tour</string>
     <string name="menu_view_tours">View Tours</string>
-    <string name="menu_ar">Free Roam</string>
+<!--    <string name="menu_ar">Free Roam</string>-->
+    <string name="menu_free_roam">Free Roam</string>
     <string name="menu_profile">Profile</string>
 
     <!-- TODO: Remove or change this placeholder text -->
