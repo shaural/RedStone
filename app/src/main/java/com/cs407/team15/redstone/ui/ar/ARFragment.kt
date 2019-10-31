@@ -70,22 +70,19 @@ class ARFragment : Fragment() {
             updateCameraPosition()
         }}
 
-        fixedRateTimer("timer", false, 0L, 1000) {
-            if (textViewTemplate != null) {
-                val anchor = hitResult.createAnchor()
-                val anchorNode = AnchorNode(anchor)
-                anchorNode.setParent(arFragment.arSceneView.scene)
-                val textViewNode = Node()
-                textViewNode.setParent(anchorNode)
-                textViewNode.localPosition = Vector3(0f, 1.0f, 0f)
-                textViewNode.renderable = textViewTemplate
-
-            }
-        }
-
         arFragment.setOnTapArPlaneListener {
                 hitResult: HitResult, plane: Plane, motionEvent: MotionEvent ->
             run {
+                if (textViewTemplate != null) {
+                    val anchor = hitResult.createAnchor()
+                    val anchorNode = AnchorNode(anchor)
+                    anchorNode.setParent(arFragment.arSceneView.scene)
+                    val textViewNode = Node()
+                    textViewNode.setParent(anchorNode)
+                    textViewNode.localPosition = Vector3(0f, 1.0f, 0f)
+                    textViewNode.renderable = textViewTemplate
+
+                }
             }
         }
         ViewRenderable.builder().setView(context!!, R.layout.basic_tour_text_view).build()
