@@ -110,6 +110,12 @@ public class Comment {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    public Long getLike() {
+        return like;
+    }
+
+    public void setLike(Long score) {
+        this.like = score;
     }
 
     @Override
