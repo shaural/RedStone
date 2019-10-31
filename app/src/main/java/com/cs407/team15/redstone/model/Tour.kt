@@ -40,11 +40,9 @@ class Tour(val name: String, val type: String, val user_id: String, val hammer: 
             val locations = locationPairs.sortedBy { locationPair -> locationPair.first }
                 .map { locationPair -> locationPair.second }
             // Fetch the tag ids for the tour and sort for consistency
-            val tagDocuments = db.collection(TOURS).document(tour_id).collection(TAGS).get().await().documents
-            val tags = tagDocuments.map {tagDocument -> tagDocument.getString(TAG_ID) as String }
-                .map { tag_id -> db.collection(TAGS).document(tag_id).get().await().getString(NAME) as String }
-                .sortedBy {tag_id -> tag_id.toUpperCase()}
-            return Tour(name, type, user_id, hammer, locations, tags)
+            val tagDocuments = db.collection(TOURS).document(tour_id).get().await().get(TAGS)
+                //.sortedBy {tag_id -> tag_id.toUpperCase()}
+            return Tour(name, type, user_id, hammer, locations, tagDocuments as List<String>)
         }
 
         // Returns whether or not a particular user is allowed to see a particular tour
