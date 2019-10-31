@@ -1,34 +1,29 @@
 package com.cs407.team15.redstone.ui.tour
 
+import android.Manifest
 import android.app.AlertDialog
-import android.content.Context
-import android.content.Intent
-import android.graphics.Bitmap
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.Button
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import com.cs407.team15.redstone.R
+import com.cs407.team15.redstone.ui.location.LocationPage
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import android.util.Log
-import android.widget.Button
-import android.widget.Toast
-import com.cs407.team15.redstone.ui.location.LocationPage
 import com.google.android.gms.maps.model.*
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
-import kotlinx.android.synthetic.main.location_display.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 
 
@@ -128,6 +123,15 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
                 }
             }
         )
+        if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            googleMap.isMyLocationEnabled = true
+        } else {
+            Toast.makeText(context,"Location not showing",Toast.LENGTH_LONG).show()
+            // Show rationale and request permission.
+            requestPermissions( arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), targetRequestCode)
+
+        }
+
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -139,5 +143,6 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
             add_location_btn.setBackgroundColor(resources.getColor(R.color.GREEN))
         }
     }
+
 }
 
