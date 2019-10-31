@@ -55,7 +55,7 @@ class AddLocationFragment : Fragment() {
             val newKey = database.child("locations").push().key.toString()
 
             FirebaseFirestore.getInstance().collection("locations").document(newKey)
-                .set(hashMapOf("timestamp" to com.google.firebase.Timestamp.now(), "description" to desc, "name" to name, "user_id" to currentFirebaseUser!!.uid, "coordinates" to GeoPoint(arguments!!.getDouble("latitude"), arguments!!.getDouble("longitude"))))
+                .set(hashMapOf("timestamp" to com.google.firebase.Timestamp.now(), "location_id" to newKey, "description" to desc, "name" to name, "user_id" to currentFirebaseUser!!.uid, "coordinates" to GeoPoint(arguments!!.getDouble("latitude"), arguments!!.getDouble("longitude"))))
             .addOnSuccessListener {
                 Toast.makeText(context, "Location Added", Toast.LENGTH_SHORT).show()
                 this.activity!!.supportFragmentManager.popBackStack()

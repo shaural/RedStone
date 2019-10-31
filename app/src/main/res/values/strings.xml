@@ -12,6 +12,7 @@
     <string name="menu_home">Home</string>
     <string name="menu_aboutpurdue">About Purdue</string>
     <string name="menu_tour">Tour</string>
+    <string name="menu_add_tour">Add Tour</string>
     <string name="menu_view_tours">View Tours</string>
     <string name="menu_ar">Free Roam</string>
     <string name="menu_profile">Profile</string>
@@ -70,4 +71,9 @@
     <string name="private_mode">Private Mode</string>
     <string name="tags">Tags</string>
     <string name="locations">Locations</string>
+    <string name="add_tag_to_tour">Add Tag to Tour</string>
+    <string name="select_tag">Select a tag...</string>
+    <string name="add_location_to_tour">Add Location to Tour</string>
+    <string name="select_location">Select a location...</string>
+    <string name="search_by_hammer_user">Search by Hammer User</string>
 </resources>

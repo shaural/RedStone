@@ -12,8 +12,9 @@ import kotlinx.coroutines.tasks.await
 import java.io.FileReader
 import kotlin.reflect.KClass
 
-class Location(val coordinates: GeoPoint, val description: String, val name: String,
-               val user_id: String, val timestamp: ServerTimestamp) {
+
+data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
+                    val description: String = "", val name: String = "", val user_id: String = "") {
 
     companion object {
         const val LOCATIONS = "locations"
@@ -24,6 +25,7 @@ class Location(val coordinates: GeoPoint, val description: String, val name: Str
         const val IS_DISMISSED = "is_dismissed"
         const val FLAGGING_USERS = "flagging_users"
         const val USER_ID = "user_id"
+        const val LOCATION_ID = "location_id"
         // A location gets automatically deleted if it gets flagged and the proportion of the
         // user base is at least PROPORTIONAL_FLAG_THRESHOLD *or* the total number of flags is
         // at least ABSOLUTE_FLAG_THRESHOLD
@@ -133,6 +135,17 @@ class Location(val coordinates: GeoPoint, val description: String, val name: Str
             catch (e: FirebaseException) {
                 false
             }
+        }
+
+
+        // Get all tours, sorted alphabetically by name
+        suspend fun getAllTours(): List<Location> {
+            // Get all tour documents
+            return FirebaseFirestore.getInstance().collection(LOCATIONS).get().await().documents
+                // Build a Location from each location document
+                .map { locationDocument -> locationDocument.toObject(Location::class.java) as Location }
+                // Sort alphabetically by tour name, ignoring case
+                .sortedBy { location -> location.name.toUpperCase() }
         }
     }
 }

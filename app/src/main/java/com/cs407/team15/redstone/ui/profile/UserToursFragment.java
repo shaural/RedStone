@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -51,9 +52,13 @@ public class UserToursFragment extends Fragment implements RecyclerAdapter.ItemC
                                 //Log.d(TAG, document.getId() + " => " + document.getData());
                             }
                             if (list.isEmpty()) {
+                                Toast toast = Toast.makeText(getContext(),"No Tours Created",Toast.LENGTH_SHORT);
+                                toast.show();
                                 getActivity().onBackPressed();
                             }
-                            fillRecycleViewer(list);
+                            else {
+                                fillRecycleViewer(list);
+                            }
                         }
                         else {
                             System.out.println("ERROR GETTING DOCS");

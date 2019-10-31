@@ -16,15 +16,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.content.ContentValues.TAG;
 
@@ -50,6 +55,7 @@ public class LocationListFragment extends Fragment implements RecyclerAdapter.It
                 getActivity().onBackPressed();
             }
         });
+
         db.collection("locations")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -99,7 +105,7 @@ public class LocationListFragment extends Fragment implements RecyclerAdapter.It
         FragmentTransaction ft = fm.beginTransaction();
         LocationPage lp = new LocationPage();
         Bundle bundle = new Bundle();
-        RecyclerView recycle = view.findViewById(R.id.locationlist);
+        RecyclerView recycle = view.findViewById(R.id.locationlist); // ?
         bundle.putString("title", adapter.getItem(position));
         lp.setArguments(bundle);
         ft.replace(container2.getId(), lp);

@@ -1,5 +1,6 @@
 package com.cs407.team15.redstone.ui.profile
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -48,25 +49,46 @@ class ProfileFragment : Fragment() {
             val user =it.toObject(User::class.java)
 
             if (user != null){
-            root.profile_email.text=user.email
-            root.profile_username.text=user.username
-            root.user_type.text=user.userType.toString()
-            root.user_likes.text=user.userLikes.toString()
-            root.user_dislike.text=user.userDislikes.toString()
-            root.user_net_likes.text=(user.userLikes - user.userDislikes).toString()
-            root.recieved_like.text=user.recievedLikes.toString()
-            root.recieved_dislike.text=user.recievedDislikes.toString()
-            root.recieved_net_likes.text=(user.recievedLikes-user.recievedDislikes).toString()
-            root.is_hammer_user.text=user.isHammerUser.toString()
+                root.profile_email.text=user.email
+                root.profile_username.text=user.username
+
+                // this is pretty arbitrary, can be changed in the future
+                if(user.userLikes > 20 && user.userDislikes < 5){
+                    user.userType = 1
+                }
+                // end of arbitrary hammer user requirements
+                if(user.userType != 0){
+                    val d = resources.getDrawable(R.drawable.ic_hammer)
+                    d.setBounds(5, 5, 5, 5)
+                    root.user_type.setImageDrawable(d)
+                }
+                root.user_likes.text=user.userLikes.toString()
+                root.user_dislike.text=user.userDislikes.toString()
+                root.user_net_likes.text=(user.userLikes - user.userDislikes).toString()
+                root.recieved_like.text=user.recievedLikes.toString()
+                root.recieved_dislike.text=user.recievedDislikes.toString()
+                root.recieved_net_likes.text=(user.recievedLikes-user.recievedDislikes).toString()
             }
 
 
         })
-//        root.usercommentstext.setOnClickListener(object : View.OnClickListener {
-//            override fun onClick(v: View?) {
-//                var fragment = //
-//            }
-//        })
+                root.usercommentstext.setOnClickListener(object : View.OnClickListener {
+                    override fun onClick(v: View?) {
+                        var fragment = UserCommentsFragment();
+                        if (fragment != null) {
+                            //var frManager = fragmentManager
+                            val transaction = fragmentManager?.beginTransaction()
+                            if (transaction != null) {
+                                if (container != null) {
+                                    transaction.replace(container.id, fragment)
+                                    transaction.addToBackStack(null)
+                                    transaction.commit()
+                                }
+                            }
+
+                        }
+                    }
+        })
         root.usertourtext.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View?) {
                 var fragment = UserToursFragment();
@@ -84,6 +106,7 @@ class ProfileFragment : Fragment() {
                 }
             }
         })
+
      /*   val database = FirebaseDatabase.getInstance().reference
         val dUser = FirebaseDatabase.getInstance().getReference("users")
 

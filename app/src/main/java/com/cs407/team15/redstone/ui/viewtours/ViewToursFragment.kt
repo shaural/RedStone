@@ -8,19 +8,20 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.Spinner
+import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Tour
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.lang.Boolean.FALSE
+import java.lang.Boolean.TRUE
 
 /**
  * A simple [Fragment] subclass.
@@ -40,6 +41,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
 
     var selectedFilterText = ""
     var selectedTag = ANY
+    var selectedHammer = TRUE
 
     override fun onItemClick(view: View, position: Int) {
     }
@@ -57,6 +59,11 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         super.onStart()
         val searchField = view!!.findViewById<EditText>(R.id.searchField)
         searchField.addTextChangedListener(this)
+
+        val sw = view!!.findViewById<Switch>(R.id.hammerSwitch)
+        sw?.setOnCheckedChangeListener { _, isChecked ->
+            getHammerUsers(isChecked)
+        }
     }
 
     // Only to be used first time that tourNames of tours to be displayed is set, in order to set up
@@ -89,6 +96,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         val tourNamesFilteredByNameAndTag = allTours
             .filter { tour -> tour.name.contains(selectedFilterText, ignoreCase = true)}
             .filter { tour -> selectedTag == ANY || tour.tags.contains(selectedTag) }
+            .filter { tour -> tour.hammer || tour.hammer == selectedHammer}
             .map {tour -> tour.name}
         setVisibleTourNames(tourNamesFilteredByNameAndTag)
     }
@@ -127,6 +135,17 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
             }
             (tagSpinner as SearchableSpinner).setTitle("Search tours by tag")
             tagSpinner.invalidate()
+        }
+    }
+
+    fun getHammerUsers(isChecked : Boolean) {
+        if(isChecked){
+            selectedHammer = TRUE
+            reapplyFiltering()
+        }
+        else{
+            selectedHammer = FALSE
+            reapplyFiltering()
         }
     }
 
