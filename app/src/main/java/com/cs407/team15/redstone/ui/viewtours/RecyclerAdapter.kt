@@ -4,11 +4,14 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cs407.team15.redstone.R
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.firestore.FirebaseFirestore
 
 class RecyclerAdapter
 // data is passed into the constructor
@@ -30,7 +33,29 @@ internal constructor(context: Context, private val mData: List<String>) :
     // binds the data to the TextView in each row
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val animal = mData[position]
+        addHammerIcon(position, holder);
         holder.myTextView.text = animal
+    }
+
+    internal fun addHammerIcon(position: Int, holder: ViewHolder) {
+        FirebaseFirestore.getInstance().collection("tours").whereEqualTo("name", mData[position])
+            .get().addOnSuccessListener { documents ->
+                for (document in documents) {
+                    FirebaseFirestore.getInstance().collection("users").whereEqualTo("uid", document["user_id"]).get()
+                        .addOnSuccessListener { documents ->
+                            for (document in documents) {
+                                if (document["userType"] == 1) {
+                                    holder.myImageView.visibility = View.VISIBLE
+
+                                }
+                            }
+                        }
+                }
+            }
+            .addOnFailureListener {
+                exception ->
+                System.out.println("EERROR")
+            }
     }
 
     // total number of rows
@@ -43,9 +68,11 @@ internal constructor(context: Context, private val mData: List<String>) :
     inner class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView),
         View.OnClickListener {
         internal var myTextView: TextView
+        internal var myImageView: ImageView
 
         init {
             myTextView = itemView.findViewById(R.id.tvAnimalName)
+            myImageView = itemView.findViewById(R.id.hammertouricon)
             itemView.setOnClickListener(this)
         }
 
