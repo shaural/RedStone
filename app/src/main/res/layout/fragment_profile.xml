@@ -29,28 +29,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0">
 
-        <!--<TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/user_type_text"
-                android:layout_width="wrap_content"
-                android:layout_height="rap_content" />
-
-            <ImageView
-                android:id="@+id/user_type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/user_type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
-                android:textSize="18sp" />
-        </TableRow>-->
-
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -64,7 +42,7 @@
 
             <TextView
                 android:id="@+id/profile_username"
-                android:layout_width="164dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:textAlignment="textEnd"
                 android:textSize="18sp" />
@@ -201,6 +179,42 @@
                 android:layout_width="257dp"
                 android:layout_height="match_parent"
                 android:textAlignment="textEnd"
+                android:textSize="18sp" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/hammerstatustext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hammer User Status:"
+                android:textSize="18sp" />
+            <TextView
+                android:id="@+id/is_hammer_user"
+                android:layout_width="257dp"
+                android:layout_height="match_parent"
+                android:textAlignment="textEnd"
+                android:textSize="18sp" />
+        </TableRow>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/usertourtext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="View Your Tours"
+                android:textSize="18sp" />
+            <TextView
+                android:id="@+id/usercommentstext"
+                android:layout_width="257dp"
+                android:layout_height="match_parent"
+                android:textAlignment="textStart"
+                android:text="View Your Comments"
                 android:textSize="18sp" />
         </TableRow>
 

@@ -1,5 +1,6 @@
 package com.cs407.team15.redstone.ui.comments;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
@@ -7,20 +8,27 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.AppCompatButton;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
 import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Comment;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -29,6 +37,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,7 +47,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-public class CommentsActivity extends AppCompatActivity {
+import static android.content.ContentValues.TAG;
+
+public class CommentsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, AdapterView.OnItemClickListener {
     String TAG = getClass().toString();
 
     private RecyclerView recyclerView;
@@ -55,11 +68,38 @@ public class CommentsActivity extends AppCompatActivity {
 
     FirebaseUser firebaseUser;
 
+    //Tag stuff
+    private ArrayList<String> tagNames;
+    private Context context;
+    private ArrayList<String> tagsOnComment;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comments);
+        tagsOnComment = new ArrayList<>();
+        FirebaseFirestore.getInstance().collection("tags").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    tagNames = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        if (document.exists()) {
+                            Log.d(TAG, document.getId() + " => " + document.get("name"));
+
+                            tagNames.add((String)document.get("name"));
+                        }
+                        else {
+                            Log.d("michael", "no document exists");
+                        }
+                    }
+                    spinnerSetup();
+                    //fillRecycleViewer(list);
+                } else {
+                    Log.d(TAG, "Error getting documents: ", task.getException());
+                }
+            }
+        });
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -166,6 +206,7 @@ public class CommentsActivity extends AppCompatActivity {
         hashMap.put("publisher", firebaseUser.getEmail());
         hashMap.put("path", path);
         hashMap.put("commentid", commentid);
+        hashMap.put("tags", tagsOnComment);
         hashMap.put("like", 0);
         hashMap.put("timestamp", ts);
 
@@ -204,6 +245,32 @@ public class CommentsActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
             }
         });
+
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        String tagName = tagNames.get(position);
+        if (!tagsOnComment.contains(tagName)) {
+            tagsOnComment.add(tagName);
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    public void spinnerSetup() {
+        Spinner tagSpinner = findViewById(R.id.tagSpinnerComment);
+        ArrayAdapter spinnerAdapter = new ArrayAdapter<String>(CommentsActivity.this,android.R.layout.simple_spinner_item, tagNames);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        tagSpinner.setAdapter(spinnerAdapter);
+        tagSpinner.setOnItemSelectedListener(this);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
     }
 
@@ -248,7 +315,7 @@ public class CommentsActivity extends AppCompatActivity {
 
             if (item1.getLike() < item2.getLike()) {
                 ret = 1;
-            } else if (item1.getLike() == item2.getLike()) {
+            } else if (item1.getLike() == item2.getLike() && item1.getTimestamp() != null && item2.getTimestamp() != null) {
                 ret = item1.getTimestamp().compareTo(item2.getTimestamp()) ;
             } else {
                 ret = -1;

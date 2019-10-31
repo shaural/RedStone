@@ -62,6 +62,17 @@
             android:padding="5dp"
             android:id="@+id/image_profile"/>
 
+        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+            android:id="@+id/tagSpinnerComment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/post"
+            android:layout_toEndOf="@id/add_comment"
+            android:background="@android:drawable/bottom_bar"
+            android:textColor="@color/common_google_signin_btn_text_light"
+            android:visibility="visible"
+            app:hintText="@string/select_tag" />
+
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -74,6 +85,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:background="@android:color/transparent"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

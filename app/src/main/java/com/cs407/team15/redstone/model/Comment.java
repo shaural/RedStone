@@ -14,6 +14,21 @@ public class Comment {
         this.commentid = commentid;
         this.path = path;
     }
+    public Comment(String comment, String publisher, String commentid, String path, Long like) {
+        this.comment = comment;
+        this.publisher = publisher;
+        this.commentid = commentid;
+        this.path = path;
+        this.like = like;
+    }
+
+    public Long getLike() {
+        return like;
+    }
+
+    public void setLike(Long like) {
+        this.like = like;
+    }
 
     public String getPath() {
         return path;
@@ -24,14 +39,6 @@ public class Comment {
     }
 
     public Comment() {
-    }
-
-    public long getLike() {
-        return like;
-    }
-
-    public void setLike(long like) {
-        this.like = like;
     }
 
     public String getComment() {
@@ -64,5 +71,16 @@ public class Comment {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "comment='" + comment + '\'' +
+                ", publisher='" + publisher + '\'' +
+                ", commentid='" + commentid + '\'' +
+                ", path='" + path + '\'' +
+                ", like='" + like + '\'' +
+                '}';
     }
 }

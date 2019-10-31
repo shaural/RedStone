@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.cs407.team15.redstone.R
@@ -64,6 +65,41 @@ class ProfileFragment : Fragment() {
                 root.recieved_net_likes.text=(user.recievedLikes-user.recievedDislikes).toString()
             }
 
+
+        })
+                root.usercommentstext.setOnClickListener(object : View.OnClickListener {
+                    override fun onClick(v: View?) {
+                        var fragment = UserCommentsFragment();
+                        if (fragment != null) {
+                            //var frManager = fragmentManager
+                            val transaction = fragmentManager?.beginTransaction()
+                            if (transaction != null) {
+                                if (container != null) {
+                                    transaction.replace(container.id, fragment)
+                                    transaction.addToBackStack(null)
+                                    transaction.commit()
+                                }
+                            }
+
+                        }
+                    }
+        })
+        root.usertourtext.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                var fragment = UserToursFragment();
+                if (fragment != null) {
+                    //var frManager = fragmentManager
+                    val transaction = fragmentManager?.beginTransaction()
+                    if (transaction != null) {
+                        if (container != null) {
+                            transaction.replace(container.id, fragment)
+                            transaction.addToBackStack(null)
+                            transaction.commit()
+                        }
+                    }
+
+                }
+            }
         })
 
      /*   val database = FirebaseDatabase.getInstance().reference
