@@ -2,6 +2,7 @@ package com.cs407.team15.redstone.model;
 
 public class Comment {
     private String comment;
+    private Long like;
     private String publisher;
     private String publisherid;
     private String commentid;
@@ -9,11 +10,12 @@ public class Comment {
     private Long like;
     private String timestamp;
 
-    public Comment(String comment, String publisher, String commentid, String path) {
+    public Comment(String comment,Long like, String publisher, String commentid, String path) {
         this.comment = comment;
         this.publisher = publisher;
         this.commentid = commentid;
         this.path = path;
+        this.like=like;
     }
     public Comment(String comment, String publisher, String commentid, String path, Long like) {
         this.comment = comment;
