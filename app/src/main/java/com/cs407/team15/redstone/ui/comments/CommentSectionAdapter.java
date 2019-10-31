@@ -72,8 +72,9 @@ public class CommentSectionAdapter extends RecyclerView.Adapter<CommentSectionAd
         final Comment comment = mComment.get(position);
 
         holder.comment.setText(comment.getComment());
+        holder.score.setText(comment.getLike().toString());
         getUserInfo(holder.image_profile, holder.username, comment.getPublisher());
-
+        holder.comment.setText("aaaaaaa");
 
     }
 
@@ -91,13 +92,14 @@ public class CommentSectionAdapter extends RecyclerView.Adapter<CommentSectionAd
     public class ImageViewHolder extends RecyclerView.ViewHolder {
 
         public ImageView image_profile;
-        public TextView username, comment;
+        public TextView username, comment,score;
 
         public ImageViewHolder(View itemView) {
             super(itemView);
             image_profile = itemView.findViewById(R.id.image_profile);
             username = itemView.findViewById(R.id.username);
             comment = itemView.findViewById(R.id.comment);
+            score = itemView.findViewById(R.id.comment_score);
         }
     }
 
