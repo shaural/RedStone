@@ -130,7 +130,13 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         holder.up_vote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                commentVote(comment);
+                commentVote(comment,true);
+            }
+        });
+        holder.down_vote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                commentVote(comment,false);
             }
         });
 
