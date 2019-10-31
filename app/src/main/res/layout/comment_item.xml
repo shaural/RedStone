@@ -26,8 +26,8 @@
         android:layout_width="272dp"
         android:layout_height="49dp"
         android:layout_marginStart="5dp"
-        android:orientation="vertical"
-        android:layout_toEndOf="@id/layout_likes">
+        android:layout_toEndOf="@id/image_profile"
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/username"

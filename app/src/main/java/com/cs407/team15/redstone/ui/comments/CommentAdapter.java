@@ -113,7 +113,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             }
         });
 
-
         //holder.score.setText(comment.getCommentScore());
         holder.up_vote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -190,6 +189,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             down_vote = itemView.findViewById(R.id.down_vote_comment);
             score = itemView.findViewById(R.id.comment_score);
 
+            up_vote = itemView.findViewById(R.id.up_vote_comment);
+            score = itemView.findViewById(R.id.comment_score);
         }
     }
 
