@@ -115,6 +115,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             }
         });
 
+        //holder.score.setText(comment.getCommentScore());
+        holder.up_vote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                commentVote(comment);
+            }
+        });
+
         /**
          * On long Click Delete comment dialog pop up
          */
