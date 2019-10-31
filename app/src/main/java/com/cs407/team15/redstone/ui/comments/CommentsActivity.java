@@ -123,6 +123,7 @@ public class CommentsActivity extends AppCompatActivity {
         hashMap.put("publisher", firebaseUser.getEmail());
         hashMap.put("path", path);
         hashMap.put("commentid", commentid);
+        hashMap.put("like", 0);
 
         reference.child(commentid).setValue(hashMap);
 
