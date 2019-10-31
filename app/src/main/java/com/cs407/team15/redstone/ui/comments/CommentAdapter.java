@@ -179,7 +179,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             score = itemView.findViewById(R.id.comment_score);
 
             up_vote = itemView.findViewById(R.id.up_vote_comment);
+            down_vote = itemView.findViewById(R.id.down_vote_comment);
             score = itemView.findViewById(R.id.comment_score);
+
         }
     }
 
