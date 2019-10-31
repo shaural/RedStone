@@ -23,6 +23,8 @@ import kotlinx.android.synthetic.main.fragment_profile.view.*
 import com.cs407.team15.redstone.ui.tour.AddTourFragment
 
 import kotlinx.coroutines.tasks.await
+import com.cs407.team15.redstone.ui.tour.AddTourFragment
+
 
 class ProfileFragment : Fragment() {
 
