@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
@@ -34,12 +37,15 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageViewHolder> {
     private String TAG = getClass().toString();
     private Context mContext;
     private List<Comment> mComment;
+    private List<Comment> filteredComment;
+
     private String postid; // Location ID
     private String email;
     private String path;
@@ -95,6 +101,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             }
         });
 
+
         /**
          * On long Click Delete comment dialog pop up
          */
@@ -135,7 +142,31 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         });
     }
 
+    public void getHammer() {
+        final ArrayList<Comment> filteringList = new ArrayList<>();
 
+        for(int i = 0 ; i < getItemCount() ; i++) {
+            final Comment comment = mComment.get(i);
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("HammerUser");
+            reference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.child(comment.getPublisherid()).exists()){
+                        Log.e(TAG, "Hammer Found: " + comment.getPublisherid());
+                        filteringList.add(comment);
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
+        filteredComment = filteringList;
+        mComment = filteredComment;
+        notifyDataSetChanged();
+    }
 
     @Override
     public int getItemCount() {
@@ -156,7 +187,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             comment = itemView.findViewById(R.id.comment);
             like_count = itemView.findViewById(R.id.tv_total);
             like = itemView.findViewById(R.id.btn_like);
-
         }
     }
 
@@ -206,6 +236,32 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                 if (dataSnapshot.child(firebaseUser.getUid()).exists()){
                     imageView.setImageResource(R.drawable.ic_liked);
                     imageView.setTag("liked");
+                } else{
+                    imageView.setImageResource(R.drawable.ic_like);
+                    imageView.setTag("like");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    /**
+     * Like
+     */
+    private void isHammer(final String publisherid, final ImageView imageView){
+
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("HammerUser");
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.child(publisherid).exists()){
+                    Log.e(TAG, "Hammer Found: " + publisherid);
+
                 } else{
                     imageView.setImageResource(R.drawable.ic_like);
                     imageView.setTag("like");

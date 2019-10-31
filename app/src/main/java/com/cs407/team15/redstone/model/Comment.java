@@ -3,6 +3,7 @@ package com.cs407.team15.redstone.model;
 public class Comment {
     private String comment;
     private String publisher;
+    private String publisherid;
     private String commentid;
     private String path;
     private long like;
@@ -32,6 +33,14 @@ public class Comment {
 
     public void setLike(long like) {
         this.like = like;
+    }
+
+    public String getPublisherid() {
+        return publisherid;
+    }
+
+    public void setPublisherid(String publisherid) {
+        this.publisherid = publisherid;
     }
 
     public String getComment() {

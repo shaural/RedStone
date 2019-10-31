@@ -1,6 +1,9 @@
 package com.cs407.team15.redstone.ui.comments;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,10 +34,13 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 public class CommentsActivity extends AppCompatActivity {
     String TAG = getClass().toString();
@@ -44,14 +50,18 @@ public class CommentsActivity extends AppCompatActivity {
     private List<Comment> commentList;
     private ProgressBar progressBar;
     private AppCompatButton sort;
+    private AppCompatImageView checkbox;
+    private TextView hammer_only;
 
     EditText addcomment;
     ImageView image_profile;
     TextView post;
 
+
     String postid;
     String publisherid;
     String path;
+    Boolean isClicked;
 
     FirebaseUser firebaseUser;
 
@@ -90,23 +100,42 @@ public class CommentsActivity extends AppCompatActivity {
         commentAdapter = new CommentAdapter(this, commentList, postid, path);
         recyclerView.setAdapter(commentAdapter);
 
-
+        isClicked = false;
         post = findViewById(R.id.post);
         addcomment = findViewById(R.id.add_comment);
         image_profile = findViewById(R.id.image_profile);
         progressBar = findViewById(R.id.comment_loading);
         sort = findViewById(R.id.btn_sort);
+        hammer_only = findViewById(R.id.hammerCheck);
+        checkbox = findViewById(R.id.hammerCheckbox);
 
         progressBar.setVisibility(View.VISIBLE);
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-
 
         setListener();
         sortCommentsByLikes(); // default
     }
 
     private void setListener() {
+        hammer_only.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isClicked == false) {
+                    isClicked = true;
+                    checkbox.setImageResource(R.drawable.ic_check);
+                    // get Hammer comment()
+                    showHammer();
+                } else {
+                    checkbox.setImageResource(R.drawable.ic_uncheck);
+                    isClicked = false;
+                    sortCommentsByLikes();
+                }
+                Log.e(TAG, "hammer_only: " + isClicked);
+
+            }
+        });
+
         post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -164,6 +193,7 @@ public class CommentsActivity extends AppCompatActivity {
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("comment", addcomment.getText().toString());
         hashMap.put("publisher", firebaseUser.getEmail());
+        hashMap.put("publisherid", firebaseUser.getUid());
         hashMap.put("path", path);
         hashMap.put("commentid", commentid);
         hashMap.put("like", 0);
@@ -235,6 +265,52 @@ public class CommentsActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void showHammer() {
+        //commentAdapter.getHammer();
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(path).child(postid);
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                progressBar.setVisibility(View.VISIBLE);
+                //commentList.clear();
+                int i = 0;
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    // Comment
+                    final Comment comment = snapshot.getValue(Comment.class);
+                    Log.e(TAG, i++ + " Comment Pid: " + comment.getPublisherid());
+
+                    FirebaseDatabase.getInstance().getReference("HammerUser")
+                            .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.child(comment.getPublisherid()).exists()){
+                                Log.e(TAG, "Hammer Found: " + comment.getPublisherid());
+
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    //commentList.add(0,comment); // reverse
+                }
+
+                //Collections.sort(commentList, cmpLikeThenTimestamp);
+
+                //commentAdapter.notifyDataSetChanged();
+                progressBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                progressBar.setVisibility(View.GONE);
+            }
+        });
     }
 
     /**
