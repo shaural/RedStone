@@ -107,7 +107,13 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         holder.up_vote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                commentVote(comment);
+                commentVote(comment,true);
+            }
+        });
+        holder.down_vote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                commentVote(comment,false);
             }
         });
 
@@ -161,7 +167,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         public ImageView image_profile;
         public TextView username, comment,score;
         public ProgressBar progressBar;
-        public Button up_vote;
+        public Button up_vote,down_vote;
 
         public ImageViewHolder(View itemView) {
             super(itemView);
@@ -170,7 +176,9 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             username = itemView.findViewById(R.id.username);
             comment = itemView.findViewById(R.id.comment);
             up_vote = itemView.findViewById(R.id.up_vote_comment);
+            down_vote = itemView.findViewById(R.id.down_vote_comment);
             score = itemView.findViewById(R.id.comment_score);
+
         }
     }
 
@@ -204,19 +212,29 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
 
 
     }
-    private void commentVote(Comment comment){
+    private void commentVote(Comment comment, final Boolean up){
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
-        comment.setLike(comment.getLike()+1);
+        if(up){
+        comment.setLike(comment.getLike()+1);}
+        else{
+            comment.setLike(comment.getLike()-1);
+        }
         database.child("Comments").child("location").child(postid).child(comment.getCommentid()).setValue(comment);
         comment.getPublisher();
+
          db.collection("users").get().addOnSuccessListener(
                  new OnSuccessListener<QuerySnapshot>() {
                      @Override
                      public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                          for(QueryDocumentSnapshot queryDocumentSnapshot: queryDocumentSnapshots){
                              User user=queryDocumentSnapshot.toObject(User.class);
-                             user.recievedLikes=user.recievedLikes+1;
+                             if(up){
+                             user.recievedLikes=user.recievedLikes+1;}
+                             else{
+                                 user.recievedLikes=user.recievedLikes-1;
+                             }
+
                              db.collection("users").document(user.email).set(user);
                          }
                      }
@@ -228,7 +246,11 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
           @Override
           public void onSuccess(DocumentSnapshot documentSnapshot) {
               User user = documentSnapshot.toObject(User.class);
-              user.userLikes=1+user.userLikes;
+              if(up){
+              user.userLikes=1+user.userLikes;}
+              else{
+                  user.userLikes=user.userLikes-1;
+              }
               db.collection("users").document(user.email).set(user);
           }
       });
