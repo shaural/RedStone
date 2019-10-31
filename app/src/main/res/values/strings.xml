@@ -57,6 +57,11 @@
     <string name="user_dislikes">User Dislikes</string>
     <string name="user_netlikes">User Net Likes</string>
     <string name="user_tours">User Tours</string>
+    <string name="completed_tours">Completed Tours</string>
+    <string name="edit_tours">Edit</string>
+    <string name="share_tour">Share</string>
+    <string name="name_tour">Name of Tour</string>
+    <string name="start_tour">Starting Location</string>
 
     <!-- Tours -->
     <string name="tour_search_hint">Search tours by name</string>

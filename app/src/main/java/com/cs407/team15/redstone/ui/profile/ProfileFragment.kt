@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.R
+import com.cs407.team15.redstone.model.Tour
 import com.cs407.team15.redstone.model.User
 import com.cs407.team15.redstone.ui.authentication.LoginActivity
 import com.google.android.gms.tasks.OnSuccessListener
@@ -24,6 +25,8 @@ import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_profile.view.*
 import kotlinx.android.synthetic.main.fragment_settings.view.*
 import kotlinx.coroutines.tasks.await
+import com.cs407.team15.redstone.ui.tour.AddTourFragment
+
 
 class ProfileFragment : Fragment() {
 
@@ -35,12 +38,13 @@ class ProfileFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         profileViewModel = ViewModelProviders.of(this).get(ProfileViewModel::class.java)
-
-       val Data = arrayOf<String>("hello","there","dave","there","dave","there","dave","there","dave","there","dave","there","dave")
+/*get userid and search whole of tours till and add tours for now also add permisions to share*/
+       val Data = ArrayList<Array<String>>()
+        Data.add(arrayOf("","","","","",""))
         val viewAdapter = profileRecycleAdapter(Data)
+        this::editPersonalTour
         val viewManager = LinearLayoutManager(this.context)
         val root = inflater.inflate(R.layout.fragment_profile, container, false)
-
       val recyclerView = root.findViewById<RecyclerView>(R.id.profile_tour_recycle_view)
         recyclerView.layoutManager =LinearLayoutManager(activity,LinearLayoutManager.VERTICAL,false)
         recyclerView.adapter=profileRecycleAdapter(Data)
@@ -51,6 +55,30 @@ class ProfileFragment : Fragment() {
         val emailProfile= current?.email
 
         val db = FirebaseFirestore.getInstance()
+
+        db.collection("tours").get().addOnSuccessListener(OnSuccessListener {
+            val tourList = it
+            val personalTourList =  ArrayList<Array<String>>()
+            for (tours in it.documents){
+
+                if(tours["user_id"]==current?.uid.toString()){
+                    val userTourList= arrayOfNulls<String>(5)
+                    userTourList[0]=(tours["name"] as String)
+                    userTourList[1]=(tours["type"] as String)
+                    userTourList[2]=(tours["hammer"].toString())
+                    val tourLocationList=tours["locations"] as ArrayList<String>
+                    val primaryLoc= tourLocationList.get(0)
+                    userTourList[3]=primaryLoc
+                    userTourList[4]=(tours["type"] as String)
+                    personalTourList.add(userTourList as Array<String>)
+                }
+
+                if(personalTourList.isEmpty()){
+                    personalTourList.add(arrayOf("","","","","",""))
+                }
+                recyclerView.adapter=profileRecycleAdapter(personalTourList as ArrayList<Array<String>>)
+            }
+        })
 
         db.collection("users").document(emailProfile!!).get().addOnSuccessListener(OnSuccessListener {
 
@@ -145,6 +173,17 @@ class ProfileFragment : Fragment() {
 
         return root
     }
+    fun editPersonalTour(){
+        val frag = fragmentManager!!.beginTransaction()
+        val bundle = Bundle()
+        bundle.putString("title","test")
+        val loc= AddTourFragment()
+        loc.arguments=bundle
+        frag.replace((view!!.parent as ViewGroup).id, loc)
+        frag.addToBackStack(null)
+        frag.commit()
+    }
+
     fun addProfileInfo(){
      //User user =
         val db =FirebaseFirestore.getInstance()
