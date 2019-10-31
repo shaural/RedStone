@@ -20,12 +20,29 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"/>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layout_setting"
+        android:layout_below="@id/toolbar">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_sort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:textSize="15dp"
+            android:text="@string/sort_btn"/>
+
+
+    </RelativeLayout>
+
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/recycler_view"
         android:layout_above="@id/bottom"
-        android:layout_below="@id/toolbar"
+        android:layout_below="@id/layout_setting"
         />
 
     <RelativeLayout

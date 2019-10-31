@@ -28,7 +28,7 @@ import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.location_display.view.*
 import kotlinx.coroutines.*
-import java.util.ArrayList
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 
@@ -104,7 +104,6 @@ class LocationPage : Fragment(), CoroutineScope {
         commentAdapter = CommentSectionAdapter(getActivity(), commentList)
         recyclerView.adapter = commentAdapter
 
-        readComments()
         Log.e("TITLE", arguments?.getCharSequence("title").toString() )
 
         launch {
@@ -171,7 +170,13 @@ class LocationPage : Fragment(), CoroutineScope {
 
 
         }
+
         return root
+    }
+
+    override fun onStart() {
+        super.onStart()
+        readComments()
     }
 
     /**
@@ -181,24 +186,31 @@ class LocationPage : Fragment(), CoroutineScope {
     private fun readComments() {
         val name = arguments?.getCharSequence("title")
 
+        // Get Location ID, then query comments
         FirebaseFirestore.getInstance().collection("locations").get()
             .addOnSuccessListener { locations ->
                 for ( location in locations.documents) {
                     if (location["name"] as String == name as String) {
                         val locID = location.id
-                        Log.e(TAG, "LocationID: " + locID)
-                        database.child("Comments").child("location").child(locID)
+                        // Query for Comments
+                        database.child("Comments")
+                            .child("location")
+                            .child(locID)
                             .addListenerForSingleValueEvent(object : ValueEventListener {
                                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                                     commentList.clear()
                                     // Get Comment
                                     for (snapshot in dataSnapshot.children) {
                                         val comment= snapshot.getValue(Comment::class.java)
-                                        Log.e(TAG, "Comment: " + comment!!.getComment())
+                                        //Log.e(TAG, "Comment: " + comment!!.getComment())
                                         commentList.add(comment as Comment)
                                     }
+
+                                    Collections.sort(commentList, cmpLikeThenTimestamp) // sorting
+
                                     commentAdapter.notifyDataSetChanged()
-                                    viewAllComments.setText("View All "+dataSnapshot.getChildrenCount()+" Comments")
+                                    viewAllComments.setText("View All "
+                                            +dataSnapshot.getChildrenCount()+" Comments")
                                 }
 
                                 override fun onCancelled(databaseError: DatabaseError) {
@@ -211,4 +223,23 @@ class LocationPage : Fragment(), CoroutineScope {
             }
 
     }
+
+    /**
+     * Compare class
+     * Dsc Likes then Asc Timestamp
+     */
+    internal var cmpLikeThenTimestamp: Comparator<Comment> =
+        Comparator { item1, item2 ->
+            val ret: Int
+
+            if (item1.like < item2.like) {
+                ret = 1
+            } else if (item1.like == item2.like) {
+                ret = item1.timestamp.compareTo(item2.timestamp)
+            } else {
+                ret = -1
+            }
+
+            ret
+        }
 }
