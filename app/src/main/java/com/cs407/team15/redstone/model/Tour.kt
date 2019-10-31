@@ -70,5 +70,6 @@ class Tour(val name: String, val type: String, val user_id: String, val hammer: 
                 // Sort alphabetically by tour name, ignoring case
                 .sortedBy { tour -> tour.name.toUpperCase() }
         }
+
     }
 }

@@ -74,7 +74,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         val adapter = RecyclerAdapter(context as Context, tourNames)
         adapter.setClickListener(this)
         recyclerView.adapter = adapter
-        getView()!!.invalidate()
+        view!!.invalidate()
     }
 
     fun setVisibleTourNames(tourNames: List<String>) {
@@ -82,7 +82,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         val adapter = RecyclerAdapter(context as Context, tourNames)
         adapter.setClickListener(this)
         recyclerView.adapter = adapter
-        getView()!!.invalidate()
+        view!!.invalidate()
     }
 
     suspend fun getAndDisplayTourData() {
@@ -97,6 +97,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
             .filter { tour -> tour.name.contains(selectedFilterText, ignoreCase = true)}
             .filter { tour -> selectedTag == ANY || tour.tags.contains(selectedTag) }
             .filter { tour -> tour.hammer || tour.hammer == selectedHammer}
+            .filter { tour -> (tour.type == "personal") && tour.user_id == FirebaseAuth.getInstance().currentUser!!.uid}
             .map {tour -> tour.name}
         setVisibleTourNames(tourNamesFilteredByNameAndTag)
     }
@@ -148,5 +149,4 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
             reapplyFiltering()
         }
     }
-
 }
