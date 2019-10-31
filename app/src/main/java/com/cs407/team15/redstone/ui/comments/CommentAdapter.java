@@ -31,6 +31,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
 
@@ -42,6 +44,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     private String postid; // Location ID
     private String email;
     private String path;
+    private String location;
 
     private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
@@ -58,6 +61,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         mComment = comments;
         this.postid = postid;
         this.path = path;
+        this.location = location;
     }
 
 
@@ -76,6 +80,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         final Comment comment = mComment.get(position);
 
         holder.comment.setText(comment.getComment());
+        holder.score.setText(comment.getLike().toString());
         getUserInfo(holder.image_profile, holder.username, comment.getPublisher());
         isLiked(comment.getCommentid(), holder.like);
         getLikesCount(comment.getCommentid(), holder.like_count);
@@ -97,6 +102,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             }
         });
 
+
+        //holder.score.setText(comment.getCommentScore());
+        holder.up_vote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                commentVote(comment);
+            }
+        });
 
         /**
          * On long Click Delete comment dialog pop up
@@ -145,9 +158,10 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
 
     public class ImageViewHolder extends RecyclerView.ViewHolder {
 
-        public ImageView image_profile, like;
-        public TextView username, comment, like_count;
+        public ImageView image_profile;
+        public TextView username, comment,score;
         public ProgressBar progressBar;
+        public Button up_vote;
 
         public ImageViewHolder(View itemView) {
             super(itemView);
@@ -155,8 +169,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             image_profile = itemView.findViewById(R.id.image_profile);
             username = itemView.findViewById(R.id.username);
             comment = itemView.findViewById(R.id.comment);
-            like_count = itemView.findViewById(R.id.tv_total);
-            like = itemView.findViewById(R.id.btn_like);
+            up_vote = itemView.findViewById(R.id.up_vote_comment);
+            score = itemView.findViewById(R.id.comment_score);
         }
     }
 
@@ -188,6 +202,36 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             });
         }
 
+
+    }
+    private void commentVote(Comment comment){
+
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+        comment.setLike(comment.getLike()+1);
+        database.child("Comments").child("location").child(postid).child(comment.getCommentid()).setValue(comment);
+        comment.getPublisher();
+         db.collection("users").get().addOnSuccessListener(
+                 new OnSuccessListener<QuerySnapshot>() {
+                     @Override
+                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                         for(QueryDocumentSnapshot queryDocumentSnapshot: queryDocumentSnapshots){
+                             User user=queryDocumentSnapshot.toObject(User.class);
+                             user.recievedLikes=user.recievedLikes+1;
+                             db.collection("users").document(user.email).set(user);
+                         }
+                     }
+                 }
+         );
+        String useremail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+
+      db.collection("users").document(useremail).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+          @Override
+          public void onSuccess(DocumentSnapshot documentSnapshot) {
+              User user = documentSnapshot.toObject(User.class);
+              user.userLikes=1+user.userLikes;
+              db.collection("users").document(user.email).set(user);
+          }
+      });
 
     }
 
