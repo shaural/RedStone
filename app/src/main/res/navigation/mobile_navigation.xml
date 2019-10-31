@@ -44,10 +44,10 @@
         />
 
     <fragment
-        android:id="@+id/nav_ar"
-        android:name="com.cs407.team15.redstone.ui.ar.ARFragment"
-        android:label="@string/menu_ar"
-        tools:layout="@layout/fragment_ar" />
+        android:id="@+id/nav_free_roam"
+        android:name="com.cs407.team15.redstone.ui.FreeRoamFragment"
+        android:label="@string/menu_free_roam"
+        tools:layout="@layout/fragment_free_roam" />
 
     <fragment
         android:id="@+id/nav_profile"
