@@ -126,10 +126,10 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
         if (ContextCompat.checkSelfPermission(context!!, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             googleMap.isMyLocationEnabled = true
         } else {
-            Toast.makeText(context,"Location not showing",Toast.LENGTH_LONG).show()
+//            Toast.makeText(context,"Location not showing",Toast.LENGTH_LONG).show()
             // Show rationale and request permission.
             requestPermissions( arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), targetRequestCode)
-
+            googleMap.isMyLocationEnabled = true
         }
 
     }
