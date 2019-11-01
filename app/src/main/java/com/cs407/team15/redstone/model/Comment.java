@@ -41,7 +41,7 @@ public class Comment {
 
     public Comment() {
     }
-  
+
     public String getPublisherid() {
         return publisherid;
     }
