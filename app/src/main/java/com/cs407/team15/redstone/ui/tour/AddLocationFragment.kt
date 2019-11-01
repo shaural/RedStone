@@ -93,11 +93,6 @@ class AddLocationFragment : Fragment() {
                         storeTags.add(stringStorage)
                     }
 
-//            var checkTags = ArrayList<Boolean>()
-//            for (i in 1..storeTags.size){
-//                checkTags.add(false)
-//            }
-
                     //addTagsButton.setOnClickListener {
                     val tagsArr = arrayOfNulls<String>(storeTags.size)
                     storeTags.toArray(tagsArr)
@@ -108,12 +103,11 @@ class AddLocationFragment : Fragment() {
                         checkTags[which] = isChecked
                     }
                     builder.setPositiveButton("Add") { dialog, which ->
-                        var flag0 = 0
                         var addingTagsArr = ArrayList<String>()
                         for (i in checkTags.indices) {
                             val checked = checkTags[i]
                             if (checked) {
-                                flag0 = 1
+
                                 addingTagsArr.add(storeTags[i])
                             }
                         }
@@ -147,11 +141,29 @@ class AddLocationFragment : Fragment() {
                                 )
                             )
                         )
+
+                        var flag1 = 0
                         for (i in addingTagsArray) {
-                            val tagInputs = hashMapOf(
-                                "name" to i as String
-                            )
-                            addTagtoLoc.collection("tags").add(tagInputs)
+
+                            addTagtoLoc.collection("tags").get().addOnSuccessListener { tags ->
+                                for (t in tags.documents) {
+                                    if (i == t["name"]){
+                                        flag1 = 1
+                                    }
+                                }
+                                if (flag1 == 0){
+                                    val tagInputs = hashMapOf(
+                                        "name" to i as String
+                                    )
+                                    addTagtoLoc.collection("tags").add(tagInputs)
+                                }
+                                flag1 = 0
+                            }
+
+//                            val tagInputs = hashMapOf(
+//                                "name" to i as String
+//                            )
+//                            addTagtoLoc.collection("tags").add(tagInputs)
                         }
                     }
                     val adialog = builder.create()
