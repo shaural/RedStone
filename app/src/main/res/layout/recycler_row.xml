@@ -8,9 +8,16 @@
 
     <TextView
         android:id="@+id/tvAnimalName"
-        android:layout_width="wrap_content"
+        android:layout_width="321dp"
         android:layout_height="wrap_content"
-        android:textSize="20sp"/>
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/edit_tour_button"
+        android:layout_width="203dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="@string/edit_tours" />
 
     <ImageView
         android:layout_width="wrap_content"
