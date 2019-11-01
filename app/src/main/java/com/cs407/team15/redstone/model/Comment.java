@@ -1,5 +1,7 @@
 package com.cs407.team15.redstone.model;
 
+import java.util.ArrayList;
+
 public class Comment {
     private String comment;
     private String publisher;
@@ -8,6 +10,32 @@ public class Comment {
     private String path;
     private Long like;
     private String timestamp;
+    String tags;
+    private String locationId;
+
+    public String getLocationId() {
+        return locationId;
+    }
+
+    public void setLocationId(String locationId) {
+        this.locationId = locationId;
+    }
+
+    public long getLike() {
+        return like;
+    }
+
+    public void setLike(long like) {
+        this.like = like;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
 
     public Comment(String comment, String publisher, String commentid, String path) {
         this.comment = comment;
@@ -23,13 +51,13 @@ public class Comment {
         this.like = like;
     }
 
-    public Long getLike() {
-        return like;
-    }
-
-    public void setLike(Long like) {
-        this.like = like;
-    }
+//    public Long getLike() {
+//        return like;
+//    }
+//
+//    public void setLike(Long like) {
+//        this.like = like;
+//    }
 
     public String getPath() {
         return path;
@@ -41,7 +69,6 @@ public class Comment {
 
     public Comment() {
     }
-
 
     public String getPublisherid() {
         return publisherid;
@@ -90,7 +117,9 @@ public class Comment {
                 ", publisher='" + publisher + '\'' +
                 ", commentid='" + commentid + '\'' +
                 ", path='" + path + '\'' +
-                ", like='" + like + '\'' +
+                ", like=" + like +
+                ", timestamp='" + timestamp + '\'' +
+                ", tags='" + tags + '\'' +
                 '}';
     }
 }
