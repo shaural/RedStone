@@ -210,7 +210,7 @@ class ARFragment : Fragment() {
             if (minVal != null && !locations_db[minVal.key].isNullOrEmpty()) {
                 var db_val = locations_db[minVal.key].orEmpty()
                 cur_id_str = map_gp_id[minVal.key].orEmpty()
-                getTags()
+                getTags(cur_id_str)
                 location_name = db_val.substring(0, db_val.indexOf('-'))
                 location_desc = db_val.substring(db_val.indexOf('-') + 1, db_val.length)
                 displayed_text_view.tv_ar_text.text = location_name
@@ -220,9 +220,9 @@ class ARFragment : Fragment() {
             }
         }
     }
-    private fun getTags() {
+    private fun getTags(idstr: String) {
         var ar_tags = ArrayList<String>()
-        db!!.collection("locations").document("-LsXA9m-ta2j7snxPyYE").collection("tags").get().addOnCompleteListener { col ->
+        db!!.collection("locations").document(idstr).collection("tags").get().addOnCompleteListener { col ->
             if (col != null) {
                 col.result!!.forEach { t ->
                     ar_tags.add(t["name"].toString())
