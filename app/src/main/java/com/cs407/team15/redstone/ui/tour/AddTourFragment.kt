@@ -118,7 +118,7 @@ class AddTourFragment : Fragment(){
             }
         }else{
             buttonCreateTour.setOnClickListener {
-                addNewTour(false,tourId!!)
+                addNewTour(false,null)
             }
         }
         return view
@@ -213,7 +213,7 @@ class AddTourFragment : Fragment(){
         dialog.show()
     }
 
-    fun addNewTour(isEdit:Boolean,tourId:String) {
+    fun addNewTour(isEdit:Boolean,tourId:String?) {
         val db = FirebaseFirestore.getInstance()
         var user = User()
 
@@ -258,7 +258,7 @@ class AddTourFragment : Fragment(){
         val initialVotes = 0
         val newTour = Tour(name, type, user_id, hammer, locationsOTStr, tagsOnTour, initialVotes)
 if(isEdit){
-    db.collection("tours").document(tourId).set(newTour)
+    db.collection("tours").document(tourId!!).set(newTour)
 }else {
     db.collection("tours")
         .add(newTour)

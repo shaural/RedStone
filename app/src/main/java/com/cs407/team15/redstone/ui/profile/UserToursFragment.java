@@ -1,6 +1,7 @@
 package com.cs407.team15.redstone.ui.profile;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
+import com.cs407.team15.redstone.model.Tour;
+import com.cs407.team15.redstone.ui.tour.AddTourFragment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,6 +26,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class UserToursFragment extends Fragment implements RecyclerAdapter.ItemClickListener{
     private FirebaseFirestore db;
@@ -45,10 +49,13 @@ public class UserToursFragment extends Fragment implements RecyclerAdapter.ItemC
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            ArrayList<String> list = new ArrayList<>();
+                            ArrayList<Tour> list = new ArrayList<>();
+                            ArrayList<String> tourIDList = new ArrayList<>();
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 //populate some recycler view
-                                list.add(document.get("name").toString());
+                                tourIDList.add((String) document.getReference().getPath().split("/")[0]);
+                                Tour tour = new Tour((String)document.get("name"),(String)document.get("type"),(String)document.get("user_id"),(Boolean)document.get("hammer"),(List<String>) document.get("locations"),(List<String>)document.get("tags"));
+                                list.add(tour);
                                 //Log.d(TAG, document.getId() + " => " + document.getData());
                             }
                             if (list.isEmpty()) {
@@ -57,7 +64,7 @@ public class UserToursFragment extends Fragment implements RecyclerAdapter.ItemC
                                 getActivity().onBackPressed();
                             }
                             else {
-                                fillRecycleViewer(list);
+                                fillRecycleViewer(list,tourIDList);
                             }
                         }
                         else {
@@ -69,10 +76,10 @@ public class UserToursFragment extends Fragment implements RecyclerAdapter.ItemC
         return view;
 
     }
-    public void fillRecycleViewer(ArrayList<String> list) {
+    public void fillRecycleViewer(ArrayList<Tour> list, ArrayList<String> tourIDList) {
         RecyclerView recyclerView = view.findViewById(R.id.usertourlist);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new RecyclerAdapter(getContext(), list);
+        adapter = new RecyclerAdapter(getContext(), list,tourIDList,this);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
         view.invalidate();
@@ -88,6 +95,25 @@ public class UserToursFragment extends Fragment implements RecyclerAdapter.ItemC
         bundle.putString("title", adapter.getItem(position));
         //lp.setArguments(bundle);
         //ft.replace(container2.getId(), lp);
+        ft.addToBackStack(null);
+        ft.commit();
+    }
+
+
+    @Override
+    public void onEditClick(Tour tour , String tourId) {
+        FragmentManager  frag = getFragmentManager();
+        FragmentTransaction ft=frag.beginTransaction();
+        Bundle bundle = new  Bundle();
+        bundle.putString("title",tour.getName());
+        bundle.putString("tourId",tourId);
+        bundle.putString("type",tour.getType());
+        bundle.putStringArrayList("tags",new ArrayList(tour.getTags()));
+        bundle.putStringArrayList("locations",new ArrayList(tour.getLocations()));
+        AddTourFragment loc= new AddTourFragment();
+        loc.setArguments(bundle);
+        ft.replace(container2.getId(),loc);
+        //frag.replace((view!!.parent as ViewGroup).id, loc)
         ft.addToBackStack(null);
         ft.commit();
     }
