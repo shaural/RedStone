@@ -324,32 +324,7 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
         }
 
     }
-
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String tagName = tagNames.get(position);
-        if (!tagsOnComment.contains(tagName)) {
-            tagsOnComment.add(tagName);
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
-
-    public void spinnerSetup() {
-        Spinner tagSpinner = findViewById(R.id.tagSpinnerComment);
-        ArrayAdapter spinnerAdapter = new ArrayAdapter<String>(CommentsActivity.this,android.R.layout.simple_spinner_item, tagNames);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        tagSpinner.setAdapter(spinnerAdapter);
-        tagSpinner.setOnItemSelectedListener(this);
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-    }
+    
 
     /**
      * Filter Hammer User's Comment Only
