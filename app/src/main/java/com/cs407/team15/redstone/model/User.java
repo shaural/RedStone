@@ -1,5 +1,8 @@
 package com.cs407.team15.redstone.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class User {
     public String uid;
     public String token;
@@ -12,6 +15,7 @@ public class User {
     public int recievedDislikes;
     public int recievedLikes;
     public int userType;
+    public List<String> tour_invites;
     public boolean isHammerUser;
 
     public User() {
@@ -111,5 +115,12 @@ public class User {
 
     public void setUserType(int userType) {
         this.userType = userType;
+    }
+
+    public List<String> getTour_invites() {
+        return tour_invites;
+    }
+    public void setTour_invites(List<String> tour_invites){
+        this.tour_invites=tour_invites;
     }
 }

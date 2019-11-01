@@ -71,8 +71,11 @@ class profileRecycleAdapter(private val myDataset: ArrayList<Array<String>>, pri
 
         }
 
-        holder.share.setOnClickListener({
+        holder.edit.setOnClickListener({
           frag.editPersonalTour(tour,tourIdList?.get(position))
+        })
+        holder.share.setOnClickListener({
+            frag.shareTour(tour,tourIdList?.get(position))
         })
     }
     fun populatDraftTour(){
