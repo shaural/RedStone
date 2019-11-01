@@ -136,8 +136,4 @@ public class UserCommentsFragment extends Fragment implements RecyclerAdapter.It
 
     }
 
-    @Override
-    public void onEditClick(Tour tour , String tourId) {
-
-    }
 }

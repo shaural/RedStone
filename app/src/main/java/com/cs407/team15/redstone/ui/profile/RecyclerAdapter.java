@@ -58,7 +58,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     RecyclerAdapter(Context context, List<String> data, ArrayList<Comment> comments) {
         this.mInflater = LayoutInflater.from(context);
-        this.mData = data;
+        //this.mData = tourIDList;
+        this.tourIDList=data;
         this.comments = comments;
     }
 
@@ -84,11 +85,11 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         if(userTourFrag!=null){
         String animal = mData.get(position).getName();
         holder.myTextView.setText(animal);
-            holder.editTourButton.setOnClickListener(new View.OnClickListener() {
+            /*holder.editTourButton.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View view) {
                     mClickListener.onEditClick(mData.get(position),tourIDList.get(position));
                 }
-            });
+            });*/
 
         }else{
             String animal = tourIDList.get(position);

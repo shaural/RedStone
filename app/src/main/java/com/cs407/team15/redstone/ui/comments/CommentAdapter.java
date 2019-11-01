@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -19,6 +20,7 @@ import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Comment;
 import com.cs407.team15.redstone.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -80,7 +82,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         final Comment comment = mComment.get(position);
 
         holder.comment.setText(comment.getComment());
-        holder.score.setText(comment.getLike().toString());
+        holder.score.setText(String.valueOf(comment.getLike()));
         getUserInfo(holder.image_profile, holder.username, comment.getPublisher());
 
 
