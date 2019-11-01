@@ -1,17 +1,33 @@
 package com.cs407.team15.redstone.ui.viewtours
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.R
+import com.cs407.team15.redstone.model.Comment
+import com.cs407.team15.redstone.ui.comments.CommentSectionAdapter
+import com.cs407.team15.redstone.ui.comments.CommentsActivity
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.firestore.SetOptions
+import kotlinx.android.synthetic.main.location_display.view.*
+import java.util.ArrayList
 
 class TourInfoActivity : AppCompatActivity() {
+
+    lateinit var recyclerView: RecyclerView
+    lateinit var commentList: ArrayList<Comment>
+    lateinit var viewAllComments: TextView
+    private lateinit var commentAdapter: CommentSectionAdapter
+
+    private lateinit var database: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,5 +91,27 @@ class TourInfoActivity : AppCompatActivity() {
             }
         }
 
+
+        // Comments recyclerview
+        viewAllComments = findViewById(R.id.tv_comments)
+        recyclerView = findViewById(R.id.recycler_view_comment)
+        recyclerView.setHasFixedSize(true)
+
+        val mLayoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = mLayoutManager
+
+        commentList = ArrayList<Comment>()
+        commentAdapter = CommentSectionAdapter(this, commentList)
+        recyclerView.adapter = commentAdapter
+
+        var allcomments = findViewById<TextView>(R.id.tv_comments)
+        allcomments.setOnClickListener {
+            val intent = Intent (this, CommentsActivity::class.java)
+            intent.putExtra("path", "tour")
+            intent.putExtra("postid", tourId)
+            intent.putExtra("publisherid", ue)
+            //intent.putExtra("context", context);
+            startActivity(intent)
+        }
     }
 }
