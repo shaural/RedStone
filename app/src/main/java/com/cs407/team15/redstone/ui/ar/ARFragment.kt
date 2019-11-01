@@ -2,6 +2,7 @@ package com.cs407.team15.redstone.ui.ar
 
 import android.app.ActivityManager
 import android.content.Context
+import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -10,6 +11,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.R
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
 import com.google.ar.core.Pose
@@ -32,8 +35,12 @@ class ARFragment : Fragment() {
 
     private var currentPosition: Pose? = null // Camera's current position in space
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient // to get location
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
 
         if (!isThisDeviceSupported()) {
             return
@@ -69,8 +76,13 @@ class ARFragment : Fragment() {
         }
         ViewRenderable.builder().setView(context!!, R.layout.basic_tour_text_view).build()
             .thenAccept { renderable -> textViewTemplate = renderable }
-        Toast.makeText(context,"Location not showing",Toast.LENGTH_LONG).show()
-
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location : Location? ->
+                // Got last known location. In some rare situations this can be null.
+                var lat = location!!.latitude.toString()
+                var lon = location!!.longitude.toString()
+//                Toast.makeText(context,location!!.latitude.toString() + location!!.longitude.toString(), Toast.LENGTH_LONG).show()
+            }
     }
 
     fun updateCameraPosition() {
