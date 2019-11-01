@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.profile_list_item.view.*
 import androidx.core.view.children
 import androidx.core.view.get
 import androidx.core.view.isVisible
-import com.cs407.team15.redstone.R
+
 import com.cs407.team15.redstone.ui.home.NoticesAdapter
 import com.cs407.team15.redstone.ui.location.LocationPage
 import com.cs407.team15.redstone.ui.location.RecyclerAdapter
