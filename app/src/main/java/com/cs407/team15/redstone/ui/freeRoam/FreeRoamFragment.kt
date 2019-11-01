@@ -12,13 +12,18 @@ import com.cs407.team15.redstone.ui.tour.TourFragment
 
 
 class FreeRoamFragment : Fragment() {
+    var isAR = true
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_free_roam, container, false)
-
+        val nextFrag = ARFragment()
+        activity!!.supportFragmentManager.beginTransaction()
+            .replace(id, nextFrag, "ARFragment")
+            .addToBackStack(null) //maybe should add
+            .commit()
         return root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -27,18 +32,24 @@ class FreeRoamFragment : Fragment() {
         var btn_map = getView()!!.findViewById(R.id.launch_map_fragment) as Button
 
         btn_ar.setOnClickListener{
-            val nextFrag = ARFragment()
-            activity!!.supportFragmentManager.beginTransaction()
-                .replace(id, nextFrag, "ARFragment")
-                .addToBackStack(null) //maybe should add
-                .commit()
+            if (!isAR) {
+                val nextFrag = ARFragment()
+                activity!!.supportFragmentManager.beginTransaction()
+                    .replace(id, nextFrag, "ARFragment")
+                    .addToBackStack(null) //maybe should add
+                    .commit()
+                isAR = !isAR
+            }
         }
         btn_map.setOnClickListener{
-            val nextFrag = TourFragment()
-            activity!!.supportFragmentManager.beginTransaction()
-                .replace(id, nextFrag, "TourFragment")
-                .addToBackStack(null) //maybe should add
-                .commit()
+            if (isAR) {
+                val nextFrag = TourFragment()
+                activity!!.supportFragmentManager.beginTransaction()
+                    .replace(id, nextFrag, "TourFragment")
+                    .addToBackStack(null) //maybe should add
+                    .commit()
+                isAR = !isAR
+            }
         }
     }
 }
