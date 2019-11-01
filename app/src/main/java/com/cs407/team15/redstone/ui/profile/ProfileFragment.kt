@@ -45,6 +45,10 @@ class ProfileFragment : Fragment() {
         recyclerView.layoutManager =LinearLayoutManager(activity,LinearLayoutManager.VERTICAL,false)
         recyclerView.adapter=profileRecycleAdapter(Data,privateTourData,null,this)
 
+       // val shareRecyclerView = root.findViewById<RecyclerView>(R.id.shared_recycle)
+       // shareRecyclerView.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL,false)
+            //  shareRecyclerView.adapter=shareRecycleAdapter(privateTourData,null,this)
+
 
         val auth = FirebaseAuth.getInstance()
         val current =auth.currentUser
@@ -97,6 +101,8 @@ class ProfileFragment : Fragment() {
                 personalTourList.add(arrayOf("","","","","",""))
                 tourIdList.add("")}
             recyclerView.adapter=profileRecycleAdapter(personalTourList as ArrayList<Array<String>>,privateTourList,tourIdList,this)
+                // shareRecyclerView.adapter=shareRecycleAdapter(shareTourList,inviteIdList,this)
+        })
         })
         db.collection("users").document(emailProfile!!).get().addOnSuccessListener(OnSuccessListener {
 
