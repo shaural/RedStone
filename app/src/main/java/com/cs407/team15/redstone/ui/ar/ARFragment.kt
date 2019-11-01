@@ -28,6 +28,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.android.synthetic.main.basic_tour_text_view.view.*
+import java.lang.Float.MAX_VALUE
 
 // A great deal of this code comes from following the example in the HelloSceneForm sample AR Core
 // application provided by Google:
@@ -48,7 +49,8 @@ class ARFragment : Fragment() {
     private var cur_lat: Double = 0.0
     private var cur_lon: Double = 0.0
     private var locations_db: MutableMap<GeoPoint, String> = mutableMapOf<GeoPoint, String>()
-
+    private lateinit var displayed_text_view: View
+    private var dbCompleted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,12 +67,11 @@ class ARFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-//        Log.d("lol", "Reached")
-
         return inflater.inflate(R.layout.fragment_ar, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        displayed_text_view = layoutInflater.inflate(R.layout.basic_tour_text_view, null)
         arFragment = childFragmentManager.findFragmentById(R.id.free_roam_ar_fragment) as ArFragment
         arFragment.arSceneView.scene.addOnUpdateListener { frameTime ->
             run {
@@ -78,7 +79,14 @@ class ARFragment : Fragment() {
                 updateCameraPosition()
             }
         }
-
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                // Got last known location. In some rare situations this can be null.
+                cur_lat = location!!.latitude
+                cur_lon = location!!.longitude
+                var bearing = location!!.bearing
+                getNearestLocation()
+            }
         arFragment.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane, motionEvent: MotionEvent ->
 
             run {
@@ -129,9 +137,10 @@ class ARFragment : Fragment() {
 //                            Toast.makeText(context, gp.latitude.toString(), Toast.LENGTH_SHORT)
                             locations_db[gp] = "$name-$desc"
                         } else {
-                            Log.d("lol", "no document exists")
+//                            Log.d("lol", "no document exists")
                         }
                     }
+                    dbCompleted = true
                     getNearestLocation()
                 } else {
                     Log.d(TAG, "Error getting documents: ", task.exception)
@@ -140,32 +149,36 @@ class ARFragment : Fragment() {
         return
     }
     private fun getNearestLocation() {
-        var locationSource = Location("source")
-        locationSource.setLatitude(cur_lat);
-        locationSource.setLongitude(cur_lon);
-        val points = locations_db.keys
-        val dists : MutableMap<GeoPoint, Float> = mutableMapOf<GeoPoint, Float>()
-        points.forEach{ p ->
-            run {
-                var locationCompare = Location("compareLocation")
-                locationCompare.setLatitude(p.latitude)
-                locationCompare.setLongitude(p.longitude)
+        if (dbCompleted) {
+            var locationSource = Location("source")
+            locationSource.setLatitude(cur_lat);
+            locationSource.setLongitude(cur_lon);
+            val points = locations_db.keys
+            val dists: MutableMap<GeoPoint, Float> = mutableMapOf<GeoPoint, Float>()
+            var min_dist = MAX_VALUE
+            points.forEach { p ->
+                run {
+                    var locationCompare = Location("compareLocation")
+                    locationCompare.setLatitude(p.latitude)
+                    locationCompare.setLongitude(p.longitude)
 
-                var distance = locationSource.distanceTo(locationCompare)
-//                Log.d("lol-dist", distance.toString())
-                dists.put(p, distance)
+                    var distance = locationSource.distanceTo(locationCompare)
+                    if (distance < min_dist) {
+                        min_dist = distance
+                    }
+                    dists.put(p, distance)
+                }
             }
-        }
-        var minVal = dists.minBy { it.value }
-        if (minVal != null && !locations_db[minVal.key].isNullOrEmpty()) {
-            var db_val = locations_db[minVal.key].orEmpty()
-            location_name = db_val.substring(0, db_val.indexOf('-'))
-            location_desc = db_val.substring(db_val.indexOf('-')+1, db_val.length)
-            var v1 = getLayoutInflater().inflate(R.layout.basic_tour_text_view, null)
-            v1.tv_ar_text.text = location_name
-            v1.tv_ar_desc.text = location_desc
-            ViewRenderable.builder().setView(context!!, v1).build()
-                .thenAccept { renderable -> textViewTemplate = renderable }
+            var minVal = dists.minBy { it.value }
+            if (minVal != null && !locations_db[minVal.key].isNullOrEmpty()) {
+                var db_val = locations_db[minVal.key].orEmpty()
+                location_name = db_val.substring(0, db_val.indexOf('-'))
+                location_desc = db_val.substring(db_val.indexOf('-') + 1, db_val.length)
+                displayed_text_view.tv_ar_text.text = location_name
+                displayed_text_view.tv_ar_desc.text = location_desc
+                ViewRenderable.builder().setView(context!!, displayed_text_view).build()
+                    .thenAccept { renderable -> textViewTemplate = renderable }
+            }
         }
     }
 }
