@@ -1,6 +1,7 @@
 package com.cs407.team15.redstone.ui.viewtours
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.cs407.team15.redstone.MainActivity
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Tour
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -43,7 +45,12 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
     var selectedTag = ANY
     var selectedHammer = FALSE
 
+    //navigate to tour information
     override fun onItemClick(view: View, position: Int) {
+        view.setOnClickListener{
+            val intent = Intent(view.context, TourInfoActivity::class.java)
+            view.context.startActivity(intent)
+        }
     }
 
     override fun onCreateView(
