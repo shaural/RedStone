@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/tour_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tour Name"
+        android:textSize="24sp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="30dp"/>
+
+    <Button
+        android:id="@+id/like_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Like"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="30dp"
+        android:textSize="18sp"/>
+
+    <TextView
+        android:id="@+id/total_likes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Total likes:"
+        android:layout_marginLeft="35dp"/>
+
+    <RelativeLayout
+        android:id="@+id/buttons"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/location_content"
+        android:padding="8dp"
+        android:layout_marginLeft="35dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="35dp"
+        android:layout_marginBottom="20dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/btn_comment"
+            app:srcCompat="@drawable/ic_comment_img"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_margin="5dp" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view_comment"
+            tools:itemCount="3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/btn_comment"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="5dp" />
+
+        <TextView
+            android:id="@+id/tv_comments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/recycler_view_comment"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="15dp"
+            android:text="View All Comments" />
+
+    </RelativeLayout>
+
+</LinearLayout>
