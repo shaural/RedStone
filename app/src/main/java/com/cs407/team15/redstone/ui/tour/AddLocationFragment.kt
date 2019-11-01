@@ -47,14 +47,17 @@ class AddLocationFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(AddLocationViewModel::class.java)
+
+        //Retrieving the button from XML
         val btn_add_loc = getView()!!.findViewById(R.id.btn_add_location) as Button
         val btn_newTag = getView()!!.findViewById(R.id.btn_create_tag) as Button
         database = FirebaseDatabase.getInstance().reference
 
-
+        //Initializing the key for new location to be added
         val newKey = database.child("locations").push().key.toString()
         val addTagtoLoc = FirebaseFirestore.getInstance().collection("locations").document(newKey)
 
+        //New tag is to be added
         btn_newTag.setOnClickListener {
             val builder =  AlertDialog.Builder(context)
             val inflater = layoutInflater
@@ -63,7 +66,6 @@ class AddLocationFragment : Fragment() {
             builder.setView(dialogLayout)
             builder.setPositiveButton(android.R.string.ok) {dialog, p1 ->
                 val newTag = dialogLayout.findViewById<EditText>(R.id.editText).text.toString()
-                //Toast.makeText(context, newTag, Toast.LENGTH_SHORT).show()
                 var isValid = true
                 if (newTag.isBlank()){
                     isValid = false
@@ -83,6 +85,7 @@ class AddLocationFragment : Fragment() {
             builder.show()
         }
 
+        //Adding existing tags to new location
         val addTagsButton = view!!.findViewById(R.id.btn_add_tag) as Button
         addTagsButton.setOnClickListener {
             var storeTags = ArrayList<String>()
@@ -93,12 +96,6 @@ class AddLocationFragment : Fragment() {
                         storeTags.add(stringStorage)
                     }
 
-//            var checkTags = ArrayList<Boolean>()
-//            for (i in 1..storeTags.size){
-//                checkTags.add(false)
-//            }
-
-                    //addTagsButton.setOnClickListener {
                     val tagsArr = arrayOfNulls<String>(storeTags.size)
                     storeTags.toArray(tagsArr)
                     val checkTags = BooleanArray(storeTags.size) { i -> false }
@@ -107,13 +104,14 @@ class AddLocationFragment : Fragment() {
                     builder.setMultiChoiceItems(tagsArr, checkTags) { dialog, which, isChecked ->
                         checkTags[which] = isChecked
                     }
+
+                    //Logic to add tags to location
                     builder.setPositiveButton("Add") { dialog, which ->
-                        var flag0 = 0
                         var addingTagsArr = ArrayList<String>()
                         for (i in checkTags.indices) {
                             val checked = checkTags[i]
                             if (checked) {
-                                flag0 = 1
+
                                 addingTagsArr.add(storeTags[i])
                             }
                         }
@@ -147,25 +145,37 @@ class AddLocationFragment : Fragment() {
                                 )
                             )
                         )
+
+                        //Ensuring duplicate tags do not get added
+                        var flag1 = 0
                         for (i in addingTagsArray) {
-                            val tagInputs = hashMapOf(
-                                "name" to i as String
-                            )
-                            addTagtoLoc.collection("tags").add(tagInputs)
+
+                            addTagtoLoc.collection("tags").get().addOnSuccessListener { tags ->
+                                for (t in tags.documents) {
+                                    if (i == t["name"]){
+                                        flag1 = 1
+                                    }
+                                }
+                                if (flag1 == 0){
+                                    val tagInputs = hashMapOf(
+                                        "name" to i as String
+                                    )
+                                    addTagtoLoc.collection("tags").add(tagInputs)
+                                }
+                                flag1 = 0
+                            }
                         }
                     }
                     val adialog = builder.create()
                     adialog.show()
-                    //}
                 }
         }
 
+        //Adding location to map
         btn_add_loc.setOnClickListener {
             val name = view!!.findViewById<EditText>(R.id.et_loc_name).text.toString()
             var desc = view!!.findViewById<EditText>(R.id.et_about).text.toString()
             val currentFirebaseUser = FirebaseAuth.getInstance().currentUser
-
-            //val newKey = database.child("locations").push().key.toString()
 
             addTagtoLoc
                 .set(hashMapOf("timestamp" to com.google.firebase.Timestamp.now(), "location_id" to newKey, "description" to desc, "name" to name, "user_id" to currentFirebaseUser!!.uid, "coordinates" to GeoPoint(arguments!!.getDouble("latitude"), arguments!!.getDouble("longitude"))))
