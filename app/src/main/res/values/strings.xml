@@ -83,4 +83,7 @@
     <!--    Free Roam-->
     <string name="btn_ar">AR</string>
     <string name="btn_map">Map</string>
+
+    <!-- Comments -->
+    <string name="sort_btn">Sort</string>
 </resources>
