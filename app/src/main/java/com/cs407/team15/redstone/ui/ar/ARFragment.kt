@@ -47,9 +47,11 @@ class ARFragment : Fragment() {
     private var db: FirebaseFirestore? = null
     private lateinit var location_name: String
     private lateinit var location_desc: String
+    private lateinit var cur_id_str: String
     private var cur_lat: Double = 0.0
     private var cur_lon: Double = 0.0
     private var locations_db: MutableMap<GeoPoint, String> = mutableMapOf<GeoPoint, String>()
+    private var map_gp_id: MutableMap<GeoPoint, String> = mutableMapOf<GeoPoint, String>()
     private lateinit var displayed_text_view: View
     private var dbCompleted = false
     private lateinit var tv_to_close : HitTestResult
@@ -99,6 +101,18 @@ class ARFragment : Fragment() {
                     anchorNode.setParent(arFragment.arSceneView.scene)
                     val textViewNode = Node()
                     textViewNode.setParent(anchorNode)
+                    var plane_type = plane.type
+
+                    if(plane_type == Plane.Type.VERTICAL) {
+                        Log.d("lol", "vertical")
+                    }else if(plane_type == Plane.Type.HORIZONTAL_UPWARD_FACING) {
+                        // Ceiling, camera looking up at
+                        // This is when our anchoring is correct!
+                        Log.d("lol", "horizontal up")
+                    } else if(plane_type == Plane.Type.HORIZONTAL_DOWNWARD_FACING) {
+                        // Floor, ground, camera looking down at
+                        Log.d("lol", "horizontal down")
+                    }
                     textViewNode.localPosition = Vector3(0f, 1.0f, 0f)
                     textViewNode.renderable = textViewTemplate
                     textViewNode.setOnTapListener{ hitTestResult: HitTestResult, motionEvent: MotionEvent ->
@@ -153,10 +167,12 @@ class ARFragment : Fragment() {
                         if (document.exists()) {
                             Log.d(TAG, document.id + " => " + document.data)
                             var name = document.get("name")!!.toString()
+                            var loc_id= document.get("location_id")!!.toString()
                             var desc = document.get("description")!!.toString()
                             var gp = document.get("coordinates") as GeoPoint
 //                            Toast.makeText(context, gp.latitude.toString(), Toast.LENGTH_SHORT)
                             locations_db[gp] = "$name-$desc"
+                            map_gp_id[gp] = loc_id
                         } else {
 //                            Log.d("lol", "no document exists")
                         }
@@ -193,6 +209,8 @@ class ARFragment : Fragment() {
             var minVal = dists.minBy { it.value }
             if (minVal != null && !locations_db[minVal.key].isNullOrEmpty()) {
                 var db_val = locations_db[minVal.key].orEmpty()
+                cur_id_str = map_gp_id[minVal.key].orEmpty()
+                getTags()
                 location_name = db_val.substring(0, db_val.indexOf('-'))
                 location_desc = db_val.substring(db_val.indexOf('-') + 1, db_val.length)
                 displayed_text_view.tv_ar_text.text = location_name
@@ -201,5 +219,25 @@ class ARFragment : Fragment() {
                     .thenAccept { renderable -> textViewTemplate = renderable }
             }
         }
+    }
+    private fun getTags() {
+        var ar_tags = ArrayList<String>()
+        db!!.collection("locations").document("-LsXA9m-ta2j7snxPyYE").collection("tags").get().addOnCompleteListener { col ->
+            if (col != null) {
+                col.result!!.forEach { t ->
+                    ar_tags.add(t["name"].toString())
+                    Log.d("lol", "DocumentSnapshot data: ${t["name"]}")
+                }
+                displayTags(ar_tags)
+            } else {
+                Log.d("lol", "No such document")
+            }
+        }
+    }
+    private fun displayTags(tagsList: ArrayList<String>) {
+        var str = ""
+        tagsList.forEach { item -> str += "- ${item}\n" }
+        displayed_text_view.tv_ar_tags.text = str
+        displayed_text_view.tv_ar_tags.visibility = View.VISIBLE
     }
 }
