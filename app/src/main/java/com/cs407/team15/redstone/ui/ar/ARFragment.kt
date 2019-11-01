@@ -65,7 +65,7 @@ class ARFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.d("lol", "Reached")
+//        Log.d("lol", "Reached")
 
         return inflater.inflate(R.layout.fragment_ar, container, false)
     }
@@ -124,9 +124,10 @@ class ARFragment : Fragment() {
                         if (document.exists()) {
                             Log.d(TAG, document.id + " => " + document.data)
                             var name = document.get("name")!!.toString()
+                            var desc = document.get("description")!!.toString()
                             var gp = document.get("coordinates") as GeoPoint
-                            Toast.makeText(context, gp.latitude.toString(), Toast.LENGTH_SHORT)
-                            locations_db[gp] = name
+//                            Toast.makeText(context, gp.latitude.toString(), Toast.LENGTH_SHORT)
+                            locations_db[gp] = "$name-$desc"
                         } else {
                             Log.d("lol", "no document exists")
                         }
@@ -150,17 +151,19 @@ class ARFragment : Fragment() {
                 locationCompare.setLatitude(p.latitude)
                 locationCompare.setLongitude(p.longitude)
 
-                var distance = locationSource.distanceTo(locationCompare);
+                var distance = locationSource.distanceTo(locationCompare)
 //                Log.d("lol-dist", distance.toString())
                 dists.put(p, distance)
             }
         }
         var minVal = dists.minBy { it.value }
         if (minVal != null && !locations_db[minVal.key].isNullOrEmpty()) {
-            location_name = locations_db[minVal.key].orEmpty()
-
+            var db_val = locations_db[minVal.key].orEmpty()
+            location_name = db_val.substring(0, db_val.indexOf('-'))
+            location_desc = db_val.substring(db_val.indexOf('-')+1, db_val.length)
             var v1 = getLayoutInflater().inflate(R.layout.basic_tour_text_view, null)
-            v1.basicTourLabel.text = location_name
+            v1.tv_ar_text.text = location_name
+            v1.tv_ar_desc.text = location_desc
             ViewRenderable.builder().setView(context!!, v1).build()
                 .thenAccept { renderable -> textViewTemplate = renderable }
         }
