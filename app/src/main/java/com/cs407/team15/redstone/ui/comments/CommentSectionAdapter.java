@@ -74,7 +74,7 @@ public class CommentSectionAdapter extends RecyclerView.Adapter<CommentSectionAd
         holder.comment.setText(comment.getComment());
         //holder.score.setText(comment.getLike().toString());
         getUserInfo(holder.image_profile, holder.username, comment.getPublisher());
-
+        holder.comment.setText("aaaaaaa");
 
     }
 

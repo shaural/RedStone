@@ -19,12 +19,4 @@
         android:layout_weight="1"
         android:text="@string/edit_tours" />
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:id="@+id/hammertouricon"
-        android:background="@drawable/ic_hammer"
-        android:visibility="invisible" />
-
 </RelativeLayout>
