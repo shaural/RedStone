@@ -324,7 +324,7 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
         }
 
     }
-    
+
 
     /**
      * Filter Hammer User's Comment Only
