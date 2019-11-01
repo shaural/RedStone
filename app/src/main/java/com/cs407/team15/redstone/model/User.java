@@ -18,6 +18,21 @@ public class User {
 
     }
 
+    public User(String uid, String token, String email, String username, int login_attempt, String status, int userLikes, int userDislikes, int recievedDislikes, int recievedLikes, int userType, boolean isHammerUser) {
+        this.uid = uid;
+        this.token = token;
+        this.email = email;
+        this.username = username;
+        this.login_attempt = login_attempt;
+        this.status = status;
+        this.userLikes = userLikes;
+        this.userDislikes = userDislikes;
+        this.recievedDislikes = recievedDislikes;
+        this.recievedLikes = recievedLikes;
+        this.userType = userType;
+        this.isHammerUser = isHammerUser;
+    }
+
     public User(String id, String token, String email, String username) {
         this.uid = id;
         this.token = token;
@@ -111,5 +126,13 @@ public class User {
 
     public void setUserType(int userType) {
         this.userType = userType;
+    }
+
+    public boolean isHammerUser() {
+        return isHammerUser;
+    }
+
+    public void setHammerUser(boolean hammerUser) {
+        isHammerUser = hammerUser;
     }
 }

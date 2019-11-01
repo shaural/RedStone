@@ -1,12 +1,13 @@
 package com.cs407.team15.redstone.ui.viewtours
 
+import android.annotation.TargetApi
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-
+import java.lang.Math.toIntExact
 import androidx.recyclerview.widget.RecyclerView
 
 import com.cs407.team15.redstone.R
@@ -36,7 +37,7 @@ internal constructor(context: Context, private val mData: List<String>) :
         addHammerIcon(position, holder);
         holder.myTextView.text = animal
     }
-
+    @TargetApi(24)
     internal fun addHammerIcon(position: Int, holder: ViewHolder) {
         FirebaseFirestore.getInstance().collection("tours").whereEqualTo("name", mData[position])
             .get().addOnSuccessListener { documents ->
@@ -44,7 +45,10 @@ internal constructor(context: Context, private val mData: List<String>) :
                     FirebaseFirestore.getInstance().collection("users").whereEqualTo("uid", document["user_id"]).get()
                         .addOnSuccessListener { documents ->
                             for (document in documents) {
-                                if (document["userType"] == 1) {
+                                val one = 1
+
+                                val two = Math.toIntExact(document["userType"] as Long)
+                                if (one == two) {
                                     holder.myImageView.visibility = View.VISIBLE
 
                                 }
