@@ -9,5 +9,5 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="6dp"
-    android:text="Test"
+    android:text="This is some Test TEXT"
     android:textAlignment="center" />
