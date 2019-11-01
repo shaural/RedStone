@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -13,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
@@ -34,12 +37,15 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageViewHolder> {
     private String TAG = getClass().toString();
     private Context mContext;
     private List<Comment> mComment;
+    private List<Comment> filteredComment;
+
     private String postid; // Location ID
     private String email;
     private String path;
@@ -49,8 +55,13 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     private CollectionReference userref;
     public static final String COLLECTION_NAME_KEY = "users";
 
-
-
+    /**
+     * Comment Adapter
+     * @param context
+     * @param comments
+     * @param postid Post ID of the post attaching CommentAdapter
+     * @param path Database path to store the comment data
+     */
     public CommentAdapter(Context context, List<Comment> comments, String postid, String path){
         mContext = context;
         mComment = comments;
@@ -95,6 +106,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             }
         });
 
+
         /**
          * On long Click Delete comment dialog pop up
          */
@@ -135,8 +147,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         });
     }
 
-
-
     @Override
     public int getItemCount() {
         return mComment.size();
@@ -156,7 +166,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             comment = itemView.findViewById(R.id.comment);
             like_count = itemView.findViewById(R.id.tv_total);
             like = itemView.findViewById(R.id.btn_like);
-
         }
     }
 
@@ -206,6 +215,32 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                 if (dataSnapshot.child(firebaseUser.getUid()).exists()){
                     imageView.setImageResource(R.drawable.ic_liked);
                     imageView.setTag("liked");
+                } else{
+                    imageView.setImageResource(R.drawable.ic_like);
+                    imageView.setTag("like");
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    /**
+     * Like
+     */
+    private void isHammer(final String publisherid, final ImageView imageView){
+
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("HammerUser");
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.child(publisherid).exists()){
+                    Log.e(TAG, "Hammer Found: " + publisherid);
+
                 } else{
                     imageView.setImageResource(R.drawable.ic_like);
                     imageView.setTag("like");
