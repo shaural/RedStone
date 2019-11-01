@@ -52,7 +52,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Add Location" />
-<!--    <Button-->
+
+        <Button
+            android:id="@+id/btn_add_tag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add Tag" />
+
+        <Button
+            android:id="@+id/btn_create_tag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create Tag" />
+        <!--    <Button-->
 <!--        android:id="@+id/btn_back"-->
 <!--        android:layout_width="match_parent"-->
 <!--        android:layout_height="wrap_content"-->
