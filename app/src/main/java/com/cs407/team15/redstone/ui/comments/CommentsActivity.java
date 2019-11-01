@@ -1,7 +1,5 @@
 package com.cs407.team15.redstone.ui.comments;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.PopupMenu;
@@ -21,28 +19,21 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Comment;
-import com.cs407.team15.redstone.model.HammerUser;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 public class CommentsActivity extends AppCompatActivity {
     String TAG = getClass().toString();
@@ -55,25 +46,24 @@ public class CommentsActivity extends AppCompatActivity {
     private AppCompatButton sort;
     private AppCompatImageView checkbox;
     private TextView hammer_only;
+    private EditText addcomment;
+    private TextView post;
 
-    EditText addcomment;
     ImageView image_profile;
-    TextView post;
 
+    private String postid;
+    private String publisherid;
+    private String path;
+    private Boolean isHammerOnly;
 
-    String postid;
-    String publisherid;
-    String path;
-    Boolean isClicked;
-
-    FirebaseUser firebaseUser;
-
+    private FirebaseUser firebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comments);
 
+        // Setting toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Comments");
@@ -85,6 +75,7 @@ public class CommentsActivity extends AppCompatActivity {
             }
         });
 
+        // Get passed data from Intent
         Intent intent = getIntent();
         postid = intent.getStringExtra("postid"); // location ID
         publisherid = intent.getStringExtra("publisherid");
@@ -93,9 +84,9 @@ public class CommentsActivity extends AppCompatActivity {
         Log.e(TAG, "Author:"+ publisherid);
         Log.e(TAG, "Postid: "+ postid);
 
+        // Recycler View init and attach adapter
         recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(mLayoutManager);
 
@@ -103,9 +94,9 @@ public class CommentsActivity extends AppCompatActivity {
         commentAdapter = new CommentAdapter(this, commentList, postid, path);
         recyclerView.setAdapter(commentAdapter);
 
+        // initialize variables
+        isHammerOnly = false;
         hammerList = new ArrayList<>();
-
-        isClicked = false;
         post = findViewById(R.id.post);
         addcomment = findViewById(R.id.add_comment);
         image_profile = findViewById(R.id.image_profile);
@@ -114,33 +105,37 @@ public class CommentsActivity extends AppCompatActivity {
         hammer_only = findViewById(R.id.hammerCheck);
         checkbox = findViewById(R.id.hammerCheckbox);
 
-        progressBar.setVisibility(View.VISIBLE);
-
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
+        progressBar.setVisibility(View.VISIBLE);
+
+        // Start
         setListener();
-        sortCommentsByLikes(); // default
+        readComment(0); // default: 0
     }
 
     private void setListener() {
+        /*
+            On Click, filter Hammer User comments only
+         */
         hammer_only.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isClicked == false) {
-                    isClicked = true;
+                if (!isHammerOnly) {
+                    isHammerOnly = true;
                     checkbox.setImageResource(R.drawable.ic_check);
-                    // get Hammer comment()
-                    showHammerOnly();
                 } else {
                     checkbox.setImageResource(R.drawable.ic_uncheck);
-                    isClicked = false;
-                    sortCommentsByLikes();
+                    isHammerOnly = false;
                 }
-                Log.e(TAG, "hammer_only: " + isClicked);
-
+                readComment(0); // default: order by Like
+                Log.e(TAG, "hammer_only: " + isHammerOnly);
             }
         });
 
+        /*
+            On Click, post a comment
+         */
         post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -152,6 +147,9 @@ public class CommentsActivity extends AppCompatActivity {
             }
         });
 
+        /*
+            On Click, sort comments
+         */
         sort.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,11 +165,11 @@ public class CommentsActivity extends AppCompatActivity {
                         switch (item.getItemId()) {
                             case R.id.sort_recent:
                                 Log.e(TAG, "Sort by Timestamp");
-                                readComments();
+                                readComment(1);
                                 return true;
                             case R.id.sort_like:
                                 Log.e(TAG, "Sort by Likes");
-                                sortCommentsByLikes();
+                                readComment(0);
                                 return true;
                             default:
                                 return true;
@@ -210,73 +208,42 @@ public class CommentsActivity extends AppCompatActivity {
     }
 
     /**
-     * Read Comments
-     * Get all data from DB and add them into List
-     * then, notify comment recyclerview adapter
-     * By default, ordered by timestamp
+     * Read Comment
+     * if a user clicks Hammer User only,
+     * this method gets HammerUser list, then pass to filterHammerOnly method.
+     * @param mode Order by Likes:0 (Default), Otherwise 1 (Recent order)
      */
-    private void readComments(){
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(path).child(postid);
-        Query sortQuery = reference.orderByChild("timestamp");
+    private void readComment(final int mode){
+        if (isHammerOnly) {
+            FirebaseDatabase.getInstance().getReference("HammerUser")
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            hammerList.clear();
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                                hammerList.add(snapshot.getKey());
+                            }
+                            // TO DO
+                            filterHammerOnly(hammerList, mode);
+                        }
 
-        sortQuery.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                progressBar.setVisibility(View.VISIBLE);
-                commentList.clear();
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    Comment comment = snapshot.getValue(Comment.class);
-                    commentList.add(comment);
-                }
-
-                commentAdapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                progressBar.setVisibility(View.GONE);
-            }
-        });
+                        }
+                    });
+        } else {
+            getComments(mode);
+        }
 
     }
 
     /**
-     * Sort Comments
+     * Filter Hammer User's Comment Only
+     * @param list List of Hammer Users
+     * @param mode Order by Likes:0 (Default), Otherwise 1 (Recent order)
      */
-    private void sortCommentsByLikes(){
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(path).child(postid);
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                progressBar.setVisibility(View.VISIBLE);
-                commentList.clear();
-
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    Comment comment = snapshot.getValue(Comment.class);
-                    commentList.add(0,comment); // reverse
-                }
-
-                Collections.sort(commentList, cmpLikeThenTimestamp);
-
-                commentAdapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                progressBar.setVisibility(View.GONE);
-            }
-        });
-
-    }
-
-    /**
-     * Get Hammer user's comments
-     * @param list Hammer User list
-     */
-    private void getHammerComment(final List<String> list) {
+    private void filterHammerOnly(final List<String> list, final int mode) {
 
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(path).child(postid);
         reference.addValueEventListener(new ValueEventListener() {
@@ -288,12 +255,17 @@ public class CommentsActivity extends AppCompatActivity {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
                     Comment comment = snapshot.getValue(Comment.class);
                     if (list.contains(comment.getPublisherid())) {
-                        //Log.e(TAG, "Hammers: " + comment.getPublisherid());
                         commentList.add(0,comment); // reverse
                     }
                 }
 
-                Collections.sort(commentList, cmpLikeThenTimestamp); // Like -> Timestamp order
+                if (mode == 0) {
+                    Log.e(TAG, "HammerOnly Sort by Like");
+                    Collections.sort(commentList, cmpLikeThenTimestamp); // Like -> Timestamp order
+                } else if (mode == 1) {
+                    Log.e(TAG, "HammerOnly Sort by Recent");
+                    Collections.sort(commentList, cmpTimestamp); // Timestamp order
+                }
 
                 commentAdapter.notifyDataSetChanged();
                 progressBar.setVisibility(View.GONE);
@@ -308,29 +280,39 @@ public class CommentsActivity extends AppCompatActivity {
     }
 
     /**
-     * Show Hammer User's comment only
-     * First, get List of Hammer Users
-     * Second, pass the list to getHammerComment
+     * Get Comments
+     * @param mode Order by Likes:0 (Default), Otherwise 1 (Recent order)
      */
-    private void showHammerOnly() {
-        FirebaseDatabase.getInstance().getReference("HammerUser")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        hammerList.clear();
-                        for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-                            hammerList.add(snapshot.getKey());
-                            //Log.e(TAG, "Hammers: " + snapshot.getKey());
-                        }
-                        // TO DO
-                        getHammerComment(hammerList);
-                    }
+    private void getComments(final int mode) {
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(path).child(postid);
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                progressBar.setVisibility(View.VISIBLE);
+                commentList.clear();
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    Comment comment = snapshot.getValue(Comment.class);
+                    commentList.add(comment);
+                }
 
-                    }
-                });
+                if (mode == 0) {
+                    Log.e(TAG, "All Sort by Like");
+                    Collections.sort(commentList, cmpLikeThenTimestamp); // Like -> Timestamp order
+                } else if (mode == 1) {
+                    Log.e(TAG, "All Sort by Recent");
+                    Collections.sort(commentList, cmpTimestamp); // Timestamp order
+                }
+
+                commentAdapter.notifyDataSetChanged();
+                progressBar.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                progressBar.setVisibility(View.GONE);
+            }
+        });
     }
 
     /**
@@ -351,6 +333,17 @@ public class CommentsActivity extends AppCompatActivity {
             }
 
             return ret ;
+        }
+    } ;
+
+    /**
+     * Compare class
+     * Asc Timestamp
+     */
+    Comparator<Comment> cmpTimestamp = new Comparator<Comment>() {
+        @Override
+        public int compare(Comment item1, Comment item2) {
+            return item1.getTimestamp().compareTo(item2.getTimestamp());
         }
     } ;
 }

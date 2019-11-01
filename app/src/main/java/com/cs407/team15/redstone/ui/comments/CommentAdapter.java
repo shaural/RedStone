@@ -55,8 +55,13 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     private CollectionReference userref;
     public static final String COLLECTION_NAME_KEY = "users";
 
-
-
+    /**
+     * Comment Adapter
+     * @param context
+     * @param comments
+     * @param postid Post ID of the post attaching CommentAdapter
+     * @param path Database path to store the comment data
+     */
     public CommentAdapter(Context context, List<Comment> comments, String postid, String path){
         mContext = context;
         mComment = comments;
@@ -140,32 +145,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                 return true;
             }
         });
-    }
-
-    public void getHammer() {
-        final ArrayList<Comment> filteringList = new ArrayList<>();
-
-        for(int i = 0 ; i < getItemCount() ; i++) {
-            final Comment comment = mComment.get(i);
-            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("HammerUser");
-            reference.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.child(comment.getPublisherid()).exists()){
-                        Log.e(TAG, "Hammer Found: " + comment.getPublisherid());
-                        filteringList.add(comment);
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
-        filteredComment = filteringList;
-        mComment = filteredComment;
-        notifyDataSetChanged();
     }
 
     @Override
