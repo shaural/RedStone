@@ -26,6 +26,7 @@ class TourInfoActivity : AppCompatActivity() {
 
         val setVoteCount = findViewById<TextView>(R.id.total_likes)
         setVoteCount.setText(tourId)
+
         //Like button pressing
         var ue = FirebaseAuth.getInstance().currentUser!!.email as String
         if (tourId != null) {
@@ -37,6 +38,7 @@ class TourInfoActivity : AppCompatActivity() {
                 val likeButton = findViewById<Button>(R.id.like_btn)
                 var voteCountString = "Total likes: " + voteCount.toString()
                 setVoteCount.setText(voteCountString)
+
                 //disabling button if user already liked
                 selectedTour.collection("users_liked").get().addOnSuccessListener { user ->
                     for (u in user.documents) {
@@ -55,7 +57,20 @@ class TourInfoActivity : AppCompatActivity() {
                     selectedTour.set(updateVote, SetOptions.merge())
                     voteCountString = "Total likes: " + newVoteCount.toString()
                     setVoteCount.setText(voteCountString)
-                    println("like button pressed")
+
+                    //checking if user has already liked the tour
+                    val data = hashMapOf("email" to ue)
+                    var flag = 0;
+                    selectedTour.collection("users_liked").get().addOnSuccessListener { user ->
+                        for (u in user.documents) {
+                            if (u["email"] as String == ue){
+                                flag = 1
+                            }
+                        }
+                        if (flag == 0){
+                            selectedTour.collection("users_liked").document().set(data)
+                        }
+                    }
                 }
             }
         }
