@@ -164,6 +164,7 @@ class LocationPage : Fragment(), CoroutineScope {
                 intent.putExtra("path", "location")
                 intent.putExtra("postid", location_id)
                 intent.putExtra("publisherid", publisher_id)
+                //intent.putExtra("context", context);
                 startActivity(intent)
             }
 
@@ -234,7 +235,7 @@ class LocationPage : Fragment(), CoroutineScope {
 
             if (item1.like < item2.like) {
                 ret = 1
-            } else if (item1.like == item2.like) {
+            } else if (item1.like == item2.like && item1.timestamp != null && item2.timestamp != null) {
                 ret = item1.timestamp.compareTo(item2.timestamp)
             } else {
                 ret = -1

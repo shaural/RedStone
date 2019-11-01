@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.cs407.team15.redstone.R
@@ -15,11 +16,6 @@ import com.cs407.team15.redstone.model.User
 import com.cs407.team15.redstone.ui.authentication.LoginActivity
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.fragment_profile.view.*
 import kotlinx.coroutines.tasks.await
@@ -69,6 +65,41 @@ class ProfileFragment : Fragment() {
                 root.recieved_net_likes.text=(user.recievedLikes-user.recievedDislikes).toString()
             }
 
+
+        })
+                root.usercommentstext.setOnClickListener(object : View.OnClickListener {
+                    override fun onClick(v: View?) {
+                        var fragment = UserCommentsFragment();
+                        if (fragment != null) {
+                            //var frManager = fragmentManager
+                            val transaction = fragmentManager?.beginTransaction()
+                            if (transaction != null) {
+                                if (container != null) {
+                                    transaction.replace(container.id, fragment)
+                                    transaction.addToBackStack(null)
+                                    transaction.commit()
+                                }
+                            }
+
+                        }
+                    }
+        })
+        root.usertourtext.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                var fragment = UserToursFragment();
+                if (fragment != null) {
+                    //var frManager = fragmentManager
+                    val transaction = fragmentManager?.beginTransaction()
+                    if (transaction != null) {
+                        if (container != null) {
+                            transaction.replace(container.id, fragment)
+                            transaction.addToBackStack(null)
+                            transaction.commit()
+                        }
+                    }
+
+                }
+            }
         })
 
      /*   val database = FirebaseDatabase.getInstance().reference

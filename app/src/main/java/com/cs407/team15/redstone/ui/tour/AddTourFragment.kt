@@ -1,22 +1,35 @@
 package com.cs407.team15.redstone.ui.tour
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
+import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Location
+import com.cs407.team15.redstone.model.Tour
+import com.cs407.team15.redstone.model.User
+import com.cs407.team15.redstone.ui.location.RecyclerAdapter
+import com.cs407.team15.redstone.ui.tour.helper.ItemTouchHelperAdapter
+import com.cs407.team15.redstone.ui.tour.helper.SimpleItemTouchHelperCallback
+import com.cs407.team15.redstone.ui.viewtours.ViewToursFragment
+import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner
+import kotlinx.android.synthetic.main.fragment_addtour.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -27,6 +40,7 @@ class AddTourFragment : Fragment(){
     val allLocations: MutableList<Location> = mutableListOf()
     // List of all locations that exist on the tour being added
     val locationsOnTour: MutableList<Location> = mutableListOf()
+    val locationsOTStr : MutableList<String> = mutableListOf()
     /// Alphabetized list of the names of all tags that exist
     val allTagNames: MutableList<String> = mutableListOf()
     // List of the names of all the tags on the tour being added
@@ -34,17 +48,21 @@ class AddTourFragment : Fragment(){
 
     var locationsAdapter: LocationsAdapter? = null
     var tagsAdapter: TagsAdapter? = null
+    var containerId = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        containerId = container!!.id
         GlobalScope.launch { getLocationsAndFillLocationSpinner() }
         GlobalScope.launch { getTagsAndFillTagSpinner() }
         val view = inflater.inflate(R.layout.fragment_addtour, container, false)
         val locationsRecyclerView = view.findViewById<RecyclerView>(R.id.locationsRecyclerView)
         val tagsRecyclerView = view.findViewById<RecyclerView>(R.id.tagsRecyclerView)
+        val cancelButton = view.findViewById<Button>(R.id.buttonCancelNewTour)
+        val buttonCreateTour = view.findViewById<Button>(R.id.buttonCreateTour)
 
         var layoutManager = LinearLayoutManager(activity)
         locationsRecyclerView.layoutManager = layoutManager
@@ -53,12 +71,25 @@ class AddTourFragment : Fragment(){
         locationsAdapter = LocationsAdapter(activity as Activity, locationsOnTour)
         locationsRecyclerView.adapter = locationsAdapter
 
+        //drag and drop functionality
+        val callback = SimpleItemTouchHelperCallback(locationsAdapter as ItemTouchHelperAdapter)
+        val touchHelper = ItemTouchHelper(callback)
+        touchHelper.attachToRecyclerView(locationsRecyclerView)
+
         layoutManager = LinearLayoutManager(activity)
         tagsRecyclerView.layoutManager = layoutManager
         tagsRecyclerView.itemAnimator = DefaultItemAnimator()
 
         tagsAdapter = TagsAdapter(activity as Activity, tagsOnTour)
         tagsRecyclerView.adapter = tagsAdapter
+
+        cancelButton.setOnClickListener{
+            cancelTour()
+        }
+
+        buttonCreateTour.setOnClickListener{
+            addNewTour()
+        }
 
         return view
     }
@@ -75,6 +106,7 @@ class AddTourFragment : Fragment(){
             locationSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                     locationsOnTour.add(allLocations[position])
+                    locationsOTStr.add(allLocations[position].name)
                     locationsAdapter!!.notifyDataSetChanged()
                 }
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -107,5 +139,88 @@ class AddTourFragment : Fragment(){
             (tagSpinner as SearchableSpinner).setTitle(getString(R.string.add_tag_to_tour))
             tagSpinner.invalidate()
         }
+    }
+
+    fun cancelTour() {
+        val builder = AlertDialog.Builder(context)
+
+        builder.setTitle("Cancel Tour")
+        builder.setMessage("Are you sure you want to cancel your new tour?")
+
+        builder.setPositiveButton("YES") { dialog, which ->
+            activity!!.onBackPressed()
+        }
+
+        builder.setNegativeButton("NO") { dialog, which ->
+        }
+
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+    }
+
+    fun addNewTour() {
+        val db = FirebaseFirestore.getInstance()
+        var user = User()
+
+        db.collection("users").document(FirebaseAuth.getInstance().currentUser?.email!!).get()
+            .addOnSuccessListener(OnSuccessListener {
+                user = it.toObject(User::class.java) as User
+            })
+
+        val name: String
+        if(view!!.findViewById<EditText>(R.id.editTitle).text.toString().equals(null)){
+            Toast.makeText(context,"Please enter something in text box", Toast.LENGTH_LONG).show()
+            name = ""
+            return
+        }
+        else{
+            name = view!!.findViewById<EditText>(R.id.editTitle).text.toString()
+        }
+
+        val type: String = if (view!!.findViewById<Switch>(R.id.switchPT).isChecked)
+            "personal"
+        else
+            "community"
+
+        if(type == "community" && checkRepeatTours()){
+            Toast.makeText(context,"A tour with those locations already exists.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val user_id: String = FirebaseAuth.getInstance().currentUser!!.uid
+        val hammer: Boolean = user.userType != 0
+
+        if(locationsOTStr.isEmpty()){
+            Toast.makeText(context,"Please add at least one location",Toast.LENGTH_LONG).show()
+            return
+        }
+
+        if(tagsOnTour.isEmpty() && type == "community"){
+            Toast.makeText(context,"Please add at least one tag", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val newTour = Tour(name, type, user_id, hammer, locationsOTStr, tagsOnTour)
+
+        db.collection("tours")
+            .add(newTour)
+            .addOnSuccessListener { documentReference ->
+                Log.d(TAG, "DocumentSnapshot written with ID: ${documentReference.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error adding document", e)
+
+            }
+
+        //go to viewTours
+        val viewToursFrag = ViewToursFragment()
+        val fragTransaction = fragmentManager!!.beginTransaction()
+        fragTransaction.replace(containerId, viewToursFrag)
+        fragTransaction.addToBackStack(null)
+        fragTransaction.commit()
+    }
+
+    fun checkRepeatTours() : Boolean {
+        return false
     }
 }

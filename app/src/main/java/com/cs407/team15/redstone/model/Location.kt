@@ -38,7 +38,7 @@ data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
             return try {
                 FirebaseFirestore.getInstance().collection(LOCATIONS).document(location_id).
                     collection(FLAGGING_USERS).whereEqualTo(USER_ID, user_id).get().await().
-                    documents.size > 0;
+                    documents.size > 0
             }
             catch (e: FirebaseException) {
                 false
