@@ -14,9 +14,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -64,6 +68,7 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
     private TextView hammer_only;
     private EditText addcomment;
     private TextView post;
+    private LinearLayout layout_tags;
 
     ImageView image_profile;
 
@@ -106,6 +111,7 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
                 }
             }
         });
+
         // Create New Tag Button
         Button tagBtn = findViewById(R.id.addtagbtn);
         tagBtn.setOnClickListener(new View.OnClickListener() {
@@ -116,16 +122,23 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
                 View popupView = inflater.inflate(R.layout.addtag_popup, null);
 
                 // create the popup window
-                int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-                int height = LinearLayout.LayoutParams.WRAP_CONTENT;
-                boolean focusable = true; // lets taps outside the popup also dismiss it
-                final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+//                int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+//                int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+//                boolean focusable = true; // lets taps outside the popup also dismiss it
+//                final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+                final PopupWindow popupWindow = new PopupWindow(popupView,
+                        WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT,true);
+
 
                 // show the popup window
                 // which view you pass in doesn't matter, it is only used for the window tolken
-                popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
+                popupWindow.showAtLocation(popupView, Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK, 0, 0);
+
                 Button addtag = popupView.findViewById(R.id.tagaddbutton);
                 final EditText editText = popupView.findViewById(R.id.tagaddpopup);
+
+
+
                 addtag.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -189,6 +202,7 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
         sort = findViewById(R.id.btn_sort);
         hammer_only = findViewById(R.id.hammerCheck);
         checkbox = findViewById(R.id.hammerCheckbox);
+        layout_tags = findViewById(R.id.layout_tags);
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
