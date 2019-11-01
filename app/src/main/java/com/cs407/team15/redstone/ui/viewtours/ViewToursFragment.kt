@@ -41,7 +41,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
 
     var selectedFilterText = ""
     var selectedTag = ANY
-    var selectedHammer = TRUE
+    var selectedHammer = FALSE
 
     override fun onItemClick(view: View, position: Int) {
     }
@@ -89,7 +89,10 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         // Filter out tours that the user is not allowed to see here, so that nowhere else on the
         // page will need to handle this filtering
         allTours.addAll(0, Tour.getAllTours().filter {tour -> Tour.canCurrentUserViewTour(tour)} )
-        activity!!.runOnUiThread { setupRecyclerView(allTours.map { tour -> tour.name }) }
+        activity!!.runOnUiThread {
+            reapplyFiltering()
+            setupRecyclerView(allTours.map { tour -> tour.name })
+        }
     }
 
     fun reapplyFiltering() {
