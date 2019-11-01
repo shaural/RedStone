@@ -39,6 +39,7 @@ class ProfileFragment : Fragment() {
 
         val db = FirebaseFirestore.getInstance()
 
+        // get current user info from firebase
         db.collection("users").document(emailProfile!!).get().addOnSuccessListener(OnSuccessListener {
 
             val user =it.toObject(User::class.java)
@@ -47,16 +48,19 @@ class ProfileFragment : Fragment() {
                 root.profile_email.text=user.email
                 root.profile_username.text=user.username
 
-                // this is pretty arbitrary, can be changed in the future
+                // hammer user requirements
                 if(user.userLikes > 20 && user.userDislikes < 5){
                     user.userType = 1
                 }
-                // end of arbitrary hammer user requirements
+                // end of hammer user requirements
+
                 if(user.userType != 0){
                     val d = resources.getDrawable(R.drawable.ic_hammer)
                     d.setBounds(5, 5, 5, 5)
                     root.user_type.setImageDrawable(d)
                 }
+
+                // get user info
                 root.user_likes.text=user.userLikes.toString()
                 root.user_dislike.text=user.userDislikes.toString()
                 root.user_net_likes.text=(user.userLikes - user.userDislikes).toString()
@@ -67,6 +71,7 @@ class ProfileFragment : Fragment() {
 
 
         })
+        // go to new fragment
                 root.usercommentstext.setOnClickListener(object : View.OnClickListener {
                     override fun onClick(v: View?) {
                         var fragment = UserCommentsFragment();
@@ -84,6 +89,7 @@ class ProfileFragment : Fragment() {
                         }
                     }
         })
+        // go to new fragment
         root.usertourtext.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View?) {
                 var fragment = UserToursFragment();

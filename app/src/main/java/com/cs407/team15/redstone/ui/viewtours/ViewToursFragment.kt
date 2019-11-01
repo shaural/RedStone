@@ -119,6 +119,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         }
     }
 
+    // filter all specifications: name, tags, hammer user, and personal tours
     fun reapplyFiltering() {
         val tourNamesFilteredByNameAndTag = allTours
             .filter { tour -> tour.name.contains(selectedFilterText, ignoreCase = true)}
