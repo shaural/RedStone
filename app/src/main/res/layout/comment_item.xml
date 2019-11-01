@@ -46,10 +46,10 @@
 
     <Button
         android:id="@+id/up_vote_comment"
-        android:layout_width="59dp"
-        android:layout_height="21dp"
+        android:layout_width="25dp"
+        android:layout_height="23dp"
         android:layout_marginStart="320dp"
-        android:background="@drawable/ic_check_black_24dp" />
+        android:background="@drawable/ic_mood_black_24dp" />
 
     <TextView
         android:id="@+id/comment_score"

@@ -9,7 +9,6 @@ public class Comment {
     private String publisherid;
     private String commentid;
     private String path;
-    private Long like;
     private String timestamp;
     String tags;
     private String locationId;
@@ -110,13 +109,8 @@ public class Comment {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
-    public Long getLike() {
-        return like;
     }
 
-    public void setLike(Long score) {
-        this.like = score;
-    }
 
     @Override
     public String toString() {
