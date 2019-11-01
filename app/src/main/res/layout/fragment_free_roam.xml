@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <Button
+        android:id="@+id/launch_ar_fragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="45dp"
+        android:padding="5dp"
+        android:layout_margin="10dp"
+        android:text="@string/btn_ar"
+        android:background="@color/btn_def" />
+    <Button
+        android:id="@+id/launch_map_fragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="45dp"
+        android:padding="5dp"
+        android:layout_margin="10dp"
+        android:text="@string/btn_map"
+        android:background="@color/btn_def" />
+</androidx.appcompat.widget.LinearLayoutCompat>
