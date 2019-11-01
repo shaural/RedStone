@@ -67,6 +67,9 @@ class ProfileFragment : Fragment() {
 
 
         })
+        /*
+        Begin the fragment for user comments
+         */
                 root.usercommentstext.setOnClickListener(object : View.OnClickListener {
                     override fun onClick(v: View?) {
                         var fragment = UserCommentsFragment();
@@ -84,6 +87,9 @@ class ProfileFragment : Fragment() {
                         }
                     }
         })
+        /*
+        begin fragment for user tours
+         */
         root.usertourtext.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View?) {
                 var fragment = UserToursFragment();
