@@ -46,27 +46,27 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
     var selectedTag = ANY
     var selectedHammer = FALSE
 
-    var tourId: String = ""
-
     //navigate to tour information
     override fun onItemClick(view: View, position: Int) {
         view.setOnClickListener{
             val intent = Intent(view.context, TourInfoActivity::class.java)
             intent.putExtra("tourName", allTours[position].name)
-            intent.putExtra("tourVotes", allTours[position].votes)
 
+            var tourID = ""
             FirebaseFirestore.getInstance().collection("tours").get()
                 .addOnSuccessListener { tour ->
                     for (t in tour.documents){
                         if (t["name"] as String == allTours[position].name) {
-                            val tourID = t.id
+                            tourID = t.id
                             intent.putExtra("tourID", tourID)
-                            Toast.makeText(context, tourID, Toast.LENGTH_SHORT).show()
+                            //Toast.makeText(context, tourID, Toast.LENGTH_SHORT).show()
+                            view.context.startActivity(intent)
                         }
                     }
                 }
-
-            view.context.startActivity(intent)
+            //Toast.makeText(context, tourID, Toast.LENGTH_SHORT).show()
+            //intent.putExtra("tourID", tourID)
+            //view.context.startActivity(intent)
         }
     }
 

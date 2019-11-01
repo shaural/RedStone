@@ -11,4 +11,21 @@
         android:textSize="24sp"
         android:layout_marginLeft="30dp"
         android:layout_marginTop="30dp"/>
+
+    <Button
+        android:id="@+id/like_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Like"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="30dp"
+        android:textSize="18sp"/>
+
+    <TextView
+        android:id="@+id/total_likes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Total likes:"
+        android:layout_marginLeft="35dp"/>
+
 </LinearLayout>
