@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -45,10 +46,26 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
     var selectedTag = ANY
     var selectedHammer = FALSE
 
+    var tourId: String = ""
+
     //navigate to tour information
     override fun onItemClick(view: View, position: Int) {
         view.setOnClickListener{
             val intent = Intent(view.context, TourInfoActivity::class.java)
+            intent.putExtra("tourName", allTours[position].name)
+            intent.putExtra("tourVotes", allTours[position].votes)
+
+            FirebaseFirestore.getInstance().collection("tours").get()
+                .addOnSuccessListener { tour ->
+                    for (t in tour.documents){
+                        if (t["name"] as String == allTours[position].name) {
+                            val tourID = t.id
+                            intent.putExtra("tourID", tourID)
+                            Toast.makeText(context, tourID, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+
             view.context.startActivity(intent)
         }
     }

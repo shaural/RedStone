@@ -70,5 +70,7 @@ class Tour(val name: String, val type: String, val user_id: String, val hammer: 
                 .sortedBy { tour -> tour.name.toUpperCase() }
         }
 
+        // Get all ID for tours
+
     }
 }

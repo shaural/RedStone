@@ -11,6 +11,7 @@ class TourInfoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_tour_info)
+        val tourTitle = intent.getStringExtra("tourName")
 
     }
 }
