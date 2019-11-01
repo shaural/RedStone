@@ -93,7 +93,7 @@
             android:background="@android:drawable/bottom_bar"
             android:textColor="@color/common_google_signin_btn_text_light"
             android:visibility="visible"
-            app:hintText="@string/select_tag" />
+            app:hintText="Tag" />
 
         <EditText
             android:layout_width="wrap_content"
@@ -110,7 +110,7 @@
             android:layout_height="wrap_content"
             android:layout_toStartOf="@id/post"
             android:id="@+id/addtagbtn"
-            android:text="Create New Tag"
+            android:text="Create Tag"
             />
 
         <TextView
