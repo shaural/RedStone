@@ -20,6 +20,7 @@ import com.google.ar.core.Plane
 import com.google.ar.core.Pose
 import com.google.ar.core.TrackingState
 import com.google.ar.sceneform.AnchorNode
+import com.google.ar.sceneform.HitTestResult
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ViewRenderable
@@ -51,6 +52,8 @@ class ARFragment : Fragment() {
     private var locations_db: MutableMap<GeoPoint, String> = mutableMapOf<GeoPoint, String>()
     private lateinit var displayed_text_view: View
     private var dbCompleted = false
+    private lateinit var tv_to_close : HitTestResult
+    private lateinit var tv_to_close_motion : MotionEvent
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,13 +101,31 @@ class ARFragment : Fragment() {
                     textViewNode.setParent(anchorNode)
                     textViewNode.localPosition = Vector3(0f, 1.0f, 0f)
                     textViewNode.renderable = textViewTemplate
+                    textViewNode.setOnTapListener{ hitTestResult: HitTestResult, motionEvent: MotionEvent ->
+                        tv_to_close = hitTestResult
+                        tv_to_close_motion = motionEvent
+                        // First call ArFragment's listener to handle TransformableNodes.
+                        arFragment.onPeekTouch(tv_to_close, tv_to_close_motion)
+
+                        //We are only interested in the ACTION_UP events - anything else just return
+                        if (tv_to_close_motion.action == MotionEvent.ACTION_UP) {
+
+                            // Check for touching a Sceneform node
+                            if (tv_to_close.node != null) {
+                                var hitNode =  tv_to_close.node
+                                if (hitNode != null) {
+                                    arFragment.arSceneView.scene.removeChild(hitNode);
+                                    hitNode.setParent(null)
+                                }
+                            }
+                        }
+                    }
 
                 }
             }
         }
     }
-
-    fun updateCameraPosition() {
+     fun updateCameraPosition() {
         val camera = arFragment.arSceneView.arFrame?.camera
         currentPosition =
             if (camera?.trackingState == TrackingState.TRACKING) camera?.displayOrientedPose else null
