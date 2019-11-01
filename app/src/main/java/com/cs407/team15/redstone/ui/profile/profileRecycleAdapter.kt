@@ -1,27 +1,18 @@
 package com.cs407.team15.redstone.ui.profile
 
-import android.os.Bundle
-import android.text.Layout
-import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.view.children
-import androidx.core.view.get
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.R
-import com.cs407.team15.redstone.ui.home.NoticesAdapter
-import com.cs407.team15.redstone.ui.location.LocationPage
-import com.cs407.team15.redstone.ui.location.RecyclerAdapter
-import kotlinx.android.synthetic.main.fragment_profile.view.*
+import com.cs407.team15.redstone.model.Tour
 import kotlinx.android.synthetic.main.profile_list_item.view.*
 
-class profileRecycleAdapter(private val myDataset: ArrayList<Array<String>>) :
+class profileRecycleAdapter(private val myDataset: ArrayList<Array<String>>, private val userPrivatTourData:ArrayList<Tour>,private val tourIdList:ArrayList<String>?, val frag:ProfileFragment) :
     RecyclerView.Adapter<profileRecycleAdapter.MyViewHolder>() {
     class MyViewHolder(val textView: LinearLayout, val start:TextView, val title:TextView,val share:Button,val edit:Button, val hammer:ImageView, val privateTour:ImageView) : RecyclerView.ViewHolder(textView)
     // Create new views (invoked by the layout manager)
@@ -47,10 +38,16 @@ class profileRecycleAdapter(private val myDataset: ArrayList<Array<String>>) :
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
+        val tour=userPrivatTourData.get(position)
 
-        Log.v("hey",myDataset.get(position)[2])
-        holder.start.text=myDataset.get(position)[3]
-        holder.title.text=myDataset.get(position)[0]
+        if(!tour.locations.isEmpty()){
+            holder.start.text=tour.locations.get(0)
+        }
+        else{
+            holder.start.text=""
+        }
+        //myDataset.get(position)[3]
+        holder.title.text=tour.name//myDataset.get(position)[0]
         if( holder.start.text.isBlank()){
            holder.hammer.isVisible=false
             holder.privateTour.isVisible=false
@@ -58,16 +55,16 @@ class profileRecycleAdapter(private val myDataset: ArrayList<Array<String>>) :
             holder.edit.isVisible=false
             return
         }
-        if(myDataset.get(position)[1]=="personal"){
+        if(tour.type=="personal"){
             holder.privateTour.setImageResource(R.drawable.ic_private_tour_24dp)
-        }else if(myDataset.get(position)[1]=="draft"){
+        }else if(tour.type=="draft"){
             holder.privateTour.setImageResource(R.drawable.ic_private_tour_24dp)
 
         }
         else{
             holder.privateTour.isVisible=false
         }
-        if(myDataset.get(position)[2]=="true"){
+        if(tour.hammer==true){
             holder.hammer.isVisible=false
         }else{
             holder.hammer.setImageResource(R.drawable.ic_hammer)
@@ -75,11 +72,12 @@ class profileRecycleAdapter(private val myDataset: ArrayList<Array<String>>) :
         }
 
         holder.share.setOnClickListener({
-
+          frag.editPersonalTour(tour,tourIdList?.get(position))
         })
     }
+    fun populatDraftTour(){
 
+    }
     // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = myDataset.size
-
+    override fun getItemCount() = userPrivatTourData.size
 }
