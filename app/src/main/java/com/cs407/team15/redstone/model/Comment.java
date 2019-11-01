@@ -15,21 +15,6 @@ public class Comment {
         this.path = path;
         this.like=like;
     }
-    public Comment(String comment, String publisher, String commentid, String path, Long like) {
-        this.comment = comment;
-        this.publisher = publisher;
-        this.commentid = commentid;
-        this.path = path;
-        this.like = like;
-    }
-
-    public Long getLike() {
-        return like;
-    }
-
-    public void setLike(Long like) {
-        this.like = like;
-    }
 
     public String getPath() {
         return path;
@@ -83,6 +68,12 @@ public class Comment {
                 ", commentid='" + commentid + '\'' +
                 ", path='" + path + '\'' +
                 ", like='" + like + '\'' +
-                '}';
+                '}';}
+    public Long getLike() {
+        return like;
+    }
+
+    public void setLike(Long score) {
+        this.like = score;
     }
 }
