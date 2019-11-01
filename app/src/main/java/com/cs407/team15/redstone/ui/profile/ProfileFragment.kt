@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.fragment_profile.view.*
 import com.cs407.team15.redstone.ui.tour.AddTourFragment
 
 import kotlinx.coroutines.tasks.await
-import com.cs407.team15.redstone.ui.tour.AddTourFragment
+
 
 
 class ProfileFragment : Fragment() {
@@ -37,7 +37,7 @@ class ProfileFragment : Fragment() {
        val Data = ArrayList<Array<String>>()
         Data.add(arrayOf("","","","","",""))
         val privateTourData = ArrayList<Tour>()
-        privateTourData.add(Tour("","","",true, listOf(),listOf()))
+        privateTourData.add(Tour("","","",true, listOf(),listOf(),0))
 //        val viewAdapter = profileRecycleAdapter(Data,privateTourData,null,this)
 //        val viewManager = LinearLayoutManager(this.context)
         val root = inflater.inflate(R.layout.fragment_profile, container, false)
@@ -79,7 +79,7 @@ class ProfileFragment : Fragment() {
 
                     val userTourList= arrayOfNulls<String>(5+locs.size+tags.size+1)
 
-                    val tour = Tour(tours["name"] as String,tours["type"] as String,tours["user_id"] as String,tours["hammer"] as Boolean, locs.toList(),tags.toList())
+                    val tour = Tour(tours["name"] as String,tours["type"] as String,tours["user_id"] as String,tours["hammer"] as Boolean, locs.toList(),tags.toList(),tours["votes"] as Number)
                     //val name: String, val type: String, val user_id: String, val hammer: Boolean, val locations: List<String>, val tags: List<String>) {
 
 
@@ -90,7 +90,7 @@ class ProfileFragment : Fragment() {
                     if(tourPath==invite){
                         var locs= (tours["locations"] as ArrayList<String>)
                         var tags = (tours["tags"] as ArrayList<String>)
-                        val tour = Tour(tours["name"] as String,tours["type"] as String,tours["user_id"] as String,tours["hammer"] as Boolean, locs.toList(),tags.toList())
+                        val tour = Tour(tours["name"] as String,tours["type"] as String,tours["user_id"] as String,tours["hammer"] as Boolean, locs.toList(),tags.toList(),tours["votes"]as Number)
                         shareTourList.add(tour)
                     }
                 }

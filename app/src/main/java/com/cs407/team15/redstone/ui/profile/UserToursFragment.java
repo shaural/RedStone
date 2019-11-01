@@ -64,7 +64,7 @@ public class UserToursFragment extends Fragment implements RecyclerAdapter.ItemC
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 //populate some recycler view
                                 tourIDList.add((String) document.getReference().getPath().split("/")[0]);
-                                Tour tour = new Tour((String)document.get("name"),(String)document.get("type"),(String)document.get("user_id"),(Boolean)document.get("hammer"),(List<String>) document.get("locations"),(List<String>)document.get("tags"));
+                                Tour tour = new Tour((String)document.get("name"),(String)document.get("type"),(String)document.get("user_id"),(Boolean)document.get("hammer"),(List<String>) document.get("locations"),(List<String>)document.get("tags"),(Number)document.get("votes"));
                                 list.add(tour);
                                 //Log.d(TAG, document.getId() + " => " + document.getData());
                             }

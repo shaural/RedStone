@@ -51,7 +51,7 @@ class UserSharedTour : Fragment(){
                         if(tourPath==invite){
                             var locs= (tours["locations"] as ArrayList<String>)
                             var tags = (tours["tags"] as ArrayList<String>)
-                            val tour = Tour(tours["name"] as String,tours["type"] as String,tours["user_id"] as String,tours["hammer"] as Boolean, locs.toList(),tags.toList())
+                            val tour = Tour(tours["name"] as String,tours["type"] as String,tours["user_id"] as String,tours["hammer"] as Boolean, locs.toList(),tags.toList(),tours["votes"] as Number)
                             shareTourList.add(tour)
                         }
                     }
