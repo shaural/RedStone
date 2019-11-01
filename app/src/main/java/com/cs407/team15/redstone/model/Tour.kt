@@ -6,7 +6,7 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ServerTimestamp
 import kotlinx.coroutines.tasks.await
 
-class Tour(val name: String, val type: String, val user_id: String, val hammer: Boolean, val locations: List<String>, val tags: List<String>) {
+class Tour(val name: String, val type: String, val user_id: String, val hammer: Boolean, val locations: List<String>, val tags: List<String>, val votes: Number) {
     companion object {
         const val TOURS = "tours"
         const val NAME = "name"
@@ -18,6 +18,7 @@ class Tour(val name: String, val type: String, val user_id: String, val hammer: 
         const val POSITION = "position"
         const val TAG_ID = "tag_id"
         const val LOCATION_ID = "location_id"
+        const val VOTES = "votes"
 
         // Get the single tour with the specified name, or null if no such tour with that name
         // exists
@@ -31,6 +32,7 @@ class Tour(val name: String, val type: String, val user_id: String, val hammer: 
             val type = tourDocument.getString(TYPE) as String
             val user_id = tourDocument.getString(USER_ID) as String
             val hammer = tourDocument.getBoolean(HAMMER) as Boolean
+            val votes = tourDocument.getDouble(VOTES) as Number
             // Location ids for a tour are stored as pairs of location id and position.
             // Fetch the documents, sort by the position, then pull out just the location ids
             val locationDocuments = db.collection(TOURS).document(tour_id)
@@ -41,7 +43,7 @@ class Tour(val name: String, val type: String, val user_id: String, val hammer: 
                 .map { locationPair -> locationPair.second }
             // Fetch the tag names
             val tags = (db.collection(TOURS).document(tour_id).get().await().get(TAGS) as List<String>).sorted()
-            return Tour(name, type, user_id, hammer, locations, tags)
+            return Tour(name, type, user_id, hammer, locations, tags, votes)
         }
 
         // Returns whether or not a particular user is allowed to see a particular tour
