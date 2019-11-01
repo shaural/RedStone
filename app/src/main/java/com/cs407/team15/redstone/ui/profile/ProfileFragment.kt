@@ -35,12 +35,16 @@ class ProfileFragment : Fragment() {
         Data.add(arrayOf("","","","","",""))
         val privateTourData = ArrayList<Tour>()
         privateTourData.add(Tour("","","",true, listOf(),listOf()))
-        val viewAdapter = profileRecycleAdapter(Data,privateTourData,null,this)
-        val viewManager = LinearLayoutManager(this.context)
+//        val viewAdapter = profileRecycleAdapter(Data,privateTourData,null,this)
+//        val viewManager = LinearLayoutManager(this.context)
         val root = inflater.inflate(R.layout.fragment_profile, container, false)
       val recyclerView = root.findViewById<RecyclerView>(R.id.profile_tour_recycle_view)
         recyclerView.layoutManager =LinearLayoutManager(activity,LinearLayoutManager.VERTICAL,false)
         recyclerView.adapter=profileRecycleAdapter(Data,privateTourData,null,this)
+
+       // val shareRecyclerView = root.findViewById<RecyclerView>(R.id.shared_recycle)
+       // shareRecyclerView.layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL,false)
+            //  shareRecyclerView.adapter=shareRecycleAdapter(privateTourData,null,this)
 
 
         val auth = FirebaseAuth.getInstance()
@@ -48,16 +52,25 @@ class ProfileFragment : Fragment() {
         val emailProfile= current?.email
 
         val db = FirebaseFirestore.getInstance()
-
-        db.collection("tours").get().addOnSuccessListener(OnSuccessListener {
+        db.collection("users").document(current?.email!!).get().addOnSuccessListener(OnSuccessListener{
+            var tourInviteList = ArrayList<Tour>()
+            val inviteIdList = ArrayList<String>()
+            if(it["tour_invites"]!=null){
+                val tourList=it["tour_invites"] as List<String>
+                for( tour in tourList){
+                    inviteIdList.add(tour)
+                }
+            }
+        db.collection("tours").get().addOnSuccessListener({
             val tourList = it
             val personalTourList =  ArrayList<Array<String>>()
             val privateTourList = ArrayList<Tour>()
             val tourIdList = ArrayList<String>()
+            val shareTourList = ArrayList<Tour>()
             for (tours in it.documents){
-
+                var tourPath = tours.reference.path.split("/")[1].toString()
                 if(tours["user_id"]==current?.uid.toString() && tours["type"]=="personal"){
-                    tourIdList.add(tours.reference.path.split("/")[1].toString())
+                    tourIdList.add(tourPath)
                     var locs= (tours["locations"] as ArrayList<String>)
                     var tags = (tours["tags"] as ArrayList<String>)
 
@@ -65,18 +78,19 @@ class ProfileFragment : Fragment() {
 
                     val tour = Tour(tours["name"] as String,tours["type"] as String,tours["user_id"] as String,tours["hammer"] as Boolean, locs.toList(),tags.toList())
                     //val name: String, val type: String, val user_id: String, val hammer: Boolean, val locations: List<String>, val tags: List<String>) {
-                    userTourList[0]=(tours["name"] as String)
-                    userTourList[1]=(tours["type"] as String)
-                    userTourList[2]=(tours["hammer"].toString())
-                    val tourLocationList=tours["locations"] as ArrayList<String>
-                    val primaryLoc= tourLocationList.get(0)
-                    userTourList[3]=primaryLoc
-                    userTourList[4]=(tours["type"] as String)
+
 
                     personalTourList.add(userTourList as Array<String>)
                     privateTourList.add(tour)
                 }
-
+                for(invite in inviteIdList){
+                    if(tourPath==invite){
+                        var locs= (tours["locations"] as ArrayList<String>)
+                        var tags = (tours["tags"] as ArrayList<String>)
+                        val tour = Tour(tours["name"] as String,tours["type"] as String,tours["user_id"] as String,tours["hammer"] as Boolean, locs.toList(),tags.toList())
+                        shareTourList.add(tour)
+                    }
+                }
 
 
             }
@@ -84,6 +98,8 @@ class ProfileFragment : Fragment() {
                 personalTourList.add(arrayOf("","","","","",""))
                 tourIdList.add("")}
             recyclerView.adapter=profileRecycleAdapter(personalTourList as ArrayList<Array<String>>,privateTourList,tourIdList,this)
+                // shareRecyclerView.adapter=shareRecycleAdapter(shareTourList,inviteIdList,this)
+        })
         })
         db.collection("users").document(emailProfile!!).get().addOnSuccessListener(OnSuccessListener {
 
@@ -115,9 +131,19 @@ class ProfileFragment : Fragment() {
 
 
         })
-        /*
-        Begin the fragment for user comments
-         */
+
+        root.shared_tours_button.setOnClickListener(
+            {
+                val frag = fragmentManager!!.beginTransaction()
+                val bundle = Bundle()
+                val loc= UserSharedTour()
+                loc.arguments=bundle
+                frag.replace((view!!.parent as ViewGroup).id, loc)
+                frag.addToBackStack(null)
+                frag.commit()
+            }
+        )
+
                 root.usercommentstext.setOnClickListener(object : View.OnClickListener {
                     override fun onClick(v: View?) {
                         var fragment = UserCommentsFragment();
@@ -198,6 +224,21 @@ class ProfileFragment : Fragment() {
         frag.addToBackStack(null)
         frag.commit()
     }
+    fun shareTour(tour: Tour, tourId: String?){
+        val frag = fragmentManager!!.beginTransaction()
+        val bundle = Bundle()
+        bundle.putString("title",tour.name)
+        bundle.putString("tourId",tourId)
+        bundle.putString("type",tour.type)
+        bundle.putStringArrayList("tags",ArrayList(tour.tags))
+        bundle.putStringArrayList("locations",ArrayList(tour.locations))
+        val loc= ShareTour()
+        loc.arguments=bundle
+        frag.replace((view!!.parent as ViewGroup).id, loc)
+        frag.addToBackStack(null)
+        frag.commit()
+    }
+
 
     fun addProfileInfo(){
      //User user =

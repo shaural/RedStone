@@ -28,19 +28,32 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import com.cs407.team15.redstone.model.Tour;
+
 import java.util.List;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
 
-    private List<String> mData;
+    private List<Tour> mData;
+    private List<String> tourIDList;
     private LayoutInflater mInflater;
+    private Context context;
     private ItemClickListener mClickListener;
     private ArrayList<Comment> comments;
+    private  UserToursFragment userTourFrag;
 
     // data is passed into the constructor
+    RecyclerAdapter(Context context, List<Tour> data,List<String> tourIDList, UserToursFragment userToursFrag) {
+        this.mInflater = LayoutInflater.from(context);
+        this.context=context;
+        this.mData = data;
+        this.userTourFrag = userToursFrag;
+        this.tourIDList=tourIDList;
+    }
     RecyclerAdapter(Context context, List<String> data) {
         this.mInflater = LayoutInflater.from(context);
-        this.mData = data;
+        this.context=context;
+        this.tourIDList=data;
     }
 
     RecyclerAdapter(Context context, List<String> data, ArrayList<Comment> comments) {
@@ -67,15 +80,26 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     // binds the data to the TextView in each row
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
-        String animal = mData.get(position);
+    public void onBindViewHolder(ViewHolder holder, final int position) {
+        if(userTourFrag!=null){
+        String animal = mData.get(position).getName();
         holder.myTextView.setText(animal);
+            holder.editTourButton.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View view) {
+                    mClickListener.onEditClick(mData.get(position),tourIDList.get(position));
+                }
+            });
+
+        }else{
+            String animal = tourIDList.get(position);
+            holder.myTextView.setText(animal);
+        }
     }
 
     // total number of rows
     @Override
     public int getItemCount() {
-        return mData.size();
+        return tourIDList.size();
     }
 
 
@@ -142,7 +166,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     // convenience method for getting data at click position
     String getItem(int id) {
-        return mData.get(id);
+        return tourIDList.get(id);
     }
 
     // allows clicks events to be caught
@@ -153,5 +177,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+        void onEditClick(Tour tour , String tourId);
     }
 }

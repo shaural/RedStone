@@ -16,6 +16,7 @@ import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Comment;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.cs407.team15.redstone.model.Tour;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -128,5 +129,10 @@ public class UserCommentsFragment extends Fragment implements RecyclerAdapter.It
 //
 //            }
 //        });
+    }
+
+    @Override
+    public void onEditClick(Tour tour , String tourId) {
+
     }
 }

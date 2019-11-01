@@ -42,7 +42,7 @@
                 android:id="@+id/profile_username"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:textAlignment="textEnd"
+                android:textAlignment="textStart"
                 android:textSize="18sp" />
         </TableRow>
 
@@ -61,7 +61,7 @@
                 android:id="@+id/profile_email"
                 android:layout_width="162dp"
                 android:layout_height="match_parent"
-                android:textAlignment="textEnd"
+                android:textAlignment="textStart"
                 android:textSize="18sp" />
         </TableRow>
 
@@ -80,7 +80,7 @@
                 android:id="@+id/recieved_like"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
+                android:textAlignment="textStart"
                 android:textSize="18sp" />
         </TableRow>
 
@@ -99,7 +99,7 @@
                 android:id="@+id/recieved_dislike"
                 android:layout_width="225dp"
                 android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
+                android:textAlignment="textStart"
                 android:textSize="18sp" />
         </TableRow>
 
@@ -118,7 +118,7 @@
                 android:id="@+id/recieved_net_likes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
+                android:textAlignment="textStart"
                 android:textSize="18sp" />
         </TableRow>
 
@@ -137,7 +137,7 @@
                 android:id="@+id/user_likes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
+                android:textAlignment="textStart"
                 android:textSize="18sp" />
 
         </TableRow>
@@ -157,7 +157,7 @@
                 android:id="@+id/user_dislike"
                 android:layout_width="250dp"
                 android:layout_height="match_parent"
-                android:textAlignment="textEnd"
+                android:textAlignment="textStart"
                 android:textSize="18sp" />
         </TableRow>
 
@@ -176,7 +176,7 @@
                 android:id="@+id/user_net_likes"
                 android:layout_width="257dp"
                 android:layout_height="match_parent"
-                android:textAlignment="textEnd"
+                android:textAlignment="textStart"
                 android:textSize="18sp" />
         </TableRow>
 
@@ -190,13 +190,15 @@
                 android:layout_height="wrap_content"
                 android:text="Hammer User Status:"
                 android:textSize="18sp" />
+
             <TextView
                 android:id="@+id/is_hammer_user"
                 android:layout_width="257dp"
                 android:layout_height="match_parent"
-                android:textAlignment="textEnd"
+                android:textAlignment="textStart"
                 android:textSize="18sp" />
         </TableRow>
+
         <TableRow
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -207,12 +209,13 @@
                 android:layout_height="wrap_content"
                 android:text="View Your Tours"
                 android:textSize="18sp" />
+
             <TextView
                 android:id="@+id/usercommentstext"
                 android:layout_width="257dp"
                 android:layout_height="match_parent"
-                android:textAlignment="textStart"
                 android:text="View Your Comments"
+                android:textAlignment="textStart"
                 android:textSize="18sp" />
         </TableRow>
 
@@ -220,10 +223,11 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/profile_tour_recycle_view"
-        android:layout_width="412dp"
-        android:layout_height="188dp"
-        android:layout_marginTop="60dp"
+        android:layout_width="406dp"
+        android:layout_height="344dp"
+        android:layout_marginTop="130dp"
         android:scrollbars="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tableLayout"
@@ -240,24 +244,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tableLayout" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="405dp"
-        android:layout_height="140dp"
-        android:layout_marginTop="11dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <Button
+        android:id="@+id/shared_tours_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Shared Tours"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView3" />
-
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="198dp"
-        android:layout_height="33dp"
-        android:layout_marginStart="36dp"
-        android:layout_marginTop="11dp"
-        android:text="@string/completed_tours"
-        android:textSize="24sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_tour_recycle_view" />
+        app:layout_constraintTop_toBottomOf="@+id/tableLayout" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
