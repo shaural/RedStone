@@ -236,8 +236,16 @@ class ARFragment : Fragment() {
     }
     private fun displayTags(tagsList: ArrayList<String>) {
         var str = ""
-        tagsList.forEach { item -> str += "- ${item}\n" }
+        var max_len = 0
+        tagsList.forEach { item ->
+            str += "- ${item}\n"
+            if (item.length > max_len) {
+                max_len = item.length
+            }
+        }
         displayed_text_view.tv_ar_tags.text = str
+        displayed_text_view.tv_ar_tags.width = 30 * max_len
+        displayed_text_view.tv_ar_tags.height = tagsList.size * 75
         displayed_text_view.tv_ar_tags.visibility = View.VISIBLE
     }
 }
