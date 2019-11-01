@@ -84,24 +84,40 @@
             android:padding="5dp"
             android:id="@+id/image_profile"/>
 
+        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+            android:id="@+id/tagSpinnerComment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/addtagbtn"
+            android:layout_toEndOf="@id/add_comment"
+            android:background="@android:drawable/bottom_bar"
+            android:textColor="@color/common_google_signin_btn_text_light"
+            android:visibility="visible"
+            app:hintText="@string/select_tag" />
+
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/image_profile"
+            android:layout_toEndOf="@id/image_profile"
             android:hint="Add a comment..."
             android:textColor="@color/common_google_signin_btn_text_light"
             android:textColorHint="@color/common_google_signin_btn_text_light"
             android:id="@+id/add_comment"
             android:layout_centerVertical="true"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
             android:background="@android:color/transparent"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/post"
+            android:id="@+id/addtagbtn"
+            android:text="Create New Tag"
+            />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/post"
             android:text="POST"
-            android:layout_marginEnd="5dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:textColor="@color/colorPrimary"

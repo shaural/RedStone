@@ -41,7 +41,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
 
     var selectedFilterText = ""
     var selectedTag = ANY
-    var selectedHammer = TRUE
+    var selectedHammer = FALSE
 
     override fun onItemClick(view: View, position: Int) {
     }
@@ -74,7 +74,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         val adapter = RecyclerAdapter(context as Context, tourNames)
         adapter.setClickListener(this)
         recyclerView.adapter = adapter
-        getView()!!.invalidate()
+        view!!.invalidate()
     }
 
     fun setVisibleTourNames(tourNames: List<String>) {
@@ -82,14 +82,17 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         val adapter = RecyclerAdapter(context as Context, tourNames)
         adapter.setClickListener(this)
         recyclerView.adapter = adapter
-        getView()!!.invalidate()
+        view!!.invalidate()
     }
 
     suspend fun getAndDisplayTourData() {
         // Filter out tours that the user is not allowed to see here, so that nowhere else on the
         // page will need to handle this filtering
         allTours.addAll(0, Tour.getAllTours().filter {tour -> Tour.canCurrentUserViewTour(tour)} )
-        activity!!.runOnUiThread { setupRecyclerView(allTours.map { tour -> tour.name }) }
+        activity!!.runOnUiThread {
+            reapplyFiltering()
+            setupRecyclerView(allTours.map { tour -> tour.name })
+        }
     }
 
     fun reapplyFiltering() {
@@ -97,6 +100,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
             .filter { tour -> tour.name.contains(selectedFilterText, ignoreCase = true)}
             .filter { tour -> selectedTag == ANY || tour.tags.contains(selectedTag) }
             .filter { tour -> tour.hammer || tour.hammer == selectedHammer}
+            .filter { tour -> (tour.type == "personal") && tour.user_id == FirebaseAuth.getInstance().currentUser!!.uid}
             .map {tour -> tour.name}
         setVisibleTourNames(tourNamesFilteredByNameAndTag)
     }
@@ -148,5 +152,4 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
             reapplyFiltering()
         }
     }
-
 }

@@ -39,11 +39,8 @@ class Tour(val name: String, val type: String, val user_id: String, val hammer: 
                 Pair(locationDocument.getLong(POSITION), locationDocument.getString(LOCATION_ID) as String) }
             val locations = locationPairs.sortedBy { locationPair -> locationPair.first }
                 .map { locationPair -> locationPair.second }
-            // Fetch the tag ids for the tour and sort for consistency
-            val tagDocuments = db.collection(TOURS).document(tour_id).collection(TAGS).get().await().documents
-            val tags = tagDocuments.map {tagDocument -> tagDocument.getString(TAG_ID) as String }
-                .map { tag_id -> db.collection(TAGS).document(tag_id).get().await().getString(NAME) as String }
-                .sortedBy {tag_id -> tag_id.toUpperCase()}
+            // Fetch the tag names
+            val tags = (db.collection(TOURS).document(tour_id).get().await().get(TAGS) as List<String>).sorted()
             return Tour(name, type, user_id, hammer, locations, tags)
         }
 
@@ -70,5 +67,6 @@ class Tour(val name: String, val type: String, val user_id: String, val hammer: 
                 // Sort alphabetically by tour name, ignoring case
                 .sortedBy { tour -> tour.name.toUpperCase() }
         }
+
     }
 }
