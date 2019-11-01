@@ -34,6 +34,28 @@
             android:textSize="15dp"
             android:text="@string/sort_btn"/>
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/hammerCheckbox"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_toRightOf="@id/btn_sort"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_uncheck"
+            android:layout_marginStart="5dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/hammerCheckbox"
+            android:text="Hammer Only"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:id="@+id/hammerCheck"
+            android:layout_marginStart="5dp"
+            />
+
 
     </RelativeLayout>
 

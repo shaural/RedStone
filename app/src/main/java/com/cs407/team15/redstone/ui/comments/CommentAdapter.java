@@ -19,7 +19,6 @@ import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Comment;
 import com.cs407.team15.redstone.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -29,7 +28,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -40,17 +38,21 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     private String TAG = getClass().toString();
     private Context mContext;
     private List<Comment> mComment;
+
     private String postid; // Location ID
     private String email;
     private String path;
 
     private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
-    private CollectionReference userref;
-    public static final String COLLECTION_NAME_KEY = "users";
 
-
-
+    /**
+     * Comment Adapter
+     * @param context
+     * @param comments
+     * @param postid Post ID of the post attaching CommentAdapter
+     * @param path Database path to store the comment data
+     */
     public CommentAdapter(Context context, List<Comment> comments, String postid, String path){
         mContext = context;
         mComment = comments;
@@ -95,6 +97,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             }
         });
 
+
         /**
          * On long Click Delete comment dialog pop up
          */
@@ -135,8 +138,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         });
     }
 
-
-
     @Override
     public int getItemCount() {
         return mComment.size();
@@ -156,7 +157,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             comment = itemView.findViewById(R.id.comment);
             like_count = itemView.findViewById(R.id.tv_total);
             like = itemView.findViewById(R.id.btn_like);
-
         }
     }
 

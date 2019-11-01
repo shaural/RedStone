@@ -200,7 +200,8 @@ class AddTourFragment : Fragment(){
             return
         }
 
-        val newTour = Tour(name, type, user_id, hammer, locationsOTStr, tagsOnTour)
+        val initialVotes = 0
+        val newTour = Tour(name, type, user_id, hammer, locationsOTStr, tagsOnTour, initialVotes)
 
         db.collection("tours")
             .add(newTour)

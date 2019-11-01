@@ -1,9 +1,11 @@
 package com.cs407.team15.redstone.ui.viewtours
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.cs407.team15.redstone.MainActivity
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Tour
 import com.google.firebase.analytics.FirebaseAnalytics
@@ -41,9 +44,30 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
 
     var selectedFilterText = ""
     var selectedTag = ANY
-    var selectedHammer = TRUE
+    var selectedHammer = FALSE
 
+    //navigate to tour information
     override fun onItemClick(view: View, position: Int) {
+        view.setOnClickListener{
+            val intent = Intent(view.context, TourInfoActivity::class.java)
+            intent.putExtra("tourName", allTours[position].name)
+
+            var tourID = ""
+            FirebaseFirestore.getInstance().collection("tours").get()
+                .addOnSuccessListener { tour ->
+                    for (t in tour.documents){
+                        if (t["name"] as String == allTours[position].name) {
+                            tourID = t.id
+                            intent.putExtra("tourID", tourID)
+                            //Toast.makeText(context, tourID, Toast.LENGTH_SHORT).show()
+                            view.context.startActivity(intent)
+                        }
+                    }
+                }
+            //Toast.makeText(context, tourID, Toast.LENGTH_SHORT).show()
+            //intent.putExtra("tourID", tourID)
+            //view.context.startActivity(intent)
+        }
     }
 
     override fun onCreateView(
@@ -89,7 +113,10 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         // Filter out tours that the user is not allowed to see here, so that nowhere else on the
         // page will need to handle this filtering
         allTours.addAll(0, Tour.getAllTours().filter {tour -> Tour.canCurrentUserViewTour(tour)} )
-        activity!!.runOnUiThread { setupRecyclerView(allTours.map { tour -> tour.name }) }
+        activity!!.runOnUiThread {
+            reapplyFiltering()
+            setupRecyclerView(allTours.map { tour -> tour.name })
+        }
     }
 
     fun reapplyFiltering() {
