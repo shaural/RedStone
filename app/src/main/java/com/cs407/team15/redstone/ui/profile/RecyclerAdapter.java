@@ -1,15 +1,33 @@
 package com.cs407.team15.redstone.ui.profile;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.cs407.team15.redstone.MainActivity;
 import com.cs407.team15.redstone.R;
+import com.cs407.team15.redstone.model.Comment;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
@@ -17,6 +35,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     private List<String> mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
+    private ArrayList<Comment> comments;
 
     // data is passed into the constructor
     RecyclerAdapter(Context context, List<String> data) {
@@ -24,10 +43,25 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
         this.mData = data;
     }
 
+    RecyclerAdapter(Context context, List<String> data, ArrayList<Comment> comments) {
+        this.mInflater = LayoutInflater.from(context);
+        this.mData = data;
+        this.comments = comments;
+    }
+
     // inflates the row layout from xml when needed
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = mInflater.inflate(R.layout.recycler_row, parent, false);
+        View view = mInflater.inflate(R.layout.recycler_row_uc, parent, false);
+        //for user tour list page, change text of button
+        Button btn = view.findViewById(R.id.delete_tag_button);
+        if (comments == null) {
+            btn = view.findViewById(R.id.delete_tag_button);
+            btn.setText("DELETE TOUR");
+        }
+        else{
+            btn.setText("Delete Tag");
+        }
         return new ViewHolder(view);
     }
 
@@ -48,11 +82,56 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView myTextView;
-
-        ViewHolder(View itemView) {
+        Button delButton;
+        ViewHolder(final View itemView) {
             super(itemView);
             myTextView = itemView.findViewById(R.id.tvAnimalName);
+            delButton = itemView.findViewById(R.id.delete_tag_button);
             itemView.setOnClickListener(this);
+            delButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (delButton.getText().equals("DELETE TOUR")) {
+                        final FirebaseFirestore db = FirebaseFirestore.getInstance(); //watch this
+                        final View v2 = v;
+                        db.collection("tours")
+                                .whereEqualTo("user_id", FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                .whereEqualTo("name", mData.get(getAdapterPosition())).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    //ArrayList<String> list = new ArrayList<>();
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        db.collection("tours").document(document.getId()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void aVoid) {
+                                                Toast toast = Toast.makeText(v2.getContext(), "Tour deleted", Toast.LENGTH_SHORT);
+                                                toast.show();
+                                                mData.remove(getAdapterPosition());
+                                                notifyItemChanged(getAdapterPosition());
+                                                //RecyclerAdapter.this.notifyItemChanged(getAdapterPosition());
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    else{
+                    DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(comments.get(getAdapterPosition()).getPath()).child(comments.get(getAdapterPosition()).getLocationId())
+                            .child(comments.get(getAdapterPosition()).getCommentid()).child("tags");
+
+                    reference.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            Toast toast = Toast.makeText(itemView.getContext(), "Removed Tag", Toast.LENGTH_SHORT);
+                            toast.show();
+                            //notifyItemChanged(getAdapterPosition());
+                        }
+                    });
+                }
+                }
+            });
         }
 
         @Override

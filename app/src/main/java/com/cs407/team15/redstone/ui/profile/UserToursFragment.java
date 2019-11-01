@@ -32,6 +32,13 @@ public class UserToursFragment extends Fragment implements RecyclerAdapter.ItemC
     private View view;
     ViewGroup container2;
 
+    /**
+     * create initival view for this fragment
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         db = FirebaseFirestore.getInstance();
@@ -39,6 +46,9 @@ public class UserToursFragment extends Fragment implements RecyclerAdapter.ItemC
         view = inflater.inflate(R.layout.fragment_userspecific_tours,
                 container, false);
         container2=container;
+        /*
+        Get the tours associated with the user
+         */
         db.collection("tours")
                 .whereEqualTo("user_id", mAuth.getCurrentUser().getUid()).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -69,6 +79,11 @@ public class UserToursFragment extends Fragment implements RecyclerAdapter.ItemC
         return view;
 
     }
+
+    /**
+     * Sets up the recycler view to see all entries
+     * @param list
+     */
     public void fillRecycleViewer(ArrayList<String> list) {
         RecyclerView recyclerView = view.findViewById(R.id.usertourlist);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -78,6 +93,12 @@ public class UserToursFragment extends Fragment implements RecyclerAdapter.ItemC
         view.invalidate();
     }
     // need to add logic for when tour page is created
+
+    /**
+     * will be the logic to take users to a specific tour page in the future.
+     * @param view
+     * @param position
+     */
     @Override
     public void onItemClick(View view, int position) {
         FragmentManager fm = getFragmentManager();
