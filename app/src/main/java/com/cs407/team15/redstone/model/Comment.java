@@ -3,9 +3,10 @@ package com.cs407.team15.redstone.model;
 public class Comment {
     private String comment;
     private String publisher;
+    private String publisherid;
     private String commentid;
     private String path;
-    private long like;
+    private Long like;
     private String timestamp;
 
     public Comment(String comment, String publisher, String commentid, String path) {
@@ -39,6 +40,15 @@ public class Comment {
     }
 
     public Comment() {
+    }
+
+
+    public String getPublisherid() {
+        return publisherid;
+    }
+
+    public void setPublisherid(String publisherid) {
+        this.publisherid = publisherid;
     }
 
     public String getComment() {

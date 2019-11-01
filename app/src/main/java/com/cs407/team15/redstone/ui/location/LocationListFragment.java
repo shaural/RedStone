@@ -88,8 +88,8 @@ public class LocationListFragment extends Fragment implements RecyclerAdapter.It
 
     public void fillRecycleViewer(ArrayList<String> list) {
         RecyclerView recyclerView = view.findViewById(R.id.locationlist);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new RecyclerAdapter(getContext(), list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        adapter = new RecyclerAdapter(getActivity(), list);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
         view.invalidate();
