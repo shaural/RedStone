@@ -12,7 +12,18 @@ import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Tour
 import kotlinx.android.synthetic.main.profile_list_item.view.*
 
+import androidx.core.view.children
+import androidx.core.view.get
+import androidx.core.view.isVisible
+import com.cs407.team15.redstone.R
+import com.cs407.team15.redstone.ui.home.NoticesAdapter
+import com.cs407.team15.redstone.ui.location.LocationPage
+import com.cs407.team15.redstone.ui.location.RecyclerAdapter
+import kotlinx.android.synthetic.main.fragment_profile.view.*
+import kotlinx.android.synthetic.main.profile_list_item.view.*
+
 class profileRecycleAdapter(private val myDataset: ArrayList<Array<String>>, private val userPrivatTourData:ArrayList<Tour>,private val tourIdList:ArrayList<String>?, val frag:ProfileFragment) :
+
     RecyclerView.Adapter<profileRecycleAdapter.MyViewHolder>() {
     class MyViewHolder(val textView: LinearLayout, val start:TextView, val title:TextView,val share:Button,val edit:Button, val hammer:ImageView, val privateTour:ImageView) : RecyclerView.ViewHolder(textView)
     // Create new views (invoked by the layout manager)
