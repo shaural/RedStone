@@ -6,7 +6,7 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ServerTimestamp
 import kotlinx.coroutines.tasks.await
 
-class Tour(val name: String, val type: String, val user_id: String, val hammer: Boolean, val locations: List<String>, val tags: List<String>) {
+class Tour(var name: String, val type: String, val user_id: String, val hammer: Boolean, val locations: List<String>, val tags: List<String>) {
     companion object {
         const val TOURS = "tours"
         const val NAME = "name"

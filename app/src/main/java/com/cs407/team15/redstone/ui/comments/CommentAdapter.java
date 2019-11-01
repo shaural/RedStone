@@ -82,13 +82,12 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         holder.comment.setText(comment.getComment());
         holder.score.setText(comment.getLike().toString());
         getUserInfo(holder.image_profile, holder.username, comment.getPublisher());
-        isLiked(comment.getCommentid(), holder.like);
-        getLikesCount(comment.getCommentid(), holder.like_count);
+
 
         /**
          * On Click like the comment
          */
-        holder.like.setOnClickListener(new View.OnClickListener() {
+/*        holder.like.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (holder.like.getTag().equals("like")) {
@@ -100,7 +99,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                             .child(firebaseUser.getUid()).removeValue();
                 }
             }
-        });
+        });*/
 
         //holder.score.setText(comment.getCommentScore());
         holder.up_vote.setOnClickListener(new View.OnClickListener() {
@@ -166,7 +165,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     public class ImageViewHolder extends RecyclerView.ViewHolder {
 
         public ImageView image_profile, like;
-        public TextView username, comment, like_count;
+        public TextView username, comment, like_count,score;
         public ProgressBar progressBar;
         public Button up_vote,down_vote;
 
@@ -176,8 +175,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             image_profile = itemView.findViewById(R.id.image_profile);
             username = itemView.findViewById(R.id.username);
             comment = itemView.findViewById(R.id.comment);
-            like_count = itemView.findViewById(R.id.tv_total);
-            like = itemView.findViewById(R.id.btn_like);
+
 
             up_vote = itemView.findViewById(R.id.up_vote_comment);
             down_vote = itemView.findViewById(R.id.down_vote_comment);

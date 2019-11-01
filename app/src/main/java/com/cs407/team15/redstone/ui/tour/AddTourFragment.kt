@@ -13,25 +13,25 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Location
 import com.cs407.team15.redstone.model.Tour
 import com.cs407.team15.redstone.model.User
-import com.cs407.team15.redstone.ui.location.RecyclerAdapter
 import com.cs407.team15.redstone.ui.tour.helper.ItemTouchHelperAdapter
 import com.cs407.team15.redstone.ui.tour.helper.SimpleItemTouchHelperCallback
 import com.cs407.team15.redstone.ui.viewtours.ViewToursFragment
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner
-import kotlinx.android.synthetic.main.fragment_addtour.*
+import kotlinx.android.synthetic.main.fragment_addtour.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.ArrayList
 
 class AddTourFragment : Fragment(){
 
@@ -55,7 +55,9 @@ class AddTourFragment : Fragment(){
         savedInstanceState: Bundle?
     ): View? {
         containerId = container!!.id
-        GlobalScope.launch { getLocationsAndFillLocationSpinner() }
+        val locations = arguments?.getStringArrayList("locations")
+        val tourId = arguments?.getString("tourId")
+        GlobalScope.launch { getLocationsAndFillLocationSpinner(locations) }
         GlobalScope.launch { getTagsAndFillTagSpinner() }
         val view = inflater.inflate(R.layout.fragment_addtour, container, false)
         val locationsRecyclerView = view.findViewById<RecyclerView>(R.id.locationsRecyclerView)
@@ -85,17 +87,70 @@ class AddTourFragment : Fragment(){
         cancelButton.setOnClickListener{
             cancelTour()
         }
+// add edit/ draft switch
 
-        buttonCreateTour.setOnClickListener{
-            addNewTour()
+        val title = arguments?.getString("title")
+        val type = arguments?.getString("type")
+        val tags = arguments?.getStringArrayList("tags")
+
+
+        if(title!=null){
+            view.editTitle.setText(title)
+        }
+        if(type!=null){
+            if(type=="personal") {
+                view.switchPT.isChecked = true
+            }else{
+                view.switchPT.isChecked= false
+            }
         }
 
+        if(tags!=null){
+            for( tag in tags){
+                tagsOnTour.add(tag)
+            }
+        }
+        //Location.getAllTours()
+        if(title!=null||type!=null||tags!=null||locations!=null) {
+            buttonCreateTour.setOnClickListener {
+                addNewTour(true,tourId!!)
+            }
+        }else{
+            buttonCreateTour.setOnClickListener {
+                addNewTour(false,tourId!!)
+            }
+        }
         return view
     }
 
-    suspend fun getLocationsAndFillLocationSpinner() {
+    suspend fun getLocationsAndFillLocationSpinner(locations: ArrayList<String>?) {
         // Get list of all locations in alphabetical order
         allLocations.addAll(Location.getAllTours())
+
+
+        if(locations!=null && locations.isNotEmpty()){
+            val locName= arrayOfNulls<String>(locations?.size)
+            val locPlace= arrayOfNulls<Location>(locations?.size)
+            for(allLocation in allLocations){
+                for(i in 0..locations.size-1){
+
+                if(locations.get(i)==allLocation.name){
+                    locPlace[i]=(allLocation)
+                    locName[i]=(allLocation.name)
+                }
+            }
+            }
+            if(locName.size>0){
+            for(i in 0..locName.size-1){
+                if(locName[i]!=null){
+                locationsOnTour.add(locPlace[i]!!)
+                locationsOTStr.add(locName[i]!!)
+//                locationsAdapter!!.notifyDataSetChanged()
+                }
+            }}
+        }
+
+
         val locationNames = allLocations.map { location -> location.name }
         activity!!.runOnUiThread {
             val locationSpinner = view!!.findViewById<Spinner>(R.id.locationSpinner)
@@ -157,7 +212,7 @@ class AddTourFragment : Fragment(){
         dialog.show()
     }
 
-    fun addNewTour() {
+    fun addNewTour(isEdit:Boolean,tourId:String) {
         val db = FirebaseFirestore.getInstance()
         var user = User()
 
@@ -181,7 +236,7 @@ class AddTourFragment : Fragment(){
         else
             "community"
 
-        if(type == "community" && checkRepeatTours()){
+        if(type == "community" && checkRepeatTours()&&!isEdit){
             Toast.makeText(context,"A tour with those locations already exists.", Toast.LENGTH_LONG).show()
             return
         }
@@ -200,17 +255,19 @@ class AddTourFragment : Fragment(){
         }
 
         val newTour = Tour(name, type, user_id, hammer, locationsOTStr, tagsOnTour)
+if(isEdit){
+    db.collection("tours").document(tourId).set(newTour)
+}else {
+    db.collection("tours")
+        .add(newTour)
+        .addOnSuccessListener { documentReference ->
+            Log.d(TAG, "DocumentSnapshot written with ID: ${documentReference.id}")
+        }
+        .addOnFailureListener { e ->
+            Log.w(TAG, "Error adding document", e)
 
-        db.collection("tours")
-            .add(newTour)
-            .addOnSuccessListener { documentReference ->
-                Log.d(TAG, "DocumentSnapshot written with ID: ${documentReference.id}")
-            }
-            .addOnFailureListener { e ->
-                Log.w(TAG, "Error adding document", e)
-
-            }
-
+        }
+}
         //go to viewTours
         val viewToursFrag = ViewToursFragment()
         val fragTransaction = fragmentManager!!.beginTransaction()

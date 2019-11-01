@@ -1,16 +1,11 @@
 package com.cs407.team15.redstone.ui.profile
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,10 +16,7 @@ import com.cs407.team15.redstone.ui.authentication.LoginActivity
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.android.synthetic.main.fragment_profile.view.*
-import kotlinx.android.synthetic.main.fragment_settings.view.*
-import kotlinx.coroutines.tasks.await
 import com.cs407.team15.redstone.ui.tour.AddTourFragment
 
 
@@ -41,13 +33,14 @@ class ProfileFragment : Fragment() {
 /*get userid and search whole of tours till and add tours for now also add permisions to share*/
        val Data = ArrayList<Array<String>>()
         Data.add(arrayOf("","","","","",""))
-        val viewAdapter = profileRecycleAdapter(Data)
-        this::editPersonalTour
+        val privateTourData = ArrayList<Tour>()
+        privateTourData.add(Tour("","","",true, listOf(),listOf()))
+        val viewAdapter = profileRecycleAdapter(Data,privateTourData,null,this)
         val viewManager = LinearLayoutManager(this.context)
         val root = inflater.inflate(R.layout.fragment_profile, container, false)
       val recyclerView = root.findViewById<RecyclerView>(R.id.profile_tour_recycle_view)
         recyclerView.layoutManager =LinearLayoutManager(activity,LinearLayoutManager.VERTICAL,false)
-        recyclerView.adapter=profileRecycleAdapter(Data)
+        recyclerView.adapter=profileRecycleAdapter(Data,privateTourData,null,this)
 
 
         val auth = FirebaseAuth.getInstance()
@@ -59,10 +52,19 @@ class ProfileFragment : Fragment() {
         db.collection("tours").get().addOnSuccessListener(OnSuccessListener {
             val tourList = it
             val personalTourList =  ArrayList<Array<String>>()
+            val privateTourList = ArrayList<Tour>()
+            val tourIdList = ArrayList<String>()
             for (tours in it.documents){
 
-                if(tours["user_id"]==current?.uid.toString()){
-                    val userTourList= arrayOfNulls<String>(5)
+                if(tours["user_id"]==current?.uid.toString() && tours["type"]=="personal"){
+                    tourIdList.add(tours.reference.path.split("/")[1].toString())
+                    var locs= (tours["locations"] as ArrayList<String>)
+                    var tags = (tours["tags"] as ArrayList<String>)
+
+                    val userTourList= arrayOfNulls<String>(5+locs.size+tags.size+1)
+
+                    val tour = Tour(tours["name"] as String,tours["type"] as String,tours["user_id"] as String,tours["hammer"] as Boolean, locs.toList(),tags.toList())
+                    //val name: String, val type: String, val user_id: String, val hammer: Boolean, val locations: List<String>, val tags: List<String>) {
                     userTourList[0]=(tours["name"] as String)
                     userTourList[1]=(tours["type"] as String)
                     userTourList[2]=(tours["hammer"].toString())
@@ -70,16 +72,19 @@ class ProfileFragment : Fragment() {
                     val primaryLoc= tourLocationList.get(0)
                     userTourList[3]=primaryLoc
                     userTourList[4]=(tours["type"] as String)
+
                     personalTourList.add(userTourList as Array<String>)
+                    privateTourList.add(tour)
                 }
 
-                if(personalTourList.isEmpty()){
-                    personalTourList.add(arrayOf("","","","","",""))
-                }
-                recyclerView.adapter=profileRecycleAdapter(personalTourList as ArrayList<Array<String>>)
+
+
             }
+            if(personalTourList.isEmpty()){
+                personalTourList.add(arrayOf("","","","","",""))
+                tourIdList.add("")}
+            recyclerView.adapter=profileRecycleAdapter(personalTourList as ArrayList<Array<String>>,privateTourList,tourIdList,this)
         })
-
         db.collection("users").document(emailProfile!!).get().addOnSuccessListener(OnSuccessListener {
 
             val user =it.toObject(User::class.java)
@@ -173,10 +178,14 @@ class ProfileFragment : Fragment() {
 
         return root
     }
-    fun editPersonalTour(){
+    fun editPersonalTour(tour: Tour, tourId: String?){
         val frag = fragmentManager!!.beginTransaction()
         val bundle = Bundle()
-        bundle.putString("title","test")
+        bundle.putString("title",tour.name)
+        bundle.putString("tourId",tourId)
+        bundle.putString("type",tour.type)
+        bundle.putStringArrayList("tags",ArrayList(tour.tags))
+        bundle.putStringArrayList("locations",ArrayList(tour.locations))
         val loc= AddTourFragment()
         loc.arguments=bundle
         frag.replace((view!!.parent as ViewGroup).id, loc)

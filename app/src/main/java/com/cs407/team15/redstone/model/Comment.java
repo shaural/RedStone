@@ -6,7 +6,6 @@ public class Comment {
     private String publisher;
     private String commentid;
     private String path;
-    private long like;
     private String timestamp;
 
     public Comment(String comment,Long like, String publisher, String commentid, String path) {
@@ -73,13 +72,8 @@ public class Comment {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
-    public Long getLike() {
-        return like;
     }
 
-    public void setLike(Long score) {
-        this.like = score;
-    }
 
     @Override
     public String toString() {
