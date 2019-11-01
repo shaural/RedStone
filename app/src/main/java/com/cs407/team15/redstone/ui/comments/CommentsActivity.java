@@ -12,12 +12,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
@@ -27,6 +32,7 @@ import android.widget.Toast;
 
 import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Comment;
+import com.cs407.team15.redstone.model.Tag;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -100,6 +106,47 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
                 }
             }
         });
+        // Create New Tag Button
+        Button tagBtn = findViewById(R.id.addtagbtn);
+        tagBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                LayoutInflater inflater = (LayoutInflater)
+                        getSystemService(LAYOUT_INFLATER_SERVICE);
+                View popupView = inflater.inflate(R.layout.addtag_popup, null);
+
+                // create the popup window
+                int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+                int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                boolean focusable = true; // lets taps outside the popup also dismiss it
+                final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+
+                // show the popup window
+                // which view you pass in doesn't matter, it is only used for the window tolken
+                popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
+                Button addtag = popupView.findViewById(R.id.tagaddbutton);
+                final EditText editText = popupView.findViewById(R.id.tagaddpopup);
+                addtag.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (!tagNames.contains(editText.getText().toString())) {
+                            //add to db and tagnames
+                            tagNames.add(editText.getText().toString());
+                            FirebaseFirestore.getInstance().collection("tags").add(new Tag(editText.getText().toString()));
+                            Toast poptart = Toast.makeText(CommentsActivity.this,"Tag Added", Toast.LENGTH_SHORT);
+                            poptart.show();
+                            popupWindow.dismiss();
+                        }
+                        else {
+                            Toast poptart = Toast.makeText(CommentsActivity.this,"Tag already exists", Toast.LENGTH_SHORT);
+                            poptart.show();
+                            popupWindow.dismiss();
+                        }
+                    }
+                });
+            }
+        });
+
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
