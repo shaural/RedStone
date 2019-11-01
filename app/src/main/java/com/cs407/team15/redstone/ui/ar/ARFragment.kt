@@ -1,42 +1,24 @@
 package com.cs407.team15.redstone.ui.ar
 
-import android.content.pm.PackageManager
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.TextView
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
-import com.cs407.team15.redstone.R
-import android.Manifest;
 import android.app.ActivityManager
 import android.content.Context
-import android.opengl.GLES20
-import android.opengl.GLSurfaceView
-import android.util.Log
+import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import com.google.ar.core.*
-import com.google.ar.core.examples.java.common.helpers.DisplayRotationHelper
-import com.google.ar.core.examples.java.common.rendering.BackgroundRenderer
-import com.google.ar.core.exceptions.CameraNotAvailableException
-import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
+import androidx.fragment.app.Fragment
+import com.cs407.team15.redstone.R
+import com.google.ar.core.HitResult
+import com.google.ar.core.Plane
+import com.google.ar.core.Pose
+import com.google.ar.core.TrackingState
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Vector3
-import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.ViewRenderable
 import com.google.ar.sceneform.ux.ArFragment
-import com.google.ar.sceneform.ux.BaseArFragment
-import kotlinx.coroutines.delay
-import java.io.IOException
-import javax.microedition.khronos.egl.EGLConfig
-import javax.microedition.khronos.opengles.GL10
-import kotlin.concurrent.fixedRateTimer
 
 // A great deal of this code comes from following the example in the HelloSceneForm sample AR Core
 // application provided by Google:
@@ -87,6 +69,8 @@ class ARFragment : Fragment() {
         }
         ViewRenderable.builder().setView(context!!, R.layout.basic_tour_text_view).build()
             .thenAccept { renderable -> textViewTemplate = renderable }
+        Toast.makeText(context,"Location not showing",Toast.LENGTH_LONG).show()
+
     }
 
     fun updateCameraPosition() {
