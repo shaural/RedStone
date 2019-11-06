@@ -189,7 +189,12 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
         recyclerView.setLayoutManager(mLayoutManager);
 
         commentList = new ArrayList<>();
-        commentAdapter = new CommentAdapter(this, commentList, postid, path);
+        ArrayList<String> postids = new ArrayList<>();
+        postids.add(postid);
+        ArrayList<String> paths = new ArrayList<>();
+        paths.add(path);
+
+        commentAdapter = new CommentAdapter(this, commentList, postids, paths);
         recyclerView.setAdapter(commentAdapter);
 
         // initialize variables
