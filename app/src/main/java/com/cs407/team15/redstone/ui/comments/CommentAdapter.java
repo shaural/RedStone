@@ -32,6 +32,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageViewHolder> {
@@ -39,12 +40,13 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     private Context mContext;
     private List<Comment> mComment;
 
-    private String postid; // Location ID
+    private ArrayList<String> postid; // Location ID
     private String email;
-    private String path;
+    private ArrayList<String> path;
 
     private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
+    private boolean onePathAndPost;
 
     /**
      * Comment Adapter
@@ -53,12 +55,22 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
      * @param postid Post ID of the post attaching CommentAdapter
      * @param path Database path to store the comment data
      */
-    public CommentAdapter(Context context, List<Comment> comments, String postid, String path){
+    public CommentAdapter(Context context, List<Comment> comments, ArrayList<String> postid, ArrayList<String> path){
         mContext = context;
         mComment = comments;
         this.postid = postid;
         this.path = path;
+        if (path.size() > 1) {
+            onePathAndPost = false;
+        }
+        else {
+            onePathAndPost = true;
+        }
     }
+
+
+
+    //public CommentAdapter(Context context, )
 
 
     @NonNull
@@ -77,8 +89,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
 
         holder.comment.setText(comment.getComment());
         getUserInfo(holder.image_profile, holder.username, comment.getPublisher());
-        isLiked(comment.getCommentid(), holder.like);
-        getLikesCount(comment.getCommentid(), holder.like_count);
+        isLiked(comment.getCommentid(), holder.like,position);
+        getLikesCount(comment.getCommentid(), holder.like_count, position);
 
         /**
          * On Click like the comment
@@ -86,13 +98,25 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         holder.like.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (holder.like.getTag().equals("like")) {
-                    FirebaseDatabase.getInstance().getReference("Likes").child(path).child(comment.getCommentid())
-                            .child(firebaseUser.getUid()).setValue(true);
+                if (!onePathAndPost) {
+                    if (holder.like.getTag().equals("like")) {
+                        FirebaseDatabase.getInstance().getReference("Likes").child(path.get(position)).child(comment.getCommentid())
+                                .child(firebaseUser.getUid()).setValue(true);
 
-                } else {
-                    FirebaseDatabase.getInstance().getReference("Likes").child(path).child(comment.getCommentid())
-                            .child(firebaseUser.getUid()).removeValue();
+                    } else {
+                        FirebaseDatabase.getInstance().getReference("Likes").child(path.get(position)).child(comment.getCommentid())
+                                .child(firebaseUser.getUid()).removeValue();
+                    }
+                }
+                else {
+                    if (holder.like.getTag().equals("like")) {
+                        FirebaseDatabase.getInstance().getReference("Likes").child(path.get(0)).child(comment.getCommentid())
+                                .child(firebaseUser.getUid()).setValue(true);
+
+                    } else {
+                        FirebaseDatabase.getInstance().getReference("Likes").child(path.get(0)).child(comment.getCommentid())
+                                .child(firebaseUser.getUid()).removeValue();
+                    }
                 }
             }
         });
@@ -118,16 +142,30 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
                                     Log.e(TAG, "Remove attempt: " + "Comments/"+path+"/"+postid+"/"+comment.getCommentid());
-                                    FirebaseDatabase.getInstance().getReference("Comments").child(path)
-                                            .child(postid).child(comment.getCommentid())
-                                            .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()){
-                                                Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
+                                    if (!onePathAndPost) {
+                                        FirebaseDatabase.getInstance().getReference("Comments").child(path.get(position))
+                                                .child(postid.get(position)).child(comment.getCommentid())
+                                                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
+                                                }
                                             }
-                                        }
-                                    });
+                                        });
+                                    }
+                                    else {
+                                        FirebaseDatabase.getInstance().getReference("Comments").child(path.get(0))
+                                                .child(postid.get(0)).child(comment.getCommentid())
+                                                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+                                        });
+                                    }
                                     dialog.dismiss();
                                 }
                             });
@@ -194,11 +232,16 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     /**
      * Like
      */
-    private void isLiked(final String commentid, final ImageView imageView){
+    private void isLiked(final String commentid, final ImageView imageView, int position){
 
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Likes").child(path).child(commentid);
+        DatabaseReference reference;
+        if (!onePathAndPost) {
+            reference = FirebaseDatabase.getInstance().getReference("Likes").child(path.get(position)).child(commentid);
+        }
+        else {
+            reference = FirebaseDatabase.getInstance().getReference("Likes").child(path.get(0)).child(commentid);
+        }
 
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -222,8 +265,15 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     /**
      * Count and update the number of likes
      */
-    private void getLikesCount(String commentid, final TextView likes){
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Likes").child(path).child(commentid);
+    private void getLikesCount(String commentid, final TextView likes, final int position){
+        DatabaseReference reference;
+        if (!onePathAndPost) {
+            reference = FirebaseDatabase.getInstance().getReference("Likes").child(path.get(position)).child(commentid);
+        }
+        else {
+            reference = FirebaseDatabase.getInstance().getReference("Likes").child(path.get(0)).child(commentid);
+
+        }
         final String cid = commentid; // comment id
 
         reference.addValueEventListener(new ValueEventListener() {
@@ -233,8 +283,15 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                 likes.setText(dataSnapshot.getChildrenCount()+" ");
 
                 // Update likes count
-                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Comments")
-                        .child(path).child(postid);
+                DatabaseReference ref;
+                if (!onePathAndPost) {
+                    ref = FirebaseDatabase.getInstance().getReference("Comments")
+                            .child(path.get(position)).child(postid.get(position));
+                }
+                else {
+                    ref = FirebaseDatabase.getInstance().getReference("Comments")
+                            .child(path.get(0)).child(postid.get(0));
+                }
                 Query commentQuery = ref.orderByChild("commentid").equalTo(cid);
                 commentQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -242,8 +299,14 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                         for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
                             Comment comment = singleSnapshot.getValue(Comment.class);
                             comment.setLike(cnt);
-                            FirebaseDatabase.getInstance().getReference("Comments")
-                                    .child(path).child(postid).child(cid).setValue(comment);
+                            if (!onePathAndPost) {
+                                FirebaseDatabase.getInstance().getReference("Comments")
+                                        .child(path.get(position)).child(postid.get(position)).child(cid).setValue(comment);
+                            }
+                            else {
+                                FirebaseDatabase.getInstance().getReference("Comments")
+                                        .child(path.get(0)).child(postid.get(0)).child(cid).setValue(comment);
+                            }
                         }
                     }
                     @Override
