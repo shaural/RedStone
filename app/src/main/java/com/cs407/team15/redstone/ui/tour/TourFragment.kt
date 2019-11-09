@@ -192,6 +192,9 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
                 bundle.putFloatArray("longitudes", longitudes.toFloatArray())
                 bundle.putIntArray("xpoints", xPoints.toIntArray())
                 bundle.putIntArray("ypoints", yPoints.toIntArray())
+                // We want to draw the location with "up" being north. Bearing is degrees that the
+                // map is rotated clockwise from north
+                bundle.putFloat("mapRotation", mMap.cameraPosition.bearing)
 
                 resetAfterPossiblyAddingLocation()
                 newFragment.arguments = bundle

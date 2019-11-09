@@ -197,26 +197,42 @@ class AddLocationFragment : Fragment() {
 //            this.activity!!.supportFragmentManager.popBackStack()
 //        }
 
+
+
         locationShape.setImageBitmap(drawLocationShapeAsBitmap(arguments!!.getIntArray("xpoints")!!,
-            arguments!!.getIntArray("ypoints")!!, 200, 200))
+            arguments!!.getIntArray("ypoints")!!, 200, 200, arguments!!.getFloat("mapRotation")!!))
 
     }
 
-    private fun drawLocationShapeAsBitmap(xPoints: IntArray, yPoints: IntArray, width: Int, height: Int): Bitmap {
+    // Rotate a set of points by the given number of degrees, then translate and scale to take up
+    // as much of a canvas of width by height as possible
+    private fun normalizePoints(xPoints: IntArray, yPoints: IntArray, width: Int, height: Int, degrees: Float): Pair<List<Float>, List<Float>> {
+        // Rotate points so that the location is drawn with up being north.
+        // See https://stackoverflow.com/a/3162657/ for an explanation
+        val radians = degrees * Math.PI / 180
+        val rotatedXPoints = xPoints.zip(yPoints).map { point -> point.first * Math.cos(radians) - point.second * Math.sin(radians) }
+        val rotatedYPoints = xPoints.zip(yPoints).map { point -> point.first * Math.sin(radians) + point.second * Math.cos(radians) }
+        // Scale and translate input coordinates to take up as much of the canvas as possible
+        val minX = rotatedXPoints.min()!!
+        val xWidth = rotatedXPoints.max()!! - minX
+        val minY = rotatedYPoints.min()!!
+        val yHeight = rotatedYPoints.max()!! - minY
+        val transformedXPoints = rotatedXPoints.map { xPoint -> (1.0F * (xPoint - minX) * width / xWidth).toFloat() }
+        val transformedYPoints = rotatedYPoints.map { yPoint -> (1.0F * (yPoint - minY) * height / yHeight).toFloat() }
+        return Pair(transformedXPoints, transformedYPoints)
+    }
+
+    private fun drawLocationShapeAsBitmap(xPoints: IntArray, yPoints: IntArray, width: Int, height: Int, degrees :Float): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { strokeWidth = 3F; color = 0xFFFFFFFF.toInt() }
-        // Scale and translate input coordinates to take up as much of the canvas as possible
-        val minX = xPoints.min()!!
-        val xWidth = xPoints.max()!! - minX
-        val minY = yPoints.min()!!
-        val yHeight = yPoints.max()!! - minX
-        val transformedXPoints = xPoints.map { xPoint -> 1.0F * (xPoint - minX) * width / xWidth }
-        val transformedYPoints = yPoints.map { yPoint -> 1.0F * (yPoint - minY) * height / yHeight }
+
+        val transformedPoints = normalizePoints(xPoints, yPoints, width, height, degrees)
         // drawLines() needs coordinates in a certain format to represent pairs of points
         // xPoints = [1F, 2F, 3F], yPoints = [4F, 5F, 6F] => [1F, 4F, 1F, 4F, 2F, 5F, 2F, 5F, 3F, 6F, 3F, 6F]
-        val pointArray = transformedXPoints.zip(transformedYPoints)
-            .map { pair -> listOf(pair.first, pair.second, pair.first, pair.second) }.flatten().toFloatArray()
+        val pointArray = transformedPoints.first.zip(transformedPoints.second)
+            .map { pair -> listOf(pair.first, pair.second, pair.first, pair.second) }.flatten()
+            .map { dbl -> dbl.toFloat() }.toFloatArray()
         // Omit duplicate first two and last two coordinates
         canvas.drawLines(pointArray, 2, pointArray.size - 4, paint)
         // Draw the line between the last point and the first point
