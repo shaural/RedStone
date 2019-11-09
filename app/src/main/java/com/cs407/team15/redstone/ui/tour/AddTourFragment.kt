@@ -13,23 +13,19 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Location
 import com.cs407.team15.redstone.model.Tour
 import com.cs407.team15.redstone.model.User
-import com.cs407.team15.redstone.ui.location.RecyclerAdapter
 import com.cs407.team15.redstone.ui.tour.helper.ItemTouchHelperAdapter
 import com.cs407.team15.redstone.ui.tour.helper.SimpleItemTouchHelperCallback
 import com.cs407.team15.redstone.ui.viewtours.ViewToursFragment
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner
-import kotlinx.android.synthetic.main.fragment_addtour.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -96,7 +92,7 @@ class AddTourFragment : Fragment(){
 
     suspend fun getLocationsAndFillLocationSpinner() {
         // Get list of all locations in alphabetical order
-        allLocations.addAll(Location.getAllTours())
+        allLocations.addAll(Location.getAllLocations())
         val locationNames = allLocations.map { location -> location.name }
         activity!!.runOnUiThread {
             val locationSpinner = view!!.findViewById<Spinner>(R.id.locationSpinner)

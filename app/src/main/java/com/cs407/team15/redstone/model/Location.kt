@@ -139,7 +139,7 @@ data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
 
 
         // Get all tours, sorted alphabetically by name
-        suspend fun getAllTours(): List<Location> {
+        suspend fun getAllLocations(): List<Location> {
             // Get all tour documents
             return FirebaseFirestore.getInstance().collection(LOCATIONS).get().await().documents
                 // Build a Location from each location document

@@ -52,6 +52,7 @@
 
     <!-- Location -->
     <string name="add_location">Add Location</string>
+    <string name="finalize_location">Finalize Location</string>
     <string name="user_type">User Type</string>
     <string name="likes">Recived Likes</string>
     <string name="dislikes">Recived Dislikes</string>
