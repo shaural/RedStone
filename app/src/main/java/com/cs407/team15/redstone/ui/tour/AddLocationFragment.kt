@@ -1,6 +1,9 @@
 package com.cs407.team15.redstone.ui.tour
 
 import android.app.AlertDialog
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.util.Log
@@ -10,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 
 import com.cs407.team15.redstone.R
@@ -49,8 +53,9 @@ class AddLocationFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(AddLocationViewModel::class.java)
 
         //Retrieving the button from XML
-        val btn_add_loc = getView()!!.findViewById(R.id.btn_add_location) as Button
-        val btn_newTag = getView()!!.findViewById(R.id.btn_create_tag) as Button
+        val btn_add_loc = getView()!!.findViewById<Button>(R.id.btn_add_location)
+        val btn_newTag = getView()!!.findViewById<Button>(R.id.btn_create_tag)
+        val locationShape = view!!.findViewById<ImageView>(R.id.locationShape)
         database = FirebaseDatabase.getInstance().reference
 
         //Initializing the key for new location to be added
@@ -192,6 +197,32 @@ class AddLocationFragment : Fragment() {
 //            this.activity!!.supportFragmentManager.popBackStack()
 //        }
 
+        locationShape.setImageBitmap(drawLocationShapeAsBitmap(arguments!!.getIntArray("xpoints")!!,
+            arguments!!.getIntArray("ypoints")!!, 200, 200))
+
+    }
+
+    private fun drawLocationShapeAsBitmap(xPoints: IntArray, yPoints: IntArray, width: Int, height: Int): Bitmap {
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { strokeWidth = 3F; color = 0xFFFFFFFF.toInt() }
+        // Scale and translate input coordinates to take up as much of the canvas as possible
+        val minX = xPoints.min()!!
+        val xWidth = xPoints.max()!! - minX
+        val minY = yPoints.min()!!
+        val yHeight = yPoints.max()!! - minX
+        val transformedXPoints = xPoints.map { xPoint -> 1.0F * (xPoint - minX) * width / xWidth }
+        val transformedYPoints = yPoints.map { yPoint -> 1.0F * (yPoint - minY) * height / yHeight }
+        // drawLines() needs coordinates in a certain format to represent pairs of points
+        // xPoints = [1F, 2F, 3F], yPoints = [4F, 5F, 6F] => [1F, 4F, 1F, 4F, 2F, 5F, 2F, 5F, 3F, 6F, 3F, 6F]
+        val pointArray = transformedXPoints.zip(transformedYPoints)
+            .map { pair -> listOf(pair.first, pair.second, pair.first, pair.second) }.flatten().toFloatArray()
+        // Omit duplicate first two and last two coordinates
+        canvas.drawLines(pointArray, 2, pointArray.size - 4, paint)
+        // Draw the line between the last point and the first point
+        canvas.drawLines(floatArrayOf(pointArray[pointArray.size - 2], pointArray[pointArray.size - 1], pointArray[0], pointArray[1]),
+            0, 4, paint)
+        return bitmap
     }
 
 

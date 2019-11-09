@@ -15,10 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.ui.location.LocationPage
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.DocumentSnapshot
@@ -180,9 +177,22 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
                 Toast.makeText(context, "Add Location", Toast.LENGTH_SHORT).show()
                 val newFragment = AddLocationFragment()
                 val bundle = Bundle()
-                val gp = GeoPoint(locationVertices.first().latitude, locationVertices.first().longitude)
+                val gp = locationVertices.first()
                 bundle.putDouble("latitude", gp.latitude)
                 bundle.putDouble("longitude", gp.longitude)
+
+                // Store all the coordinates selected by the user to pass to the add location page.
+                // Pass in a projection of those coordinates to the plane to show the user the
+                // shape of the new location on that page.
+                val latitudes = locationVertices.map { geoPoint -> geoPoint.latitude.toFloat() }
+                val longitudes = locationVertices.map { geoPoint ->  geoPoint.longitude.toFloat() }
+                val xPoints = locationVertices.map { geoPoint -> mMap.projection.toScreenLocation(toLatLng(geoPoint)).x }
+                val yPoints = locationVertices.map { geoPoint -> mMap.projection.toScreenLocation(toLatLng(geoPoint)).y }
+                bundle.putFloatArray("latitudes", latitudes.toFloatArray())
+                bundle.putFloatArray("longitudes", longitudes.toFloatArray())
+                bundle.putIntArray("xpoints", xPoints.toIntArray())
+                bundle.putIntArray("ypoints", yPoints.toIntArray())
+
                 resetAfterPossiblyAddingLocation()
                 newFragment.arguments = bundle
                 val transaction = fragmentManager!!.beginTransaction()
