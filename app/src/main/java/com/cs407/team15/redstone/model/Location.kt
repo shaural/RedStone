@@ -137,7 +137,6 @@ data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
             }
         }
 
-
         // Get all tours, sorted alphabetically by name
         suspend fun getAllLocations(): List<Location> {
             // Get all tour documents

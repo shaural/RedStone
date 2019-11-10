@@ -182,8 +182,19 @@ class AddLocationFragment : Fragment() {
             var desc = view!!.findViewById<EditText>(R.id.et_about).text.toString()
             val currentFirebaseUser = FirebaseAuth.getInstance().currentUser
 
+            val latitudes = arguments!!.getFloatArray("latitudes")!!
+            val longitudes = arguments!!.getFloatArray("longitudes")!!
+            // See comment in drawLocationShapeAsBitmap() for why we compute center of location this way
+            val centralLatitude = latitudes.reduce {acc, latitude -> acc + latitude} / latitudes.size
+            val centralLongitude = longitudes.reduce {acc, longitude -> acc + longitude} / longitudes.size
+
             addTagtoLoc
-                .set(hashMapOf("timestamp" to com.google.firebase.Timestamp.now(), "location_id" to newKey, "description" to desc, "name" to name, "user_id" to currentFirebaseUser!!.uid, "coordinates" to GeoPoint(arguments!!.getDouble("latitude"), arguments!!.getDouble("longitude"))))
+                .set(hashMapOf("timestamp" to com.google.firebase.Timestamp.now(),
+                    "location_id" to newKey,
+                    "description" to desc,
+                    "name" to name,
+                    "user_id" to currentFirebaseUser!!.uid,
+                    "coordinates" to GeoPoint(centralLatitude.toDouble(), centralLongitude.toDouble())))
             .addOnSuccessListener {
                 Toast.makeText(context, "Location Added", Toast.LENGTH_SHORT).show()
                 this.activity!!.supportFragmentManager.popBackStack()
@@ -199,19 +210,17 @@ class AddLocationFragment : Fragment() {
 
 
 
-        locationShape.setImageBitmap(drawLocationShapeAsBitmap(arguments!!.getIntArray("xpoints")!!,
-            arguments!!.getIntArray("ypoints")!!, 200, 200, arguments!!.getFloat("mapRotation")!!))
+        locationShape.setImageBitmap(drawLocationShapeAsBitmap(arguments!!.getIntegerArrayList("xpoints")!!,
+            arguments!!.getIntegerArrayList("ypoints")!!, true, 200, 200, arguments!!.getFloat("mapRotation")!!))
 
     }
 
     // Rotate a set of points by the given number of degrees, then translate and scale to take up
     // as much of a canvas of width by height as possible
-    private fun normalizePoints(xPoints: IntArray, yPoints: IntArray, width: Int, height: Int, degrees: Float): Pair<List<Float>, List<Float>> {
+    private fun normalizePoints(xPoints: List<Int>, yPoints: List<Int>, width: Int, height: Int, degrees: Float): Pair<List<Float>, List<Float>> {
         // Rotate points so that the location is drawn with up being north.
-        // See https://stackoverflow.com/a/3162657/ for an explanation
-        val radians = degrees * Math.PI / 180
-        val rotatedXPoints = xPoints.zip(yPoints).map { point -> point.first * Math.cos(radians) - point.second * Math.sin(radians) }
-        val rotatedYPoints = xPoints.zip(yPoints).map { point -> point.first * Math.sin(radians) + point.second * Math.cos(radians) }
+        val rotatedXPoints = xPoints.zip(yPoints).map { point -> rotatePoint(point.first, point.second, degrees).first }
+        val rotatedYPoints = xPoints.zip(yPoints).map { point -> rotatePoint(point.first, point.second, degrees).second }
         // Scale and translate input coordinates to take up as much of the canvas as possible
         val minX = rotatedXPoints.min()!!
         val xWidth = rotatedXPoints.max()!! - minX
@@ -222,7 +231,16 @@ class AddLocationFragment : Fragment() {
         return Pair(transformedXPoints, transformedYPoints)
     }
 
-    private fun drawLocationShapeAsBitmap(xPoints: IntArray, yPoints: IntArray, width: Int, height: Int, degrees :Float): Bitmap {
+    private fun rotatePoint(x: Int, y: Int, degrees: Float): Pair<Float, Float> {
+        // See https://stackoverflow.com/a/3162657/ for an explanation
+        val radians = degrees * Math.PI / 180
+        return Pair((x * Math.cos(radians) - y * Math.sin(radians)).toFloat(),
+                    (x * Math.sin(radians) + y * Math.cos(radians)).toFloat())
+    }
+
+    private fun drawLocationShapeAsBitmap(xPoints: MutableList<Int>, yPoints: MutableList<Int>,
+                                          shouldDrawCentroid: Boolean,
+                                          width: Int, height: Int, degrees :Float): Bitmap {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { strokeWidth = 3F; color = 0xFFFFFFFF.toInt() }
@@ -232,14 +250,25 @@ class AddLocationFragment : Fragment() {
         // xPoints = [1F, 2F, 3F], yPoints = [4F, 5F, 6F] => [1F, 4F, 1F, 4F, 2F, 5F, 2F, 5F, 3F, 6F, 3F, 6F]
         val pointArray = transformedPoints.first.zip(transformedPoints.second)
             .map { pair -> listOf(pair.first, pair.second, pair.first, pair.second) }.flatten()
-            .map { dbl -> dbl.toFloat() }.toFloatArray()
+            .toFloatArray()
         // Omit duplicate first two and last two coordinates
-        canvas.drawLines(pointArray, 2, pointArray.size - 4, paint)
+        canvas.drawLines(pointArray, 2, pointArray.size - 2, paint)
         // Draw the line between the last point and the first point
         canvas.drawLines(floatArrayOf(pointArray[pointArray.size - 2], pointArray[pointArray.size - 1], pointArray[0], pointArray[1]),
             0, 4, paint)
+
+        if (shouldDrawCentroid) {
+            // Compute the central point of the location's vertices by averaging them.
+            // There is an arguably better way to compute a central point that will produce a point
+            // within the location's polygon, but there is far higher complexity which is further
+            // compounded substantially by accounting for the curvature of the earth. This method is
+            // sufficient for our purposes.
+            val centroidX = transformedPoints.first.reduce {acc, point -> acc + point} / transformedPoints.first.size
+            val centroidY = transformedPoints.second.reduce {acc, point -> acc + point} / transformedPoints.second.size
+            canvas.drawCircle(centroidX, centroidY, 5F, paint)
+        }
+
         return bitmap
     }
-
 
 }

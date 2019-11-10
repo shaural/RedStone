@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.R
+import com.cs407.team15.redstone.model.Location
 import com.cs407.team15.redstone.ui.location.LocationPage
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
@@ -190,8 +191,8 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
                 val yPoints = locationVertices.map { geoPoint -> mMap.projection.toScreenLocation(toLatLng(geoPoint)).y }
                 bundle.putFloatArray("latitudes", latitudes.toFloatArray())
                 bundle.putFloatArray("longitudes", longitudes.toFloatArray())
-                bundle.putIntArray("xpoints", xPoints.toIntArray())
-                bundle.putIntArray("ypoints", yPoints.toIntArray())
+                bundle.putIntegerArrayList("xpoints", ArrayList<Int>(xPoints))
+                bundle.putIntegerArrayList("ypoints", ArrayList<Int>(yPoints))
                 // We want to draw the location with "up" being north. Bearing is degrees that the
                 // map is rotated clockwise from north
                 bundle.putFloat("mapRotation", mMap.cameraPosition.bearing)
