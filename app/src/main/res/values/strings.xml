@@ -14,12 +14,15 @@
     <string name="menu_tour">Tour</string>
     <string name="menu_add_tour">Add Tour</string>
     <string name="menu_view_tours">View Tours</string>
-    <string name="menu_ar">Free Roam</string>
+    <string name="menu_free_roam">Free Roam</string>
     <string name="menu_profile">Profile</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="aboutLabel">About Purdue</string>
+
+    <!-- Free Roam -->
+    <string name="opengl_not_supported">This app requires OpenGL ES 3.0 or later</string>
 
     <!-- Authentication -->
     <string name="email">Email</string>
@@ -77,6 +80,11 @@
     <string name="select_location">Select a location...</string>
     <string name="search_by_hammer_user">Search by Hammer User</string>
 
+    <!--    Free Roam-->
+    <string name="btn_ar">AR</string>
+    <string name="btn_map">Map</string>
+
     <!-- Comments -->
     <string name="sort_btn">Sort</string>
+    <string name="search_tours_by_location">Search tours by location</string>
 </resources>

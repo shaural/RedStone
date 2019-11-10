@@ -35,12 +35,13 @@ class Tour(val name: String, val type: String, val user_id: String, val hammer: 
             val votes = tourDocument.getDouble(VOTES) as Number
             // Location ids for a tour are stored as pairs of location id and position.
             // Fetch the documents, sort by the position, then pull out just the location ids
-            val locationDocuments = db.collection(TOURS).document(tour_id)
+            /*val locationDocuments = db.collection(TOURS).document(tour_id)
                 .collection(LOCATIONS).get().await().documents
             val locationPairs = locationDocuments.map {locationDocument ->
                 Pair(locationDocument.getLong(POSITION), locationDocument.getString(LOCATION_ID) as String) }
             val locations = locationPairs.sortedBy { locationPair -> locationPair.first }
-                .map { locationPair -> locationPair.second }
+                .map { locationPair -> locationPair.second }*/
+            val locations = (db.collection(TOURS).document(tour_id).get().await().get(LOCATIONS) as List<String>).sorted()
             // Fetch the tag names
             val tags = (db.collection(TOURS).document(tour_id).get().await().get(TAGS) as List<String>).sorted()
             return Tour(name, type, user_id, hammer, locations, tags, votes)

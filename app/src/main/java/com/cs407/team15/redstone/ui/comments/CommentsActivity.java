@@ -14,9 +14,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -26,7 +30,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,8 +55,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-import static android.content.ContentValues.TAG;
-
 public class CommentsActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, AdapterView.OnItemClickListener {
     String TAG = getClass().toString();
 
@@ -67,6 +68,7 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
     private TextView hammer_only;
     private EditText addcomment;
     private TextView post;
+    private LinearLayout layout_tags;
 
     ImageView image_profile;
 
@@ -80,13 +82,13 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
     //Tag stuff
     private ArrayList<String> tagNames;
     private Context context;
-    private ArrayList<String> tagsOnComment;
+    private String tagsOnComment;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comments);
-        tagsOnComment = new ArrayList<>();
+        tagsOnComment = "";
         FirebaseFirestore.getInstance().collection("tags").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -109,6 +111,7 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
                 }
             }
         });
+
         // Create New Tag Button
         Button tagBtn = findViewById(R.id.addtagbtn);
         tagBtn.setOnClickListener(new View.OnClickListener() {
@@ -119,16 +122,23 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
                 View popupView = inflater.inflate(R.layout.addtag_popup, null);
 
                 // create the popup window
-                int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-                int height = LinearLayout.LayoutParams.WRAP_CONTENT;
-                boolean focusable = true; // lets taps outside the popup also dismiss it
-                final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+//                int width = LinearLayout.LayoutParams.WRAP_CONTENT;
+//                int height = LinearLayout.LayoutParams.WRAP_CONTENT;
+//                boolean focusable = true; // lets taps outside the popup also dismiss it
+//                final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+                final PopupWindow popupWindow = new PopupWindow(popupView,
+                        WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT,true);
+
 
                 // show the popup window
                 // which view you pass in doesn't matter, it is only used for the window tolken
-                popupWindow.showAtLocation(popupView, Gravity.CENTER, 0, 0);
+                popupWindow.showAtLocation(popupView, Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK, 0, 0);
+
                 Button addtag = popupView.findViewById(R.id.tagaddbutton);
                 final EditText editText = popupView.findViewById(R.id.tagaddpopup);
+
+
+
                 addtag.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -179,7 +189,12 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
         recyclerView.setLayoutManager(mLayoutManager);
 
         commentList = new ArrayList<>();
-        commentAdapter = new CommentAdapter(this, commentList, postid, path);
+        ArrayList<String> postids = new ArrayList<>();
+        postids.add(postid);
+        ArrayList<String> paths = new ArrayList<>();
+        paths.add(path);
+
+        commentAdapter = new CommentAdapter(this, commentList, postids, paths);
         recyclerView.setAdapter(commentAdapter);
 
         // initialize variables
@@ -192,6 +207,7 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
         sort = findViewById(R.id.btn_sort);
         hammer_only = findViewById(R.id.hammerCheck);
         checkbox = findViewById(R.id.hammerCheckbox);
+        layout_tags = findViewById(R.id.layout_tags);
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -290,6 +306,7 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
         hashMap.put("tags", tagsOnComment);
         hashMap.put("like", 0);
         hashMap.put("timestamp", ts);
+        hashMap.put("locationId", postid);
 
         reference.child(commentid).setValue(hashMap);
 
@@ -327,31 +344,6 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
 
     }
 
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String tagName = tagNames.get(position);
-        if (!tagsOnComment.contains(tagName)) {
-            tagsOnComment.add(tagName);
-        }
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
-
-    public void spinnerSetup() {
-        Spinner tagSpinner = findViewById(R.id.tagSpinnerComment);
-        ArrayAdapter spinnerAdapter = new ArrayAdapter<String>(CommentsActivity.this,android.R.layout.simple_spinner_item, tagNames);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        tagSpinner.setAdapter(spinnerAdapter);
-        tagSpinner.setOnItemSelectedListener(this);
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-    }
 
     /**
      * Filter Hammer User's Comment Only
@@ -397,8 +389,8 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         String tagName = tagNames.get(position);
-        if (!tagsOnComment.contains(tagName)) {
-            tagsOnComment.add(tagName);
+        if (!tagsOnComment.equals(tagName)) {
+            tagsOnComment=tagName;
         }
     }
 

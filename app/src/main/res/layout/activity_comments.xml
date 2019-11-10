@@ -63,9 +63,37 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/recycler_view"
-        android:layout_above="@id/bottom"
+        android:layout_above="@id/layout_tags"
         android:layout_below="@id/layout_setting"
         />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layout_tags"
+        android:layout_above="@id/bottom"
+        android:background="@color/cardview_dark_background">
+
+        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+            android:id="@+id/tagSpinnerComment"
+            android:layout_width="100dp"
+            android:layout_height="30dp"
+            android:background="@android:color/transparent"
+            android:textColor="@color/common_google_signin_btn_text_light"
+            android:visibility="visible"
+            app:hintText="#Tag"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/addtagbtn"
+            android:text="Create Tag"
+            android:textSize="12sp"
+            android:layout_marginStart="10dp"
+            android:background="@android:color/transparent"
+            />
+
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -84,16 +112,7 @@
             android:padding="5dp"
             android:id="@+id/image_profile"/>
 
-        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
-            android:id="@+id/tagSpinnerComment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/addtagbtn"
-            android:layout_toEndOf="@id/add_comment"
-            android:background="@android:drawable/bottom_bar"
-            android:textColor="@color/common_google_signin_btn_text_light"
-            android:visibility="visible"
-            app:hintText="@string/select_tag" />
+
 
         <EditText
             android:layout_width="wrap_content"
@@ -105,13 +124,6 @@
             android:id="@+id/add_comment"
             android:layout_centerVertical="true"
             android:background="@android:color/transparent"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/post"
-            android:id="@+id/addtagbtn"
-            android:text="Create New Tag"
-            />
 
         <TextView
             android:layout_width="wrap_content"

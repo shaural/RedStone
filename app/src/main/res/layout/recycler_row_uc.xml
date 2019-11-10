@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/cardview_dark_background">
+    android:orientation="horizontal"
+    android:padding="10dp">
 
-    <EditText
+    <TextView
+        android:id="@+id/tvAnimalName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:hint="Enter a new tag"
-        android:inputType="text"
-        android:id="@+id/tagaddpopup"/>
+        android:textSize="20sp"/>
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/tagaddpopup"
-        android:id="@+id/tagaddbutton"
-        android:text="OK"
-        />
+        android:layout_below="@+id/tvAnimalName"
+        android:layout_centerHorizontal="true"
+        android:text="Delete Tag"
+        android:id="@+id/delete_tag_button"/>
 
 </RelativeLayout>
