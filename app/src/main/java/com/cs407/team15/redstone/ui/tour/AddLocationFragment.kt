@@ -187,6 +187,7 @@ class AddLocationFragment : Fragment() {
             // See comment in drawLocationShapeAsBitmap() for why we compute center of location this way
             val centralLatitude = latitudes.reduce {acc, latitude -> acc + latitude} / latitudes.size
             val centralLongitude = longitudes.reduce {acc, longitude -> acc + longitude} / longitudes.size
+            val vertices = latitudes.zip(longitudes).map { latLong -> GeoPoint(latLong.first.toDouble(), latLong.second.toDouble())}
 
             addTagtoLoc
                 .set(hashMapOf("timestamp" to com.google.firebase.Timestamp.now(),
@@ -194,7 +195,8 @@ class AddLocationFragment : Fragment() {
                     "description" to desc,
                     "name" to name,
                     "user_id" to currentFirebaseUser!!.uid,
-                    "coordinates" to GeoPoint(centralLatitude.toDouble(), centralLongitude.toDouble())))
+                    "coordinates" to GeoPoint(centralLatitude.toDouble(), centralLongitude.toDouble()),
+                    "vertices" to vertices))
             .addOnSuccessListener {
                 Toast.makeText(context, "Location Added", Toast.LENGTH_SHORT).show()
                 this.activity!!.supportFragmentManager.popBackStack()
