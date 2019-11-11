@@ -196,7 +196,9 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
                 // We want to draw the location with "up" being north. Bearing is degrees that the
                 // map is rotated clockwise from north
                 bundle.putFloat("mapRotation", mMap.cameraPosition.bearing)
-
+                // Clear list to force reloading all locations to pick up the new location, if
+                // indeed the user did add it
+                allLocations.clear()
                 resetAfterPossiblyAddingLocation()
                 newFragment.arguments = bundle
                 val transaction = fragmentManager!!.beginTransaction()

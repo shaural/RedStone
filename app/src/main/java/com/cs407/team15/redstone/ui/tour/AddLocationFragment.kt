@@ -188,6 +188,10 @@ class AddLocationFragment : Fragment() {
             val centralLatitude = latitudes.reduce {acc, latitude -> acc + latitude} / latitudes.size
             val centralLongitude = longitudes.reduce {acc, longitude -> acc + longitude} / longitudes.size
             val vertices = latitudes.zip(longitudes).map { latLong -> GeoPoint(latLong.first.toDouble(), latLong.second.toDouble())}
+            // So that on the location detail page we can draw the polygon represented by the vertices
+            // of this location, store all the points in the form needed for drawing
+            val transformedPoints = normalizePoints(arguments!!.getIntegerArrayList("xpoints")!!,
+                arguments!!.getIntegerArrayList("ypoints")!!, 150, 150, arguments!!.getFloat("mapRotation")!!)
 
             addTagtoLoc
                 .set(hashMapOf("timestamp" to com.google.firebase.Timestamp.now(),
@@ -196,7 +200,9 @@ class AddLocationFragment : Fragment() {
                     "name" to name,
                     "user_id" to currentFirebaseUser!!.uid,
                     "coordinates" to GeoPoint(centralLatitude.toDouble(), centralLongitude.toDouble()),
-                    "vertices" to vertices))
+                    "vertices" to vertices,
+                    "polygonImageXCoordinates" to transformedPoints.first,
+                    "polygonImageYCoordinates" to transformedPoints.second))
             .addOnSuccessListener {
                 Toast.makeText(context, "Location Added", Toast.LENGTH_SHORT).show()
                 this.activity!!.supportFragmentManager.popBackStack()
@@ -213,7 +219,7 @@ class AddLocationFragment : Fragment() {
 
 
         locationShape.setImageBitmap(drawLocationShapeAsBitmap(arguments!!.getIntegerArrayList("xpoints")!!,
-            arguments!!.getIntegerArrayList("ypoints")!!, true, 200, 200, arguments!!.getFloat("mapRotation")!!))
+            arguments!!.getIntegerArrayList("ypoints")!!, true, 150, 150, arguments!!.getFloat("mapRotation")!!))
 
     }
 
