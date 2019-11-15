@@ -87,10 +87,12 @@ class ARFragment : Fragment() {
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
                 // Got last known location. In some rare situations this can be null.
-                cur_lat = location!!.latitude
-                cur_lon = location!!.longitude
-                var bearing = location!!.bearing
-                getNearestLocation()
+                if (location != null) {
+                    cur_lat = location.latitude
+                    cur_lon = location.longitude
+                    var bearing = location.bearing
+                    getNearestLocation()
+                }
             }
         arFragment.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane, motionEvent: MotionEvent ->
 
@@ -173,6 +175,19 @@ class ARFragment : Fragment() {
 //                            Toast.makeText(context, gp.latitude.toString(), Toast.LENGTH_SHORT)
                             locations_db[gp] = "$name-$desc"
                             map_gp_id[gp] = loc_id
+                            // If this location is new enough to have vertices recorded for it,
+                            // then we should use those GPS points to compare against our current
+                            // location to determine which location is closest. Ideally we would
+                            // determine nearest location in a way that also accounted for the
+                            // edges of a location's polygon, let alone something that accounted for
+                            // overlapping locations, but this is sufficient.
+                            if (document.contains("vertices")) {
+                                var vertices = document.get("vertices") as List<GeoPoint>
+                                vertices.forEach {
+                                    locations_db[it] = "$name-$desc"
+                                    map_gp_id[it] = loc_id
+                                }
+                            }
                         } else {
 //                            Log.d("lol", "no document exists")
                         }
