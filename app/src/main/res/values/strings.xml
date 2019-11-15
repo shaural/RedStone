@@ -87,4 +87,5 @@
 
     <!-- Comments -->
     <string name="sort_btn">Sort</string>
+    <string name="search_tours_by_location">Search tours by location</string>
 </resources>

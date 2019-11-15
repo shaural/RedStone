@@ -52,8 +52,12 @@ class AddTourFragment : Fragment(){
         savedInstanceState: Bundle?
     ): View? {
         containerId = container!!.id
+        // launch location spinner for selections
         GlobalScope.launch { getLocationsAndFillLocationSpinner() }
+        // launch tags spinner for selections
         GlobalScope.launch { getTagsAndFillTagSpinner() }
+
+        // inflate view
         val view = inflater.inflate(R.layout.fragment_addtour, container, false)
         val locationsRecyclerView = view.findViewById<RecyclerView>(R.id.locationsRecyclerView)
         val tagsRecyclerView = view.findViewById<RecyclerView>(R.id.tagsRecyclerView)
@@ -79,10 +83,12 @@ class AddTourFragment : Fragment(){
         tagsAdapter = TagsAdapter(activity as Activity, tagsOnTour)
         tagsRecyclerView.adapter = tagsAdapter
 
+        // X button on click listener
         cancelButton.setOnClickListener{
             cancelTour()
         }
 
+        // add tour button on click listener
         buttonCreateTour.setOnClickListener{
             addNewTour()
         }
@@ -94,6 +100,8 @@ class AddTourFragment : Fragment(){
         // Get list of all locations in alphabetical order
         allLocations.addAll(Location.getAllLocations())
         val locationNames = allLocations.map { location -> location.name }
+
+        // put location list in selectable spinner
         activity!!.runOnUiThread {
             val locationSpinner = view!!.findViewById<Spinner>(R.id.locationSpinner)
             val spinnerAdapter = ArrayAdapter<String>(context as Context, android.R.layout.simple_spinner_item, locationNames)
@@ -117,6 +125,8 @@ class AddTourFragment : Fragment(){
         val tags = FirebaseFirestore.getInstance().collection("tags").get().await()
             .documents.map{document -> document.getString("name") as String}.sorted().toMutableList()
         allTagNames.addAll(tags)
+
+        // put tags list in selectable spinner
         activity!!.runOnUiThread {
             val tagSpinner = view!!.findViewById<Spinner>(R.id.tagSpinner)
             val spinnerAdapter = ArrayAdapter<String>(context as Context, android.R.layout.simple_spinner_item, allTagNames)
@@ -137,16 +147,19 @@ class AddTourFragment : Fragment(){
         }
     }
 
+    // cancel tour creation
     fun cancelTour() {
         val builder = AlertDialog.Builder(context)
 
         builder.setTitle("Cancel Tour")
         builder.setMessage("Are you sure you want to cancel your new tour?")
 
+        // if yes, go to previous page
         builder.setPositiveButton("YES") { dialog, which ->
             activity!!.onBackPressed()
         }
 
+        // if no, exit alert dialog
         builder.setNegativeButton("NO") { dialog, which ->
         }
 
@@ -154,15 +167,18 @@ class AddTourFragment : Fragment(){
         dialog.show()
     }
 
+    // add new tour to the database
     fun addNewTour() {
         val db = FirebaseFirestore.getInstance()
         var user = User()
 
+        // make current user object
         db.collection("users").document(FirebaseAuth.getInstance().currentUser?.email!!).get()
             .addOnSuccessListener(OnSuccessListener {
                 user = it.toObject(User::class.java) as User
             })
 
+        // get name of tour from edittext
         val name: String
         if(view!!.findViewById<EditText>(R.id.editTitle).text.toString().equals(null)){
             Toast.makeText(context,"Please enter something in text box", Toast.LENGTH_LONG).show()
@@ -173,32 +189,43 @@ class AddTourFragment : Fragment(){
             name = view!!.findViewById<EditText>(R.id.editTitle).text.toString()
         }
 
+        // get "personal" or "community" type
         val type: String = if (view!!.findViewById<Switch>(R.id.switchPT).isChecked)
             "personal"
         else
             "community"
 
+        // check if other community tours exist with the same locations
         if(type == "community" && checkRepeatTours()){
             Toast.makeText(context,"A tour with those locations already exists.", Toast.LENGTH_LONG).show()
             return
         }
 
+        // get current user id
         val user_id: String = FirebaseAuth.getInstance().currentUser!!.uid
+
+        // get hammer status of current user
         val hammer: Boolean = user.userType != 0
 
+        // get list of locations
         if(locationsOTStr.isEmpty()){
             Toast.makeText(context,"Please add at least one location",Toast.LENGTH_LONG).show()
             return
         }
 
+        // get list of tags
         if(tagsOnTour.isEmpty() && type == "community"){
             Toast.makeText(context,"Please add at least one tag", Toast.LENGTH_LONG).show()
             return
         }
 
+        // tours start out with 0 votes
         val initialVotes = 0
+
+        // create tour object
         val newTour = Tour(name, type, user_id, hammer, locationsOTStr, tagsOnTour, initialVotes)
 
+        // push tour to firebase
         db.collection("tours")
             .add(newTour)
             .addOnSuccessListener { documentReference ->
