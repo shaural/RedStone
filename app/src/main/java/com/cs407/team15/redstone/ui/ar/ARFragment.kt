@@ -84,19 +84,10 @@ class ARFragment : Fragment() {
                 updateCameraPosition()
             }
         }
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                // Got last known location. In some rare situations this can be null.
-                if (location != null) {
-                    cur_lat = location.latitude
-                    cur_lon = location.longitude
-                    var bearing = location.bearing
-                    getNearestLocation()
-                }
-            }
+        updateLocation {  }
         arFragment.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane, motionEvent: MotionEvent ->
 
-            run {
+            updateLocation {
                 if (textViewTemplate != null) {
                     val anchor = hitResult.createAnchor()
                     val anchorNode = AnchorNode(anchor)
@@ -145,6 +136,21 @@ class ARFragment : Fragment() {
         val camera = arFragment.arSceneView.arFrame?.camera
         currentPosition =
             if (camera?.trackingState == TrackingState.TRACKING) camera?.displayOrientedPose else null
+    }
+
+    // Update the current location asynchronously and then execute the specified callback
+    fun updateLocation(then: ()->Unit) {
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                // Got last known location. In some rare situations this can be null.
+                if (location != null) {
+                    cur_lat = location.latitude
+                    cur_lon = location.longitude
+                    var bearing = location.bearing
+                    getNearestLocation()
+                }
+                then()
+            }
     }
 
     fun isThisDeviceSupported(): Boolean {
