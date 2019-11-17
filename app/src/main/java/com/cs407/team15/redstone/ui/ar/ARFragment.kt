@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.R
@@ -29,7 +30,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.android.synthetic.main.basic_tour_text_view.view.*
-import java.lang.Float.MAX_VALUE
 
 // A great deal of this code comes from following the example in the HelloSceneForm sample AR Core
 // application provided by Google:
@@ -37,17 +37,17 @@ import java.lang.Float.MAX_VALUE
 class ARFragment : Fragment() {
     private val TAG: String = ARFragment::class.java.simpleName
     private val MIN_OPENGL_VERSION = 3.0
+    private val MAXIMUM_COMMENTS_ON_SCREEN = 30
 
     private lateinit var arFragment: ArFragment // Google's ArFragment != this class
     private var currentPosition: Pose? = null // Camera's current position in space
-
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient // to get location
     private lateinit var textViewTemplate: ViewRenderable
     private var db: FirebaseFirestore? = null
     private lateinit var location_name: String
     private lateinit var location_desc: String
-    private lateinit var cur_id_str: String
+    private var cur_id_str: String? = null // ID of the Location whose comments, description, and tags should be shown
     private var cur_lat: Double = 0.0
     private var cur_lon: Double = 0.0
     private var locations_db: MutableMap<GeoPoint, String> = mutableMapOf<GeoPoint, String>()
@@ -56,6 +56,20 @@ class ARFragment : Fragment() {
     private var dbCompleted = false
     private lateinit var tv_to_close : HitTestResult
     private lateinit var tv_to_close_motion : MotionEvent
+
+    // When we start watching the set of comments for a particular location, we get a callback
+    // that we need to call when we want to stop watching
+    private var stopWatchingCommentsCallback: (()->Unit)? = null
+    // Because creating the ar text views needed to show comments is an asynchronous operation,
+    // we create a finite number of them when loading the page, then we manage that group
+    private val availableArTextViewPool: MutableList<ViewRenderable> = mutableListOf()
+    private val inUseArTextViewPool: MutableList<ViewRenderable> = mutableListOf()
+    // We need a reference to all the AR Nodes associated with comments so that we can remove them
+    // when we want to stop showing comments for a location. Each of these nodes will have an
+    // AnchorNode as a parent
+    private val nodesForComments: MutableList<Node> = mutableListOf()
+
+    private var currentLocation: android.location.Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +98,13 @@ class ARFragment : Fragment() {
                 updateCameraPosition()
             }
         }
+        // Create the pool of ar text views to hold comments
+        repeat(MAXIMUM_COMMENTS_ON_SCREEN) {
+            val commentTextView = layoutInflater.inflate(R.layout.tour_text_view, null)
+            ViewRenderable.builder().setView(context!!, commentTextView).build()
+                .thenAccept { renderable -> availableArTextViewPool.add(renderable) }
+        }
+
         updateLocation {  }
         arFragment.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane, motionEvent: MotionEvent ->
 
@@ -147,6 +168,7 @@ class ARFragment : Fragment() {
                     cur_lat = location.latitude
                     cur_lon = location.longitude
                     var bearing = location.bearing
+                    currentLocation = location
                     getNearestLocation()
                 }
                 then()
@@ -207,31 +229,28 @@ class ARFragment : Fragment() {
         return
     }
     private fun getNearestLocation() {
-        if (dbCompleted) {
-            var locationSource = Location("source")
-            locationSource.setLatitude(cur_lat);
-            locationSource.setLongitude(cur_lon);
-            val points = locations_db.keys
-            val dists: MutableMap<GeoPoint, Float> = mutableMapOf<GeoPoint, Float>()
-            var min_dist = MAX_VALUE
-            points.forEach { p ->
-                run {
-                    var locationCompare = Location("compareLocation")
-                    locationCompare.setLatitude(p.latitude)
-                    locationCompare.setLongitude(p.longitude)
-
-                    var distance = locationSource.distanceTo(locationCompare)
-                    if (distance < min_dist) {
-                        min_dist = distance
-                    }
-                    dists.put(p, distance)
-                }
+        if (dbCompleted && currentLocation != null) {
+            val nearestLocation = com.cs407.team15.redstone.model.Location.getNearestLocation(
+                locations_db.keys.map { run {
+                    val location = Location("");
+                    location.latitude = it.latitude;
+                    location.longitude = it.longitude;
+                    location }}, currentLocation!!)
+            if (nearestLocation == null) {
+                return
             }
-            var minVal = dists.minBy { it.value }
-            if (minVal != null && !locations_db[minVal.key].isNullOrEmpty()) {
-                var db_val = locations_db[minVal.key].orEmpty()
-                cur_id_str = map_gp_id[minVal.key].orEmpty()
-                getTags(cur_id_str)
+            val nearestLocationGeoPoint = locations_db.keys.filter {
+                    gp -> gp.latitude == nearestLocation.latitude && gp.longitude == nearestLocation.longitude
+            }.single()
+            var minVal = nearestLocationGeoPoint//dists.minBy { it.value }
+            if (minVal != null && !locations_db[minVal].isNullOrEmpty()) {
+                var db_val = locations_db[minVal].orEmpty()
+                val new_id_str = map_gp_id[minVal].orEmpty()
+                if (new_id_str != cur_id_str) {
+                    locationChanged(new_id_str)
+                }
+                cur_id_str = new_id_str
+                getTags(cur_id_str!!)
                 location_name = db_val.substring(0, db_val.indexOf('-'))
                 location_desc = db_val.substring(db_val.indexOf('-') + 1, db_val.length)
                 displayed_text_view.tv_ar_text.text = location_name
@@ -268,5 +287,49 @@ class ARFragment : Fragment() {
         displayed_text_view.tv_ar_tags.width = 30 * max_len
         displayed_text_view.tv_ar_tags.height = tagsList.size * 75
         displayed_text_view.tv_ar_tags.visibility = View.VISIBLE
+    }
+
+    private fun stopShowingAllComments() {
+        // We need to remove all the text views showing comments for the old location.
+        nodesForComments.forEach { node -> run {
+            arFragment.arSceneView.scene.removeChild(node)
+            (node.parent as AnchorNode).anchor!!.detach()
+            arFragment.arSceneView.scene.removeChild(node.parent)
+        }}
+        // Add all the AR text views that were in use back into the available pool
+        availableArTextViewPool.addAll(inUseArTextViewPool)
+        inUseArTextViewPool.clear()
+    }
+
+    private fun locationChanged(newLocationID: String) {
+        stopShowingAllComments()
+        // Stop watching comments for the old location (if there was one)
+        stopWatchingCommentsCallback?.invoke()
+        // Start watching comments for the new location.
+        stopWatchingCommentsCallback = com.cs407.team15.redstone.model.Location.watchCommentsForLocation(newLocationID)
+            { comments ->
+                comments.forEach { comment ->
+                    val arTextView = availableArTextViewPool.firstOrNull()
+                    if (arTextView != null && arFragment.arSceneView.arFrame?.camera?.trackingState == TrackingState.TRACKING) {
+                        arTextView.view.findViewById<TextView>(R.id.ar_text).text = comment.comment
+                        val anchor = arFragment.arSceneView.session!!.createAnchor(currentPosition)
+                        val currentPositionVector = Vector3(
+                            currentPosition!!.tx(),
+                            currentPosition!!.ty(),
+                            currentPosition!!.tz()
+                        )
+                        val anchorNode = AnchorNode(anchor)
+                        anchorNode.setParent(arFragment.arSceneView.scene)
+                        val textViewNode = Node()
+                        textViewNode.setParent(anchorNode)
+                        textViewNode.worldPosition = Vector3.add(
+                            currentPositionVector,
+                            arFragment.arSceneView.scene.camera.forward
+                        )
+                        textViewNode.setLookDirection(arFragment.arSceneView.scene.camera.back)
+                        textViewNode.renderable = arTextView
+                    }
+                }
+        }
     }
 }
