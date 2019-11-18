@@ -1,6 +1,9 @@
 package com.cs407.team15.redstone.ui.tour
 
 import android.app.AlertDialog
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.util.Log
@@ -10,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 
 import com.cs407.team15.redstone.R
@@ -49,8 +53,9 @@ class AddLocationFragment : Fragment() {
         viewModel = ViewModelProviders.of(this).get(AddLocationViewModel::class.java)
 
         //Retrieving the button from XML
-        val btn_add_loc = getView()!!.findViewById(R.id.btn_add_location) as Button
-        val btn_newTag = getView()!!.findViewById(R.id.btn_create_tag) as Button
+        val btn_add_loc = getView()!!.findViewById<Button>(R.id.btn_add_location)
+        val btn_newTag = getView()!!.findViewById<Button>(R.id.btn_create_tag)
+        val locationShape = view!!.findViewById<ImageView>(R.id.locationShape)
         database = FirebaseDatabase.getInstance().reference
 
         //Initializing the key for new location to be added
@@ -177,8 +182,27 @@ class AddLocationFragment : Fragment() {
             var desc = view!!.findViewById<EditText>(R.id.et_about).text.toString()
             val currentFirebaseUser = FirebaseAuth.getInstance().currentUser
 
+            val latitudes = arguments!!.getFloatArray("latitudes")!!
+            val longitudes = arguments!!.getFloatArray("longitudes")!!
+            // See comment in drawLocationShapeAsBitmap() for why we compute center of location this way
+            val centralLatitude = latitudes.reduce {acc, latitude -> acc + latitude} / latitudes.size
+            val centralLongitude = longitudes.reduce {acc, longitude -> acc + longitude} / longitudes.size
+            val vertices = latitudes.zip(longitudes).map { latLong -> GeoPoint(latLong.first.toDouble(), latLong.second.toDouble())}
+            // So that on the location detail page we can draw the polygon represented by the vertices
+            // of this location, store all the points in the form needed for drawing
+            val transformedPoints = normalizePoints(arguments!!.getIntegerArrayList("xpoints")!!,
+                arguments!!.getIntegerArrayList("ypoints")!!, 150, 150, arguments!!.getFloat("mapRotation")!!)
+
             addTagtoLoc
-                .set(hashMapOf("timestamp" to com.google.firebase.Timestamp.now(), "location_id" to newKey, "description" to desc, "name" to name, "user_id" to currentFirebaseUser!!.uid, "coordinates" to GeoPoint(arguments!!.getDouble("latitude"), arguments!!.getDouble("longitude"))))
+                .set(hashMapOf("timestamp" to com.google.firebase.Timestamp.now(),
+                    "location_id" to newKey,
+                    "description" to desc,
+                    "name" to name,
+                    "user_id" to currentFirebaseUser!!.uid,
+                    "coordinates" to GeoPoint(centralLatitude.toDouble(), centralLongitude.toDouble()),
+                    "vertices" to vertices,
+                    "polygonImageXCoordinates" to transformedPoints.first,
+                    "polygonImageYCoordinates" to transformedPoints.second))
             .addOnSuccessListener {
                 Toast.makeText(context, "Location Added", Toast.LENGTH_SHORT).show()
                 this.activity!!.supportFragmentManager.popBackStack()
@@ -192,7 +216,67 @@ class AddLocationFragment : Fragment() {
 //            this.activity!!.supportFragmentManager.popBackStack()
 //        }
 
+
+
+        locationShape.setImageBitmap(drawLocationShapeAsBitmap(arguments!!.getIntegerArrayList("xpoints")!!,
+            arguments!!.getIntegerArrayList("ypoints")!!, true, 150, 150, arguments!!.getFloat("mapRotation")!!))
+
     }
 
+    // Rotate a set of points by the given number of degrees, then translate and scale to take up
+    // as much of a canvas of width by height as possible
+    private fun normalizePoints(xPoints: List<Int>, yPoints: List<Int>, width: Int, height: Int, degrees: Float): Pair<List<Float>, List<Float>> {
+        // Rotate points so that the location is drawn with up being north.
+        val rotatedXPoints = xPoints.zip(yPoints).map { point -> rotatePoint(point.first, point.second, degrees).first }
+        val rotatedYPoints = xPoints.zip(yPoints).map { point -> rotatePoint(point.first, point.second, degrees).second }
+        // Scale and translate input coordinates to take up as much of the canvas as possible
+        val minX = rotatedXPoints.min()!!
+        val xWidth = rotatedXPoints.max()!! - minX
+        val minY = rotatedYPoints.min()!!
+        val yHeight = rotatedYPoints.max()!! - minY
+        val transformedXPoints = rotatedXPoints.map { xPoint -> (1.0F * (xPoint - minX) * width / xWidth).toFloat() }
+        val transformedYPoints = rotatedYPoints.map { yPoint -> (1.0F * (yPoint - minY) * height / yHeight).toFloat() }
+        return Pair(transformedXPoints, transformedYPoints)
+    }
+
+    private fun rotatePoint(x: Int, y: Int, degrees: Float): Pair<Float, Float> {
+        // See https://stackoverflow.com/a/3162657/ for an explanation
+        val radians = degrees * Math.PI / 180
+        return Pair((x * Math.cos(radians) - y * Math.sin(radians)).toFloat(),
+                    (x * Math.sin(radians) + y * Math.cos(radians)).toFloat())
+    }
+
+    private fun drawLocationShapeAsBitmap(xPoints: MutableList<Int>, yPoints: MutableList<Int>,
+                                          shouldDrawCentroid: Boolean,
+                                          width: Int, height: Int, degrees :Float): Bitmap {
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { strokeWidth = 3F; color = 0xFFFFFFFF.toInt() }
+
+        val transformedPoints = normalizePoints(xPoints, yPoints, width, height, degrees)
+        // drawLines() needs coordinates in a certain format to represent pairs of points
+        // xPoints = [1F, 2F, 3F], yPoints = [4F, 5F, 6F] => [1F, 4F, 1F, 4F, 2F, 5F, 2F, 5F, 3F, 6F, 3F, 6F]
+        val pointArray = transformedPoints.first.zip(transformedPoints.second)
+            .map { pair -> listOf(pair.first, pair.second, pair.first, pair.second) }.flatten()
+            .toFloatArray()
+        // Omit duplicate first two and last two coordinates
+        canvas.drawLines(pointArray, 2, pointArray.size - 2, paint)
+        // Draw the line between the last point and the first point
+        canvas.drawLines(floatArrayOf(pointArray[pointArray.size - 2], pointArray[pointArray.size - 1], pointArray[0], pointArray[1]),
+            0, 4, paint)
+
+        if (shouldDrawCentroid) {
+            // Compute the central point of the location's vertices by averaging them.
+            // There is an arguably better way to compute a central point that will produce a point
+            // within the location's polygon, but there is far higher complexity which is further
+            // compounded substantially by accounting for the curvature of the earth. This method is
+            // sufficient for our purposes.
+            val centroidX = transformedPoints.first.reduce {acc, point -> acc + point} / transformedPoints.first.size
+            val centroidY = transformedPoints.second.reduce {acc, point -> acc + point} / transformedPoints.second.size
+            canvas.drawCircle(centroidX, centroidY, 5F, paint)
+        }
+
+        return bitmap
+    }
 
 }
