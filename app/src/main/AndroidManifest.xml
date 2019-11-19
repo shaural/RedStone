@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <uses-feature android:name="android.hardware.camera.ar" />
     <uses-feature
@@ -21,7 +23,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup,android:icon">
-        <activity android:name=".ui.adminpage.adminActivity"></activity>
+        <activity android:name=".ui.adminpage.PostActivity"></activity>
+        <activity android:name=".ui.adminpage.adminActivity" />
         <activity android:name=".ui.comments.CommentsActivity" />
         <activity android:name=".ui.home.NoticeActivity" />
 
@@ -49,7 +52,10 @@
         <activity
             android:name=".ui.viewtours.TourInfoActivity"
             android:label="Tour Info"
-            android:launchMode="singleTop"></activity>
+            android:launchMode="singleTop" />
+        <activity
+            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:theme="@style/Base.Theme.AppCompat" />
     </application>
 
 </manifest>
