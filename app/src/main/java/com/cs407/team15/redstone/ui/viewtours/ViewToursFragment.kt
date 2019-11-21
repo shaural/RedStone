@@ -48,6 +48,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
     var selectedTag = ANY
     var selectedLoc = ANY
     var selectedHammer = FALSE
+    var selectedDistance = FALSE
 
     //navigate to tour information
     override fun onItemClick(view: View, position: Int) {
@@ -92,6 +93,11 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         sw?.setOnCheckedChangeListener { _, isChecked ->
             getHammerUsers(isChecked)
         }
+
+        val distanceSW = view!!.findViewById<Switch>(R.id.distanceSwitch)
+        distanceSW?.setOnCheckedChangeListener { _, disIsChecked ->
+            sortByDistance(disIsChecked)
+        }
     }
 
     // Only to be used first time that tourNames of tours to be displayed is set, in order to set up
@@ -131,7 +137,13 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
             .filter { tour -> selectedTag == ANY || tour.tags.contains(selectedTag) }
             .filter { tour -> tour.hammer || tour.hammer == selectedHammer}
             .filter { tour -> (tour.type == "community" || ((tour.type == "personal") && tour.user_id == FirebaseAuth.getInstance().currentUser!!.uid))}
-            .filter { tour -> selectedLoc == ANY || tour.locations.contains(selectedLoc) } // sort by locations
+            .filter { tour -> selectedLoc == ANY || tour.locations.contains(selectedLoc) } // filter by locations
+            .sortedWith(
+                if (selectedDistance)
+                    compareBy { tour -> tour.distance }
+                else
+                    compareBy { tour -> tour.name }
+            ) // sort by distance
             .map {tour -> tour.name}
         setVisibleTourNames(tourNamesFilteredByNameAndTag)
     }
@@ -209,6 +221,17 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         }
         else{
             selectedHammer = FALSE
+            reapplyFiltering()
+        }
+    }
+
+    fun sortByDistance(disIsChecked : Boolean) {
+        if(disIsChecked){
+            selectedDistance = TRUE
+            reapplyFiltering()
+        }
+        else{
+            selectedDistance = FALSE
             reapplyFiltering()
         }
     }
