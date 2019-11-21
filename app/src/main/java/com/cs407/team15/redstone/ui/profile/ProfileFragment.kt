@@ -1,11 +1,13 @@
 package com.cs407.team15.redstone.ui.profile
 
+import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -13,6 +15,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.User
+import com.cs407.team15.redstone.ui.adminpage.adminActivity
 import com.cs407.team15.redstone.ui.authentication.LoginActivity
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
@@ -23,6 +26,8 @@ import kotlinx.coroutines.tasks.await
 class ProfileFragment : Fragment() {
 
     private lateinit var profileViewModel: ProfileViewModel
+    private lateinit var adminPageBtn: Button
+    private var TAG: String = javaClass.toString();
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,6 +41,8 @@ class ProfileFragment : Fragment() {
         val auth = FirebaseAuth.getInstance()
         val current =auth.currentUser
         val emailProfile= current?.email
+
+        adminPageBtn = root.btn_adminpage
 
         val db = FirebaseFirestore.getInstance()
 
@@ -67,6 +74,16 @@ class ProfileFragment : Fragment() {
                 root.recieved_like.text=user.recievedLikes.toString()
                 root.recieved_dislike.text=user.recievedDislikes.toString()
                 root.recieved_net_likes.text=(user.recievedLikes-user.recievedDislikes).toString()
+
+                // Admin Page button
+                var userStatus: String = user.getStatus()
+
+                if (userStatus == "admin") {
+                    adminPageBtn.setVisibility(View.VISIBLE)
+                } else {
+                    adminPageBtn.setVisibility(View.GONE)
+                }
+
             }
 
 
@@ -74,22 +91,21 @@ class ProfileFragment : Fragment() {
         /*
         Begin the fragment for user comments
          */
-                root.usercommentstext.setOnClickListener(object : View.OnClickListener {
-                    override fun onClick(v: View?) {
-                        var fragment = UserCommentsFragment();
-                        if (fragment != null) {
-                            //var frManager = fragmentManager
-                            val transaction = fragmentManager?.beginTransaction()
-                            if (transaction != null) {
-                                if (container != null) {
-                                    transaction.replace(container.id, fragment)
-                                    transaction.addToBackStack(null)
-                                    transaction.commit()
-                                }
-                            }
-
+        root.usercommentstext.setOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                var fragment = UserCommentsFragment();
+                if (fragment != null) {
+                    //var frManager = fragmentManager
+                    val transaction = fragmentManager?.beginTransaction()
+                    if (transaction != null) {
+                        if (container != null) {
+                            transaction.replace(container.id, fragment)
+                            transaction.addToBackStack(null)
+                            transaction.commit()
                         }
                     }
+                }
+            }
         })
         /*
         begin fragment for user tours
@@ -111,6 +127,16 @@ class ProfileFragment : Fragment() {
                 }
             }
         })
+
+        /*
+            Intent to Admin Page
+         */
+        var toAdminPage = root.btn_adminpage
+        toAdminPage.setOnClickListener {
+            Log.e(TAG, "Access to Admin Page")
+            val intent = Intent(getActivity(), adminActivity::class.java)
+            startActivity(intent)
+        }
 
      /*   val database = FirebaseDatabase.getInstance().reference
         val dUser = FirebaseDatabase.getInstance().getReference("users")

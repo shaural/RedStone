@@ -2,13 +2,11 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -37,14 +35,23 @@
                 android:layout_marginTop="40dp"
                 app:srcCompat="@drawable/background_bell_tower" />
 
+            <ImageView
+                android:id="@+id/locationShape"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_below="@id/location_image"
+                android:src="@color/common_google_signin_btn_text_light_default" />
+
             <TextView
                 android:id="@+id/location_description"
-                android:layout_below="@id/location_image"
-                android:layout_margin="25dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Description"
-                />
+                android:layout_below="@id/locationShape"
+                android:layout_marginStart="25dp"
+                android:layout_marginTop="25dp"
+                android:layout_marginEnd="25dp"
+                android:layout_marginBottom="25dp"
+                android:text="Description" />
         </RelativeLayout>
 
         <!-- Like/Comments/Tag etc... -->

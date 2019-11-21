@@ -1,5 +1,6 @@
 package com.cs407.team15.redstone.ui.location;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -43,7 +44,6 @@ public class LocationListFragment extends Fragment implements RecyclerAdapter.It
     RecyclerAdapter adapter;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        db = FirebaseFirestore.getInstance();
         container2 = container;
         //col = db.collection("locations");
         view = inflater.inflate(R.layout.fragment_location_list,
@@ -56,6 +56,18 @@ public class LocationListFragment extends Fragment implements RecyclerAdapter.It
             }
         });
 
+//        RecyclerView recyclerView = view.findViewById(R.id.locationlist);
+//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+//        RecyclerAdapter adapter = new RecyclerAdapter(getContext(), locList);
+//        adapter.setClickListener(this);
+//        recyclerView.setAdapter(adapter);
+        return view;
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        db = FirebaseFirestore.getInstance();
         db.collection("locations")
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -78,12 +90,6 @@ public class LocationListFragment extends Fragment implements RecyclerAdapter.It
                         }
                     }
                 });
-//        RecyclerView recyclerView = view.findViewById(R.id.locationlist);
-//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-//        RecyclerAdapter adapter = new RecyclerAdapter(getContext(), locList);
-//        adapter.setClickListener(this);
-//        recyclerView.setAdapter(adapter);
-        return view;
     }
 
     public void fillRecycleViewer(ArrayList<String> list) {
