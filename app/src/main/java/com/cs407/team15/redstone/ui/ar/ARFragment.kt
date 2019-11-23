@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.R
+import com.cs407.team15.redstone.model.Comment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.OnCompleteListener
@@ -30,6 +31,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.android.synthetic.main.basic_tour_text_view.view.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 // A great deal of this code comes from following the example in the HelloSceneForm sample AR Core
 // application provided by Google:
@@ -56,6 +60,7 @@ class ARFragment : Fragment() {
     private var dbCompleted = false
     private lateinit var tv_to_close : HitTestResult
     private lateinit var tv_to_close_motion : MotionEvent
+    private val hammerUserIDs = mutableListOf<String>()
 
     // When we start watching the set of comments for a particular location, we get a callback
     // that we need to call when we want to stop watching
@@ -73,6 +78,7 @@ class ARFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        GlobalScope.launch { fetchListOfHammerUsers() }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
         getLocationFromDB()
         if (!isThisDeviceSupported()) {
@@ -308,28 +314,65 @@ class ARFragment : Fragment() {
         // Start watching comments for the new location.
         stopWatchingCommentsCallback = com.cs407.team15.redstone.model.Location.watchCommentsForLocation(newLocationID)
             { comments ->
+                val camera = arFragment.arSceneView.scene.camera
+                val oneMeterForward = Vector3(camera.forward).apply { y = 0F; normalized() }
+                val oneMeterLeft = Vector3(camera.left).apply { y = 0F; normalized() }
+                val oneMeterUp = Vector3(camera.up).apply { x = 0F; z = 0F; normalized() }
+                val nodesToPosition = mutableListOf<Node>()
+                val anchor = arFragment.arSceneView.session!!.createAnchor(currentPosition)
+                val anchorNode = AnchorNode(anchor)
+                val currentPositionVector = Vector3(
+                    currentPosition!!.tx(),
+                    currentPosition!!.ty(),
+                    currentPosition!!.tz()
+                )
                 comments.forEach { comment ->
                     val arTextView = availableArTextViewPool.firstOrNull()
                     if (arTextView != null && arFragment.arSceneView.arFrame?.camera?.trackingState == TrackingState.TRACKING) {
-                        arTextView.view.findViewById<TextView>(R.id.ar_text).text = comment.comment
-                        val anchor = arFragment.arSceneView.session!!.createAnchor(currentPosition)
-                        val currentPositionVector = Vector3(
-                            currentPosition!!.tx(),
-                            currentPosition!!.ty(),
-                            currentPosition!!.tz()
-                        )
-                        val anchorNode = AnchorNode(anchor)
+                        availableArTextViewPool.remove(arTextView)
+                        inUseArTextViewPool.add(arTextView)
                         anchorNode.setParent(arFragment.arSceneView.scene)
                         val textViewNode = Node()
                         textViewNode.setParent(anchorNode)
-                        textViewNode.worldPosition = Vector3.add(
-                            currentPositionVector,
-                            arFragment.arSceneView.scene.camera.forward
-                        )
-                        textViewNode.setLookDirection(arFragment.arSceneView.scene.camera.back)
+                        arTextView.view.findViewById<TextView>(R.id.ar_text).text = comment.comment
                         textViewNode.renderable = arTextView
+                        nodesToPosition.add(textViewNode)
                     }
                 }
+                arrangeComments(nodesToPosition, currentPositionVector, oneMeterForward, oneMeterLeft, oneMeterUp)
         }
+    }
+
+    private fun arrangeComments(commentNodes: List<Node>, cameraPosition: Vector3,
+                                oneMeterForward: Vector3, oneMeterLeft: Vector3, oneMeterUp: Vector3) {
+        // Translate the provided node by the provided amount of meters forward, left, and up
+        val translateInMeters = {node: Node, forwardLeftUp: Array<Double> -> node.worldPosition =
+            Vector3.add(Vector3.add(Vector3.add(node.worldPosition, oneMeterForward.scaled(forwardLeftUp[0].toFloat())),
+                oneMeterLeft.scaled(forwardLeftUp[1].toFloat())), oneMeterUp.scaled(forwardLeftUp[2].toFloat()))}
+
+        for ((position, node) in commentNodes.withIndex()) {
+            // One meter in front of the camera but at the same height as the camera
+            node.worldPosition = Vector3.add(cameraPosition, oneMeterForward)
+            // If there's enough comments for a full row, shift every comment left one meter so the
+            // arrangement of comments is horizontally centered in front of the user
+            if (commentNodes.size >= 3) {
+                node.worldPosition = Vector3.add(node.worldPosition, oneMeterLeft)
+            }
+            node.setLookDirection(oneMeterForward.negated())
+            // Arrange comments in 3 wide by 2 high grids, each grid 2 meters behind the previous one
+            // #1 #2 #3
+            // #4 #5 #6
+            translateInMeters(node, arrayOf(2.0 * (position / 6).toDouble(), -(position % 3).toDouble(), -((position % 6) / 3).toDouble()))
+        }
+    }
+
+    private suspend fun fetchListOfHammerUsers() {
+        hammerUserIDs.addAll(
+            // From the set of users
+            FirebaseFirestore.getInstance().collection("users").
+            // get hammer users'
+            whereEqualTo("isHammerUser", true).get().await().documents.
+            // uids
+            map {user -> user.getString("uid") as String})
     }
 }
