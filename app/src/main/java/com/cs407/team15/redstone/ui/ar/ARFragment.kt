@@ -11,6 +11,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Comment
@@ -61,14 +63,15 @@ class ARFragment : Fragment() {
     private lateinit var tv_to_close : HitTestResult
     private lateinit var tv_to_close_motion : MotionEvent
     private val hammerUserIDs = mutableListOf<String>()
+    private val userIDToUsername = mutableMapOf<String, String>()
 
     // When we start watching the set of comments for a particular location, we get a callback
     // that we need to call when we want to stop watching
     private var stopWatchingCommentsCallback: (()->Unit)? = null
     // Because creating the ar text views needed to show comments is an asynchronous operation,
     // we create a finite number of them when loading the page, then we manage that group
-    private val availableArTextViewPool: MutableList<ViewRenderable> = mutableListOf()
-    private val inUseArTextViewPool: MutableList<ViewRenderable> = mutableListOf()
+    private val availableArCommentViewPool: MutableList<ViewRenderable> = mutableListOf()
+    private val inUseArCommentViewPool: MutableList<ViewRenderable> = mutableListOf()
     // We need a reference to all the AR Nodes associated with comments so that we can remove them
     // when we want to stop showing comments for a location. Each of these nodes will have an
     // AnchorNode as a parent
@@ -79,6 +82,7 @@ class ARFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GlobalScope.launch { fetchListOfHammerUsers() }
+        GlobalScope.launch { fetchMapOfUserIDsToUsernames() }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
         getLocationFromDB()
         if (!isThisDeviceSupported()) {
@@ -106,9 +110,13 @@ class ARFragment : Fragment() {
         }
         // Create the pool of ar text views to hold comments
         repeat(MAXIMUM_COMMENTS_ON_SCREEN) {
-            val commentTextView = layoutInflater.inflate(R.layout.tour_text_view, null)
-            ViewRenderable.builder().setView(context!!, commentTextView).build()
-                .thenAccept { renderable -> availableArTextViewPool.add(renderable) }
+            val commentView = layoutInflater.inflate(R.layout.comment_item, null)
+            ViewRenderable.builder().setView(context!!, commentView).build()
+                .thenAccept { renderable ->
+                    renderable.view.background = ResourcesCompat.getDrawable(resources, R.drawable.back, null)
+                    renderable.view.findViewById<AppCompatImageView>(R.id.btn_like).visibility = View.INVISIBLE
+                    renderable.view.findViewById<AppCompatImageView>(R.id.image_profile).visibility = View.INVISIBLE
+                    availableArCommentViewPool.add(renderable) }
         }
 
         updateLocation {  }
@@ -303,22 +311,50 @@ class ARFragment : Fragment() {
             arFragment.arSceneView.scene.removeChild(node.parent)
         }}
         // Add all the AR text views that were in use back into the available pool
-        availableArTextViewPool.addAll(inUseArTextViewPool)
-        inUseArTextViewPool.clear()
+        availableArCommentViewPool.addAll(inUseArCommentViewPool)
+        inUseArCommentViewPool.clear()
+    }
+
+    private fun applySortingToComments(comments: List<Comment>, byLikes: Boolean, hammerOnly: Boolean): List<Comment> {
+        // If we only want hammer users remove non hammer users
+        return comments.filter { comment -> !hammerOnly || hammerUserIDs.contains(comment.publisherid) }.
+            sortedWith(object: Comparator<Comment> {
+            override fun compare(comment1: Comment, comment2: Comment): Int {
+                // Compare comments by likes descending
+                if (byLikes) {
+                    return -1 * comment1.like.compareTo(comment2.like)
+                }
+                // or by posted date descending
+                else {
+                    return -1 * comment1.timestamp.compareTo(comment2.timestamp)
+                }
+            }
+        })
     }
 
     private fun locationChanged(newLocationID: String) {
+        //you should show comment age!
+        hideAnyExistingCommentsAndShowSortedCommentsForLocation(newLocationID, false, false)
+    }
+
+    private fun sortingCriteriaChanged() {
+        hideAnyExistingCommentsAndShowSortedCommentsForLocation(cur_id_str!!, false, false)
+    }
+
+    private fun hideAnyExistingCommentsAndShowSortedCommentsForLocation(newLocationID: String, byLikes: Boolean, hammerOnly: Boolean) {
         stopShowingAllComments()
         // Stop watching comments for the old location (if there was one)
         stopWatchingCommentsCallback?.invoke()
-        // Start watching comments for the new location.
+        // Start watching comments for the new location. When the set of comments for the location
+        // is changed, all visible comments are removed, and the updated list is sorted and displayed
         stopWatchingCommentsCallback = com.cs407.team15.redstone.model.Location.watchCommentsForLocation(newLocationID)
             { comments ->
+                stopShowingAllComments()
                 val camera = arFragment.arSceneView.scene.camera
                 val oneMeterForward = Vector3(camera.forward).apply { y = 0F; normalized() }
                 val oneMeterLeft = Vector3(camera.left).apply { y = 0F; normalized() }
                 val oneMeterUp = Vector3(camera.up).apply { x = 0F; z = 0F; normalized() }
-                val nodesToPosition = mutableListOf<Node>()
+                val nodesToBePositioned = mutableListOf<Node>()
                 val anchor = arFragment.arSceneView.session!!.createAnchor(currentPosition)
                 val anchorNode = AnchorNode(anchor)
                 val currentPositionVector = Vector3(
@@ -326,20 +362,23 @@ class ARFragment : Fragment() {
                     currentPosition!!.ty(),
                     currentPosition!!.tz()
                 )
-                comments.forEach { comment ->
-                    val arTextView = availableArTextViewPool.firstOrNull()
+                applySortingToComments(comments, byLikes, hammerOnly).forEach { comment ->
+                    val arTextView = availableArCommentViewPool.firstOrNull()
                     if (arTextView != null && arFragment.arSceneView.arFrame?.camera?.trackingState == TrackingState.TRACKING) {
-                        availableArTextViewPool.remove(arTextView)
-                        inUseArTextViewPool.add(arTextView)
+                        availableArCommentViewPool.remove(arTextView)
+                        inUseArCommentViewPool.add(arTextView)
                         anchorNode.setParent(arFragment.arSceneView.scene)
                         val textViewNode = Node()
                         textViewNode.setParent(anchorNode)
-                        arTextView.view.findViewById<TextView>(R.id.ar_text).text = comment.comment
+                        arTextView.view.findViewById<TextView>(R.id.comment).text = comment.comment
+                        arTextView.view.findViewById<TextView>(R.id.username).text = userIDToUsername[comment.publisher]
+                        arTextView.view.findViewById<TextView>(R.id.tv_total).text = comment.like.toString()
                         textViewNode.renderable = arTextView
-                        nodesToPosition.add(textViewNode)
+                        nodesForComments.add(textViewNode)
+                        nodesToBePositioned.add(textViewNode)
                     }
                 }
-                arrangeComments(nodesToPosition, currentPositionVector, oneMeterForward, oneMeterLeft, oneMeterUp)
+                arrangeComments(nodesToBePositioned, currentPositionVector, oneMeterForward, oneMeterLeft, oneMeterUp)
         }
     }
 
@@ -359,10 +398,11 @@ class ARFragment : Fragment() {
                 node.worldPosition = Vector3.add(node.worldPosition, oneMeterLeft)
             }
             node.setLookDirection(oneMeterForward.negated())
-            // Arrange comments in 3 wide by 2 high grids, each grid 2 meters behind the previous one
+            // Arrange comments in 3 wide by 2 high grids, each grid 2 meters behind the previous one,
+            // within a grid one meter from top to bottom row, 1.5 meters from one column to the next
             // #1 #2 #3
             // #4 #5 #6
-            translateInMeters(node, arrayOf(2.0 * (position / 6).toDouble(), -(position % 3).toDouble(), -((position % 6) / 3).toDouble()))
+            translateInMeters(node, arrayOf(2.0 * (position / 6).toDouble(), -1.5 * (position % 3).toDouble(), -((position % 6) / 3).toDouble()))
         }
     }
 
@@ -374,5 +414,11 @@ class ARFragment : Fragment() {
             whereEqualTo("isHammerUser", true).get().await().documents.
             // uids
             map {user -> user.getString("uid") as String})
+    }
+
+    private suspend fun fetchMapOfUserIDsToUsernames() {
+        FirebaseFirestore.getInstance().collection("users").get().await().documents.
+            // Map user id to username if there is one and email address otherwise
+            forEach{ user -> userIDToUsername.put(user.id, user.getString("username") ?: user.getString("email")!!) }
     }
 }
