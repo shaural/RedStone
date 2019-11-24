@@ -4,22 +4,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <Button
-        android:id="@+id/launch_ar_fragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="45dp"
-        android:padding="5dp"
-        android:layout_margin="10dp"
-        android:text="@string/btn_ar"
-        android:background="@color/btn_def" />
-    <Button
-        android:id="@+id/launch_map_fragment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="45dp"
-        android:padding="5dp"
-        android:layout_margin="10dp"
-        android:text="@string/btn_map"
-        android:background="@color/btn_def" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/launch_ar_fragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginBottom="45dp"
+                android:background="@color/btn_def"
+                android:padding="5dp"
+                android:text="@string/btn_ar" />
+
+            <Button
+                android:id="@+id/launch_map_fragment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_marginBottom="45dp"
+                android:background="@color/btn_def"
+                android:padding="5dp"
+                android:text="@string/btn_map" />
+        </LinearLayout>
+
+        <fragment
+            android:id="@+id/free_roam_custom_ar_fragment"
+            android:name="com.cs407.team15.redstone.ui.ar.ARFragment"
+            android:layout_width="match_parent"
+            android:layout_height="fill_parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="parent" />
+    </LinearLayout>
 </androidx.appcompat.widget.LinearLayoutCompat>

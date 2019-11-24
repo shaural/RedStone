@@ -22,13 +22,15 @@ class FreeRoamFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_free_roam, container, false)
-        arFrag = ARFragment()
+        arFrag = childFragmentManager.findFragmentById(R.id.free_roam_custom_ar_fragment) as ARFragment
         mapFrag = TourFragment()
         nextFrag = arFrag
+        /*
         activity!!.supportFragmentManager.beginTransaction()
             .replace(id, nextFrag, "ARFragment")
 //            .addToBackStack(null) //maybe should add
             .commit()
+         */
         return root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -40,7 +42,7 @@ class FreeRoamFragment : Fragment() {
             if (!isAR) {
                 nextFrag = arFrag
                 activity!!.supportFragmentManager.beginTransaction()
-                    .replace(id, nextFrag, "ARFragment")
+                    .replace(mapFrag.id, nextFrag, "ARFragment")
 //                    .addToBackStack(null) //maybe should add
                     .commit()
                 isAR = !isAR
@@ -50,7 +52,7 @@ class FreeRoamFragment : Fragment() {
             if (isAR) {
                 nextFrag = mapFrag
                 activity!!.supportFragmentManager.beginTransaction()
-                    .replace(id, nextFrag, "MapFragment")
+                    .replace(arFrag.id, nextFrag, "MapFragment")
 //                    .addToBackStack(null) //maybe should add
                     .commit()
                 isAR = !isAR
