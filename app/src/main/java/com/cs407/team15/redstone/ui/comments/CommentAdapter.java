@@ -69,10 +69,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     }
 
 
-
-    //public CommentAdapter(Context context, )
-
-
     @NonNull
     @Override
     public CommentAdapter.ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

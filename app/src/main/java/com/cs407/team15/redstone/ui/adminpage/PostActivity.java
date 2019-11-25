@@ -168,6 +168,7 @@ public class PostActivity extends AppCompatActivity {
                         hashMap.put("postimage", miUrlOk);
                         hashMap.put("description", description.getText().toString());
                         hashMap.put("publisher", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                        hashMap.put("publisherid", FirebaseAuth.getInstance().getCurrentUser().getEmail());
                         hashMap.put("category", category);
                         hashMap.put("timestamp", ts);
 
@@ -199,9 +200,10 @@ public class PostActivity extends AppCompatActivity {
 
             HashMap<String, Object> hashMap = new HashMap<>();
             hashMap.put("postid", postid);
-            hashMap.put("postimage", null);
+            hashMap.put("postimage", "");
             hashMap.put("description", description.getText().toString());
             hashMap.put("publisher", FirebaseAuth.getInstance().getCurrentUser().getUid());
+            hashMap.put("publisherid", FirebaseAuth.getInstance().getCurrentUser().getEmail());
             hashMap.put("category", category);
             hashMap.put("timestamp", ts);
 
@@ -232,5 +234,12 @@ public class PostActivity extends AppCompatActivity {
             startActivity(new Intent(PostActivity.this, adminActivity.class));
             finish();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(PostActivity.this, adminActivity.class));
+        finish();
     }
 }

@@ -93,4 +93,5 @@
     <string name="tab_text_1">Notification</string>
     <string name="tab_text_2">AD</string>
     <string name="tab_text_3">Others</string>
+    <string name="title_activity_post_page">PostPageActivity</string>
 </resources>
