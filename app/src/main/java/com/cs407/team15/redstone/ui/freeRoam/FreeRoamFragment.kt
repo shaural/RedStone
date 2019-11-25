@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.ui.ar.ARFragment
@@ -16,25 +17,27 @@ class FreeRoamFragment : Fragment() {
     lateinit var nextFrag : Fragment
     lateinit var arFrag : Fragment
     lateinit var mapFrag : Fragment
+    var fragmentContainerID: Int? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_free_roam, container, false)
-        arFrag = childFragmentManager.findFragmentById(R.id.free_roam_custom_ar_fragment) as ARFragment
+        arFrag = ARFragment()
         mapFrag = TourFragment()
         nextFrag = arFrag
-        /*
-        activity!!.supportFragmentManager.beginTransaction()
-            .replace(id, nextFrag, "ARFragment")
-//            .addToBackStack(null) //maybe should add
-            .commit()
-         */
         return root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        fragmentContainerID = view!!.findViewById<FrameLayout>(R.id.fragmentContainer)!!.id
+        activity!!.supportFragmentManager.beginTransaction()
+            .replace(fragmentContainerID!!, nextFrag, "ARFragment")
+//            .addToBackStack(null) //maybe should add
+            .commit()
+
         var btn_ar = getView()!!.findViewById(R.id.launch_ar_fragment) as Button
         var btn_map = getView()!!.findViewById(R.id.launch_map_fragment) as Button
 
@@ -42,7 +45,7 @@ class FreeRoamFragment : Fragment() {
             if (!isAR) {
                 nextFrag = arFrag
                 activity!!.supportFragmentManager.beginTransaction()
-                    .replace(mapFrag.id, nextFrag, "ARFragment")
+                    .replace(fragmentContainerID!!, nextFrag, "ARFragment")
 //                    .addToBackStack(null) //maybe should add
                     .commit()
                 isAR = !isAR
@@ -52,7 +55,7 @@ class FreeRoamFragment : Fragment() {
             if (isAR) {
                 nextFrag = mapFrag
                 activity!!.supportFragmentManager.beginTransaction()
-                    .replace(arFrag.id, nextFrag, "MapFragment")
+                    .replace(fragmentContainerID!!, nextFrag, "MapFragment")
 //                    .addToBackStack(null) //maybe should add
                     .commit()
                 isAR = !isAR
