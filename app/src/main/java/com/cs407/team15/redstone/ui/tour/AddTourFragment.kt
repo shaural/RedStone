@@ -29,6 +29,10 @@ import com.toptoche.searchablespinnerlibrary.SearchableSpinner
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.lang.Math.cos
+import java.lang.Math.sin
+import java.math.BigDecimal
+import java.math.MathContext
 
 class AddTourFragment : Fragment(){
 
@@ -222,8 +226,25 @@ class AddTourFragment : Fragment(){
         // tours start out with 0 votes
         val initialVotes = 0
 
+        //distance of tour in miles
+        var distance = 0.001
+        var count = 0
+        var pastLoc : Location = locationsOnTour[0]
+        if(locationsOTStr.size > 1){
+            for (location in locationsOnTour){
+                if (count > 0){
+                    var currentLat = location.coordinates.latitude
+                    var currentLong = location.coordinates.longitude
+                    distance += calcDistanceFromCoordinates(currentLat, currentLong, pastLoc.coordinates.latitude, pastLoc.coordinates.longitude)
+                }
+                pastLoc = location
+                count += 1
+            }
+            distance = Math.floor(distance * 100) / 100
+        }
+
         // create tour object
-        val newTour = Tour(name, type, user_id, hammer, locationsOTStr, tagsOnTour, initialVotes)
+        val newTour = Tour(name, type, user_id, hammer, locationsOTStr, tagsOnTour, initialVotes, distance)
 
         // push tour to firebase
         db.collection("tours")
@@ -246,5 +267,21 @@ class AddTourFragment : Fragment(){
 
     fun checkRepeatTours() : Boolean {
         return false
+    }
+
+    //calculate the distance in miles between two coordinate points
+    private fun calcDistanceFromCoordinates(lat1: Double, lon1: Double, lat2: Double, lon2: Double) : Double{
+        if ((lat1 == lat2) && (lon1 == lon2)) {
+            return 0.0
+        }
+        else {
+            val theta = lon1 - lon2
+            var dist = (sin(Math.toRadians(lat1)) * sin(Math.toRadians(lat2))) +
+                    (cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * cos(Math.toRadians(theta)))
+            dist = Math.acos(dist)
+            dist = Math.toDegrees(dist)
+            dist = dist * 60 * 1.1515
+            return (dist)
+        }
     }
 }

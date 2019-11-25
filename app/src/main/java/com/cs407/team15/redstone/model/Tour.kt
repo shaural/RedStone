@@ -6,7 +6,8 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ServerTimestamp
 import kotlinx.coroutines.tasks.await
 
-class Tour(val name: String, val type: String, val user_id: String, val hammer: Boolean, val locations: List<String>, val tags: List<String>, val votes: Number) {
+class Tour(val name: String, val type: String, val user_id: String, val hammer: Boolean, val locations: List<String>
+           , val tags: List<String>, val votes: Number, val distance: Double) {
     companion object {
         const val TOURS = "tours"
         const val NAME = "name"
@@ -19,6 +20,7 @@ class Tour(val name: String, val type: String, val user_id: String, val hammer: 
         const val TAG_ID = "tag_id"
         const val LOCATION_ID = "location_id"
         const val VOTES = "votes"
+        const val DISTANCE = "distance"
 
         // Get the single tour with the specified name, or null if no such tour with that name
         // exists
@@ -44,7 +46,8 @@ class Tour(val name: String, val type: String, val user_id: String, val hammer: 
             val locations = (db.collection(TOURS).document(tour_id).get().await().get(LOCATIONS) as List<String>).sorted()
             // Fetch the tag names
             val tags = (db.collection(TOURS).document(tour_id).get().await().get(TAGS) as List<String>).sorted()
-            return Tour(name, type, user_id, hammer, locations, tags, votes)
+            val distance = db.collection(TOURS).document(tour_id).get().await().get(DISTANCE) as Double
+            return Tour(name, type, user_id, hammer, locations, tags, votes, distance)
         }
 
         // Returns whether or not a particular user is allowed to see a particular tour
