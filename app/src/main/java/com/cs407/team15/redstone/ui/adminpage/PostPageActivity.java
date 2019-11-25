@@ -173,9 +173,9 @@ public class PostPageActivity extends AppCompatActivity {
 
                     popupMenu.inflate(R.menu.post_menu);
                     if (!post.getPublisher().equals(firebaseUser.getUid())){
-                        postpage_btn_more.setVisibility(View.GONE);
-//                        popupMenu.getMenu().findItem(R.id.post_edit).setVisible(false);
-//                        popupMenu.getMenu().findItem(R.id.post_delete).setVisible(false);
+//                        postpage_btn_more.setVisibility(View.GONE);
+                        popupMenu.getMenu().findItem(R.id.post_edit).setVisible(false);
+                        popupMenu.getMenu().findItem(R.id.post_delete).setVisible(false);
                     }
                     popupMenu.show();
                 }
