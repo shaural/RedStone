@@ -34,7 +34,8 @@ internal constructor(context: Context, private val mData: List<String>) :
     // binds the data to the TextView in each row
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val animal = mData[position]
-        addHammerIcon(position, holder);
+        addHammerIcon(position, holder)
+        addTourMileage(position, holder)
         holder.myTextView.text = animal
     }
     @TargetApi(24)
@@ -62,6 +63,19 @@ internal constructor(context: Context, private val mData: List<String>) :
             }
     }
 
+    internal fun addTourMileage(position: Int, holder: ViewHolder) {
+        FirebaseFirestore.getInstance().collection("tours").whereEqualTo("name", mData[position])
+            .get().addOnSuccessListener { documents ->
+                for (document in documents) {
+                    holder.myMilesView.text = document["distance"].toString() + " mi"
+                }
+            }
+            .addOnFailureListener {
+                    exception ->
+                System.out.println("ERROR")
+            }
+    }
+
     // total number of rows
     override fun getItemCount(): Int {
         return mData.size
@@ -71,12 +85,14 @@ internal constructor(context: Context, private val mData: List<String>) :
     // stores and recycles views as they are scrolled off screen
     inner class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView),
         View.OnClickListener {
-        internal var myTextView: TextView
+        internal var myTextView : TextView
         internal var myImageView: ImageView
+        internal var myMilesView : TextView
 
         init {
             myTextView = itemView.findViewById(R.id.tvAnimalName)
             myImageView = itemView.findViewById(R.id.hammertouricon)
+            myMilesView = itemView.findViewById(R.id.viewTourMileage)
             itemView.setOnClickListener(this)
         }
 

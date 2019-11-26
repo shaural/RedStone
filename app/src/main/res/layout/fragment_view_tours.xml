@@ -31,11 +31,36 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/locSpinnerLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15px"
+            android:labelFor="@id/tagSpinner"
+            android:text="@string/search_tours_by_location" />
+
+        <com.toptoche.searchablespinnerlibrary.SearchableSpinner
+            android:id="@+id/locSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
     <Switch
         android:id="@+id/hammerSwitch"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:text="@string/search_by_hammer_user" />
+
+    <Switch
+        android:id="@+id/distanceSwitch"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:text="Sort by Distance" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tourList"

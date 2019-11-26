@@ -52,6 +52,7 @@
 
     <!-- Location -->
     <string name="add_location">Add Location</string>
+    <string name="finalize_location">Finalize Location</string>
     <string name="user_type">User Type</string>
     <string name="likes">Recived Likes</string>
     <string name="dislikes">Recived Dislikes</string>
@@ -86,4 +87,10 @@
 
     <!-- Comments -->
     <string name="sort_btn">Sort</string>
+    <string name="search_tours_by_location">Search tours by location</string>
+
+    <!-- Admin Page -->
+    <string name="tab_text_1">Notification</string>
+    <string name="tab_text_2">AD</string>
+    <string name="tab_text_3">Others</string>
 </resources>

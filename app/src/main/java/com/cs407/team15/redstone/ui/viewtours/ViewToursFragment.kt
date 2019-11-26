@@ -40,11 +40,15 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
     var allTours: MutableList<Tour> = mutableListOf()
     // Contains the names of all tags, plus the special "any" option
     var allTags: MutableList<String> = mutableListOf()
+    // Contains the names of all locations, plus the special "any" option
+    var allLocations: MutableList<String> = mutableListOf()
     val ANY = "any"
 
     var selectedFilterText = ""
     var selectedTag = ANY
+    var selectedLoc = ANY
     var selectedHammer = FALSE
+    var selectedDistance = FALSE
 
     //navigate to tour information
     override fun onItemClick(view: View, position: Int) {
@@ -76,6 +80,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
     ): View? {
         GlobalScope.launch { getAndDisplayTourData() }
         GlobalScope.launch { getAndDisplayTagData() }
+        GlobalScope.launch { getAndDisplayLocData() }
         return inflater.inflate(R.layout.fragment_view_tours, container, false)
     }
 
@@ -87,6 +92,11 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         val sw = view!!.findViewById<Switch>(R.id.hammerSwitch)
         sw?.setOnCheckedChangeListener { _, isChecked ->
             getHammerUsers(isChecked)
+        }
+
+        val distanceSW = view!!.findViewById<Switch>(R.id.distanceSwitch)
+        distanceSW?.setOnCheckedChangeListener { _, disIsChecked ->
+            sortByDistance(disIsChecked)
         }
     }
 
@@ -120,12 +130,20 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         }
     }
 
+    // filter all specifications: name, tags, hammer user, and personal tours
     fun reapplyFiltering() {
         val tourNamesFilteredByNameAndTag = allTours
             .filter { tour -> tour.name.contains(selectedFilterText, ignoreCase = true)}
             .filter { tour -> selectedTag == ANY || tour.tags.contains(selectedTag) }
             .filter { tour -> tour.hammer || tour.hammer == selectedHammer}
             .filter { tour -> (tour.type == "community" || ((tour.type == "personal") && tour.user_id == FirebaseAuth.getInstance().currentUser!!.uid))}
+            .filter { tour -> selectedLoc == ANY || tour.locations.contains(selectedLoc) } // filter by locations
+            .sortedWith(
+                if (selectedDistance)
+                    compareBy { tour -> tour.distance }
+                else
+                    compareBy { tour -> tour.name }
+            ) // sort by distance
             .map {tour -> tour.name}
         setVisibleTourNames(tourNamesFilteredByNameAndTag)
     }
@@ -167,6 +185,35 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         }
     }
 
+    suspend fun getAndDisplayLocData() {
+        // Get the name of all tags in alphabetical order
+        val locations = FirebaseFirestore.getInstance().collection("locations").get().await()
+            .documents.map{document -> document.getString("name") as String}.sorted().toMutableList()
+        locations.add(0, ANY) // Prepend the special "any tag" option
+        allLocations.addAll(locations)
+        activity!!.runOnUiThread {
+            val locSpinner = view!!.findViewById<Spinner>(R.id.locSpinner)
+            val spinnerAdapter = ArrayAdapter<String>(context as Context, android.R.layout.simple_spinner_item, locations)
+            spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            locSpinner.adapter = spinnerAdapter
+            locSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    selectedLoc = allLocations[position]
+                    reapplyFiltering()
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+            (locSpinner as SearchableSpinner).setTitle("Search tours by location")
+            locSpinner.invalidate()
+        }
+    }
+
     fun getHammerUsers(isChecked : Boolean) {
         if(isChecked){
             selectedHammer = TRUE
@@ -174,6 +221,17 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         }
         else{
             selectedHammer = FALSE
+            reapplyFiltering()
+        }
+    }
+
+    fun sortByDistance(disIsChecked : Boolean) {
+        if(disIsChecked){
+            selectedDistance = TRUE
+            reapplyFiltering()
+        }
+        else{
+            selectedDistance = FALSE
             reapplyFiltering()
         }
     }

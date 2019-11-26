@@ -1,6 +1,9 @@
 package com.cs407.team15.redstone.ui.location
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -118,6 +121,21 @@ class LocationPage : Fragment(), CoroutineScope {
                             location_id = loc.id
                             publisher_id = loc["user_id"] as String
 
+                            // If the location is new enough to have vertices representing its
+                            // polygonal form, then draw the polygon representing the location's
+                            // boundaries and draw the location's center, otherwise hide the
+                            // imageview that would have shown this information
+                            val locationShape = view!!.findViewById<ImageView>(R.id.locationShape)
+                            if (loc.contains("polygonImageXCoordinates")) {
+                                val polygonImageXCoordinates = loc["polygonImageXCoordinates"] as List<Double>
+                                val polygonImageYCoordinates = loc["polygonImageYCoordinates"] as List<Double>
+
+                                locationShape.setImageBitmap(drawLocationShapeAsBitmap(polygonImageXCoordinates,
+                                    polygonImageYCoordinates, true, 150, 150))
+                            }
+                            else {
+                                locationShape.visibility = View.GONE
+                            }
 
                             GlobalScope.launch(Dispatchers.IO + handler) {
                                 corout(true)
@@ -223,6 +241,36 @@ class LocationPage : Fragment(), CoroutineScope {
                 }
             }
 
+    }
+
+    // This is based on the function of the same name in AddLocationFragment.kt
+    private fun drawLocationShapeAsBitmap(xPoints: List<Double>, yPoints: List<Double>,
+                                          shouldDrawCentroid: Boolean,
+                                          width: Int, height: Int): Bitmap {
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { strokeWidth = 3F; color = 0xFFFFFFFF.toInt() }
+
+        // drawLines() needs coordinates in a certain format to represent pairs of points
+        // xPoints = [1F, 2F, 3F], yPoints = [4F, 5F, 6F] => [1F, 4F, 1F, 4F, 2F, 5F, 2F, 5F, 3F, 6F, 3F, 6F]
+        val pointArray = xPoints.zip(yPoints)
+            .map { pair -> listOf(pair.first.toFloat(), pair.second.toFloat(), pair.first.toFloat(), pair.second.toFloat()) }
+            .flatten().toFloatArray()
+        // Omit duplicate first two and last two coordinates
+        canvas.drawLines(pointArray, 2, pointArray.size - 2, paint)
+        // Draw the line between the last point and the first point
+        canvas.drawLines(floatArrayOf(pointArray[pointArray.size - 2], pointArray[pointArray.size - 1], pointArray[0], pointArray[1]),
+            0, 4, paint)
+
+        if (shouldDrawCentroid) {
+            // Compute the central point of the location's vertices by averaging them.
+            // See the function with this same name in AddLocationFragment for further explanation
+            val centroidX = xPoints.reduce {acc, point -> acc + point} / xPoints.size
+            val centroidY = yPoints.reduce {acc, point -> acc + point} / yPoints.size
+            canvas.drawCircle(centroidX.toFloat(), centroidY.toFloat(), 5F, paint)
+        }
+
+        return bitmap
     }
 
     /**

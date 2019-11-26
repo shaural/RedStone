@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,23 +11,16 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="390dp"
         android:layout_marginEnd="21dp"
-        app:layout_constraintBottom_toTopOf="@+id/tableLayout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_above="@id/tableLayout"
+        />
 
     <TableLayout
         android:id="@+id/tableLayout"
-        android:layout_width="410dp"
-        android:layout_height="729dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0">
+        >
 
         <TableRow
             android:layout_width="match_parent"
@@ -61,7 +54,7 @@
 
             <TextView
                 android:id="@+id/profile_email"
-                android:layout_width="162dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:textAlignment="textEnd"
                 android:textSize="18sp" />
@@ -99,7 +92,7 @@
 
             <TextView
                 android:id="@+id/recieved_dislike"
-                android:layout_width="225dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAlignment="textEnd"
                 android:textSize="18sp" />
@@ -157,7 +150,7 @@
 
             <TextView
                 android:id="@+id/user_dislike"
-                android:layout_width="250dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:textAlignment="textEnd"
                 android:textSize="18sp" />
@@ -176,7 +169,7 @@
 
             <TextView
                 android:id="@+id/user_net_likes"
-                android:layout_width="257dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:textAlignment="textEnd"
                 android:textSize="18sp" />
@@ -194,29 +187,47 @@
                 android:textSize="18sp" />
             <TextView
                 android:id="@+id/is_hammer_user"
-                android:layout_width="257dp"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:textAlignment="textEnd"
                 android:textSize="18sp" />
         </TableRow>
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/usertourtext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="View Your Tours"
-                android:textSize="18sp" />
-            <TextView
-                android:id="@+id/usercommentstext"
-                android:layout_width="257dp"
-                android:layout_height="match_parent"
-                android:textAlignment="textStart"
-                android:text="View Your Comments"
-                android:textSize="18sp" />
-        </TableRow>
 
     </TableLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layout_view_mine"
+        android:layout_below="@id/tableLayout"
+        android:layout_marginTop="20dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/usertourtext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="View Your Tours"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/usercommentstext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAlignment="textStart"
+            android:text="View Your Comments"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_view_mine"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:text="Admin Page"
+        android:visibility="gone"
+        android:id="@+id/btn_adminpage"/>
+
+</RelativeLayout>

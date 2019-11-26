@@ -19,13 +19,19 @@
             android:textSize="24dp"
             android:text="Add a new Location"/>
 
-        <TextView
-            android:id="@+id/tv_loc_name"
-            android:layout_marginTop="150dp"
-            android:layout_width="wrap_content"
-            android:padding="10dp"
-            android:layout_height="wrap_content"
-            android:text="Location Name:"/>
+    <ImageView
+        android:id="@+id/locationShape"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:src="@color/common_google_signin_btn_text_light_default" />
+
+    <TextView
+        android:id="@+id/tv_loc_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:padding="10dp"
+        android:text="Location Name:" />
 
         <EditText
             android:id="@+id/et_loc_name"
