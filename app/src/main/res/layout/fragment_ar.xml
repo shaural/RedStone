@@ -33,9 +33,8 @@
             android:text="@string/hammerOnly" />
     </LinearLayout>
 
-    <fragment
-        android:id="@+id/free_roam_ar_fragment"
-        android:name="com.google.ar.sceneform.ux.ArFragment"
+    <FrameLayout
+        android:id="@+id/free_roam_ar_fragment_container"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         app:layout_constraintBottom_toBottomOf="parent"

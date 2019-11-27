@@ -9,8 +9,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -24,6 +23,7 @@ import com.google.ar.core.Plane
 import com.google.ar.core.Pose
 import com.google.ar.core.TrackingState
 import com.google.ar.sceneform.AnchorNode
+import com.google.ar.sceneform.FrameTime
 import com.google.ar.sceneform.HitTestResult
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Vector3
@@ -34,6 +34,7 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.android.synthetic.main.basic_tour_text_view.view.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -49,6 +50,12 @@ class ARFragment : Fragment() {
     private var currentPosition: Pose? = null // Camera's current position in space
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient // to get location
+    private val sceneOnUpdate = { frameTime: FrameTime ->
+        run {
+            arFragment.onUpdate(frameTime)
+            updateCameraPosition()
+        }
+    }
     private lateinit var textViewTemplate: ViewRenderable
     private var db: FirebaseFirestore? = null
     private lateinit var location_name: String
@@ -79,6 +86,9 @@ class ARFragment : Fragment() {
 
     private var currentLocation: android.location.Location? = null
 
+    // Somehow we need ArFragment to finish being inflated before we can create the comment views
+    // Maybe create comment views on demand?
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GlobalScope.launch { fetchListOfHammerUsers() }
@@ -88,7 +98,6 @@ class ARFragment : Fragment() {
         if (!isThisDeviceSupported()) {
             return
         }
-
     }
 
     override fun onCreateView(
@@ -101,13 +110,17 @@ class ARFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         displayed_text_view = layoutInflater.inflate(R.layout.basic_tour_text_view, null)
-        arFragment = childFragmentManager.findFragmentById(R.id.free_roam_ar_fragment) as ArFragment
-        arFragment.arSceneView.scene.addOnUpdateListener { frameTime ->
-            run {
-                arFragment.onUpdate(frameTime)
-                updateCameraPosition()
-            }
-        }
+        updateLocation {  }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        arFragment = ArFragment()
+        val fragmentContainerID = view!!.findViewById<FrameLayout>(R.id.free_roam_ar_fragment_container)!!.id
+        activity!!.supportFragmentManager.beginTransaction()
+            .replace(fragmentContainerID!!, arFragment, "ARFragment")
+            .commit()
+
         // Create the pool of ar text views to hold comments
         repeat(MAXIMUM_COMMENTS_ON_SCREEN) {
             val commentView = layoutInflater.inflate(R.layout.comment_item, null)
@@ -119,9 +132,8 @@ class ARFragment : Fragment() {
                     availableArCommentViewPool.add(renderable) }
         }
 
-        updateLocation {  }
+        arFragment.arSceneView.scene.addOnUpdateListener(sceneOnUpdate)
         arFragment.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane, motionEvent: MotionEvent ->
-
             updateLocation {
                 if (textViewTemplate != null) {
                     val anchor = hitResult.createAnchor()
@@ -162,11 +174,27 @@ class ARFragment : Fragment() {
                             }
                         }
                     }
-
                 }
             }
         }
+        view!!.findViewById<Switch>(R.id.byLikesSwitch).setOnCheckedChangeListener {button: CompoundButton, state: Boolean -> sortingCriteriaChanged()}
+        view!!.findViewById<Switch>(R.id.hammerOnlySwitch).setOnCheckedChangeListener {button: CompoundButton, state: Boolean -> sortingCriteriaChanged()}
+        updateLocation {  }
     }
+
+    override fun onPause() {
+        super.onPause()
+        stopShowingAllComments()
+        availableArCommentViewPool.clear()
+        arFragment.arSceneView.scene.removeOnUpdateListener(sceneOnUpdate)
+        arFragment.setOnTapArPlaneListener(null)
+        view!!.findViewById<Switch>(R.id.byLikesSwitch).setOnCheckedChangeListener(null)
+        view!!.findViewById<Switch>(R.id.hammerOnlySwitch).setOnCheckedChangeListener(null)
+        currentPosition = null
+        currentLocation = null
+        cur_id_str = null
+    }
+
      fun updateCameraPosition() {
         val camera = arFragment.arSceneView.arFrame?.camera
         currentPosition =
@@ -260,10 +288,11 @@ class ARFragment : Fragment() {
             if (minVal != null && !locations_db[minVal].isNullOrEmpty()) {
                 var db_val = locations_db[minVal].orEmpty()
                 val new_id_str = map_gp_id[minVal].orEmpty()
-                if (new_id_str != cur_id_str) {
-                    locationChanged(new_id_str)
-                }
+                val locationChanged = cur_id_str != new_id_str
                 cur_id_str = new_id_str
+                if (locationChanged) {
+                    locationChanged()
+                }
                 getTags(cur_id_str!!)
                 location_name = db_val.substring(0, db_val.indexOf('-'))
                 location_desc = db_val.substring(db_val.indexOf('-') + 1, db_val.length)
@@ -332,13 +361,19 @@ class ARFragment : Fragment() {
         })
     }
 
-    private fun locationChanged(newLocationID: String) {
+    private fun locationChanged() {
         //you should show comment age!
-        hideAnyExistingCommentsAndShowSortedCommentsForLocation(newLocationID, false, false)
+        refreshCommentsDisplay()
     }
 
     private fun sortingCriteriaChanged() {
-        hideAnyExistingCommentsAndShowSortedCommentsForLocation(cur_id_str!!, false, false)
+        refreshCommentsDisplay()
+    }
+
+    private fun refreshCommentsDisplay() {
+        val sortByLikes = view!!.findViewById<Switch>(R.id.byLikesSwitch).isChecked
+        val hammerOnly = view!!.findViewById<Switch>(R.id.hammerOnlySwitch).isChecked
+        hideAnyExistingCommentsAndShowSortedCommentsForLocation(cur_id_str!!, sortByLikes, hammerOnly)
     }
 
     private fun hideAnyExistingCommentsAndShowSortedCommentsForLocation(newLocationID: String, byLikes: Boolean, hammerOnly: Boolean) {
@@ -390,8 +425,8 @@ class ARFragment : Fragment() {
                 oneMeterLeft.scaled(forwardLeftUp[1].toFloat())), oneMeterUp.scaled(forwardLeftUp[2].toFloat()))}
 
         for ((position, node) in commentNodes.withIndex()) {
-            // One meter in front of the camera but at the same height as the camera
-            node.worldPosition = Vector3.add(cameraPosition, oneMeterForward)
+            // Two meters in front of the camera but at the same height as the camera
+            node.worldPosition = Vector3.add(cameraPosition, oneMeterForward.scaled(2.0F))
             // If there's enough comments for a full row, shift every comment left one meter so the
             // arrangement of comments is horizontally centered in front of the user
             if (commentNodes.size >= 3) {
