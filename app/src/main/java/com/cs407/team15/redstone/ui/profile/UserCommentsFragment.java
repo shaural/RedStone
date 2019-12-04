@@ -96,6 +96,54 @@ public class UserCommentsFragment extends Fragment implements RecyclerAdapter.It
                                 getActivity().onBackPressed();
             }
         });
+
+        /**
+         * again for the tours section
+         */
+        reference = FirebaseDatabase.getInstance().getReference("Comments").child("tour");
+        // reference.s
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    //iterator loop for snapshot.getChildren
+                    Iterator<DataSnapshot> iterator = snapshot.getChildren().iterator();
+                    while (iterator.hasNext()) {
+                        DataSnapshot temp = iterator.next();
+                        //System.out.println(temp.child("publisher"));
+                        if (temp.child("publisher").getValue().equals(userEmail)) {
+                            Comment comment = temp.getValue(Comment.class);
+                            //comment.setPath(temp.getKey());
+                            listForDeletingTags.add(comment);
+                            commentList.add(comment);
+                            postids.add(comment.getLocationId());
+                            paths.add(comment.getPath());
+                        }
+                    }
+
+
+                }
+                if (commentList.isEmpty()) {
+                    Toast toast = Toast.makeText(getContext(),"No Comments Created",Toast.LENGTH_SHORT);
+                    toast.show();
+                    getActivity().onBackPressed();
+                }
+                else {
+                    fillRecycleViewer(commentList);
+                }
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast toast = Toast.makeText(getContext(),"Database Error",Toast.LENGTH_SHORT);
+                toast.show();
+                getActivity().onBackPressed();
+            }
+        });
+
         return view;
     }
 
