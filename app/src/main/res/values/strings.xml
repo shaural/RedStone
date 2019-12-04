@@ -84,6 +84,8 @@
     <!--    Free Roam-->
     <string name="btn_ar">AR</string>
     <string name="btn_map">Map</string>
+    <string name="byLikes">Sort by likes instead\nof date</string>
+    <string name="hammerOnly">Hammer user\ncomments only</string>
 
     <!-- Comments -->
     <string name="sort_btn">Sort</string>
