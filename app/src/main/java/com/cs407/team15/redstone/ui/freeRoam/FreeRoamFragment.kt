@@ -43,6 +43,7 @@ class FreeRoamFragment : Fragment() {
 
         btn_ar.setOnClickListener{
             if (!isAR) {
+                mapFrag.onPause()
                 nextFrag = arFrag
                 activity!!.supportFragmentManager.beginTransaction()
                     .replace(fragmentContainerID!!, nextFrag, "ARFragment")
@@ -53,6 +54,7 @@ class FreeRoamFragment : Fragment() {
         }
         btn_map.setOnClickListener{
             if (isAR) {
+                arFrag.onPause()
                 nextFrag = mapFrag
                 activity!!.supportFragmentManager.beginTransaction()
                     .replace(fragmentContainerID!!, nextFrag, "MapFragment")
@@ -61,6 +63,11 @@ class FreeRoamFragment : Fragment() {
                 isAR = !isAR
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        (if (isAR) arFrag else mapFrag).onPause()
     }
 
     override fun onDestroy() {

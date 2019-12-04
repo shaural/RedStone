@@ -186,7 +186,9 @@ data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
                     comments.addAll(dataSnapshot.children.map{ snapshot -> snapshot.getValue(Comment::class.java)!!})
                     callback(comments)
                 }
-                override fun onCancelled(e: DatabaseError) {}
+                override fun onCancelled(e: DatabaseError) {
+                    System.out.println("Should be unreachable")
+                }
             }
             locationCommentsReference.addValueEventListener(listener)
             return {locationCommentsReference.removeEventListener(listener)}

@@ -46,16 +46,10 @@ class ARFragment : Fragment() {
     private val MIN_OPENGL_VERSION = 3.0
     private val MAXIMUM_COMMENTS_ON_SCREEN = 30
 
-    private lateinit var arFragment: ArFragment // Google's ArFragment != this class
+    private var arFragment: ArFragment? = null // Google's ArFragment != this class
     private var currentPosition: Pose? = null // Camera's current position in space
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient // to get location
-    private val sceneOnUpdate = { frameTime: FrameTime ->
-        run {
-            arFragment.onUpdate(frameTime)
-            updateCameraPosition()
-        }
-    }
     private lateinit var textViewTemplate: ViewRenderable
     private var db: FirebaseFirestore? = null
     private lateinit var location_name: String
@@ -86,9 +80,6 @@ class ARFragment : Fragment() {
 
     private var currentLocation: android.location.Location? = null
 
-    // Somehow we need ArFragment to finish being inflated before we can create the comment views
-    // Maybe create comment views on demand?
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GlobalScope.launch { fetchListOfHammerUsers() }
@@ -105,21 +96,28 @@ class ARFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_ar, container, false)
+        val view = inflater.inflate(R.layout.fragment_ar, container, false)
+        arFragment = childFragmentManager.findFragmentById(R.id.free_roam_ar_fragment) as ArFragment
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         displayed_text_view = layoutInflater.inflate(R.layout.basic_tour_text_view, null)
-        updateLocation {  }
-    }
 
-    override fun onResume() {
-        super.onResume()
-        arFragment = ArFragment()
-        val fragmentContainerID = view!!.findViewById<FrameLayout>(R.id.free_roam_ar_fragment_container)!!.id
-        activity!!.supportFragmentManager.beginTransaction()
-            .replace(fragmentContainerID!!, arFragment, "ARFragment")
-            .commit()
+        var frameNumber = 0
+        val sceneOnUpdate = { frameTime: FrameTime ->
+            run {
+                arFragment!!.onUpdate(frameTime)
+                updateCameraPosition()
+                frameNumber += 1
+                // This is reached about once every 8 seconds on my machine. The frequency doesn't
+                // really matter as long as it is between 1 - 10 seconds.
+                if (frameNumber % 100 == 0) {
+                    updateLocation { }
+                }
+            }
+        }
+        arFragment!!.arSceneView.scene.addOnUpdateListener(sceneOnUpdate)
 
         // Create the pool of ar text views to hold comments
         repeat(MAXIMUM_COMMENTS_ON_SCREEN) {
@@ -132,13 +130,12 @@ class ARFragment : Fragment() {
                     availableArCommentViewPool.add(renderable) }
         }
 
-        arFragment.arSceneView.scene.addOnUpdateListener(sceneOnUpdate)
-        arFragment.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane, motionEvent: MotionEvent ->
+        arFragment!!.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane, motionEvent: MotionEvent ->
             updateLocation {
                 if (textViewTemplate != null) {
                     val anchor = hitResult.createAnchor()
                     val anchorNode = AnchorNode(anchor)
-                    anchorNode.setParent(arFragment.arSceneView.scene)
+                    anchorNode.setParent(arFragment!!.arSceneView.scene)
                     val textViewNode = Node()
                     textViewNode.setParent(anchorNode)
                     var plane_type = plane.type
@@ -159,7 +156,7 @@ class ARFragment : Fragment() {
                         tv_to_close = hitTestResult
                         tv_to_close_motion = motionEvent
                         // First call ArFragment's listener to handle TransformableNodes.
-                        arFragment.onPeekTouch(tv_to_close, tv_to_close_motion)
+                        arFragment!!.onPeekTouch(tv_to_close, tv_to_close_motion)
 
                         //We are only interested in the ACTION_UP events - anything else just return
                         if (tv_to_close_motion.action == MotionEvent.ACTION_UP) {
@@ -168,7 +165,7 @@ class ARFragment : Fragment() {
                             if (tv_to_close.node != null) {
                                 var hitNode =  tv_to_close.node
                                 if (hitNode != null) {
-                                    arFragment.arSceneView.scene.removeChild(hitNode);
+                                    arFragment!!.arSceneView.scene.removeChild(hitNode);
                                     hitNode.setParent(null)
                                 }
                             }
@@ -184,19 +181,24 @@ class ARFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        stopShowingAllComments()
-        availableArCommentViewPool.clear()
-        arFragment.arSceneView.scene.removeOnUpdateListener(sceneOnUpdate)
-        arFragment.setOnTapArPlaneListener(null)
-        view!!.findViewById<Switch>(R.id.byLikesSwitch).setOnCheckedChangeListener(null)
-        view!!.findViewById<Switch>(R.id.hammerOnlySwitch).setOnCheckedChangeListener(null)
-        currentPosition = null
-        currentLocation = null
-        cur_id_str = null
+        stopWatchingCommentsCallback?.invoke()
+        arFragment!!.onPause()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        stopWatchingCommentsCallback?.invoke()
+        arFragment!!.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopWatchingCommentsCallback?.invoke()
+        arFragment!!.onDestroy()
     }
 
      fun updateCameraPosition() {
-        val camera = arFragment.arSceneView.arFrame?.camera
+        val camera = arFragment?.arSceneView?.arFrame?.camera
         currentPosition =
             if (camera?.trackingState == TrackingState.TRACKING) camera?.displayOrientedPose else null
     }
@@ -335,9 +337,9 @@ class ARFragment : Fragment() {
     private fun stopShowingAllComments() {
         // We need to remove all the text views showing comments for the old location.
         nodesForComments.forEach { node -> run {
-            arFragment.arSceneView.scene.removeChild(node)
+            arFragment!!.arSceneView.scene.removeChild(node)
             (node.parent as AnchorNode).anchor!!.detach()
-            arFragment.arSceneView.scene.removeChild(node.parent)
+            arFragment!!.arSceneView.scene.removeChild(node.parent)
         }}
         // Add all the AR text views that were in use back into the available pool
         availableArCommentViewPool.addAll(inUseArCommentViewPool)
@@ -385,12 +387,12 @@ class ARFragment : Fragment() {
         stopWatchingCommentsCallback = com.cs407.team15.redstone.model.Location.watchCommentsForLocation(newLocationID)
             { comments ->
                 stopShowingAllComments()
-                val camera = arFragment.arSceneView.scene.camera
+                val camera = arFragment!!.arSceneView.scene.camera
                 val oneMeterForward = Vector3(camera.forward).apply { y = 0F; normalized() }
                 val oneMeterLeft = Vector3(camera.left).apply { y = 0F; normalized() }
                 val oneMeterUp = Vector3(camera.up).apply { x = 0F; z = 0F; normalized() }
                 val nodesToBePositioned = mutableListOf<Node>()
-                val anchor = arFragment.arSceneView.session!!.createAnchor(currentPosition)
+                val anchor = arFragment!!.arSceneView.session!!.createAnchor(currentPosition)
                 val anchorNode = AnchorNode(anchor)
                 val currentPositionVector = Vector3(
                     currentPosition!!.tx(),
@@ -399,10 +401,10 @@ class ARFragment : Fragment() {
                 )
                 applySortingToComments(comments, byLikes, hammerOnly).forEach { comment ->
                     val arTextView = availableArCommentViewPool.firstOrNull()
-                    if (arTextView != null && arFragment.arSceneView.arFrame?.camera?.trackingState == TrackingState.TRACKING) {
+                    if (arTextView != null && arFragment!!.arSceneView.arFrame?.camera?.trackingState == TrackingState.TRACKING) {
                         availableArCommentViewPool.remove(arTextView)
                         inUseArCommentViewPool.add(arTextView)
-                        anchorNode.setParent(arFragment.arSceneView.scene)
+                        anchorNode.setParent(arFragment!!.arSceneView.scene)
                         val textViewNode = Node()
                         textViewNode.setParent(anchorNode)
                         arTextView.view.findViewById<TextView>(R.id.comment).text = comment.comment
