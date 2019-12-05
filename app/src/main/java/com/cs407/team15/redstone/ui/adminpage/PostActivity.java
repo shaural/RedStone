@@ -225,48 +225,6 @@ public class PostActivity extends AppCompatActivity {
         }
     }
 
-    private void addNotification(String userid, String postid, String text){
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid);
-
-        Long tsLong = System.currentTimeMillis()/1000; // Timestamp
-        String ts = tsLong.toString();
-
-        HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("postid", postid);
-        hashMap.put("postimage", "");
-        hashMap.put("description", text);
-        hashMap.put("publisher", FirebaseAuth.getInstance().getCurrentUser().getUid());
-        hashMap.put("publisherid", FirebaseAuth.getInstance().getCurrentUser().getEmail());
-        hashMap.put("category", "Notification");
-        hashMap.put("timestamp", ts);
-
-        reference.push().setValue(hashMap);
-    }
-
-//    private void deleteNotifications(final String postid, String userid){
-//        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid);
-//        reference.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-//                    if (snapshot.child("postid").getValue().equals(postid)){
-//                        snapshot.getRef().removeValue()
-//                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                    @Override
-//                                    public void onComplete(@NonNull Task<Void> task) {
-//                                        Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
-//                                    }
-//                                });
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
-//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
