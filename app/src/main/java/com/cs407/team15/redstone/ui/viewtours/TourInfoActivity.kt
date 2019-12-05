@@ -17,11 +17,18 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.firestore.SetOptions
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.*
+import com.google.firebase.firestore.GeoPoint
 import kotlinx.android.synthetic.main.location_display.view.*
+import kotlinx.coroutines.tasks.await
 import java.util.*
 import kotlin.Comparator
 
-class TourInfoActivity : AppCompatActivity() {
+class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
 
     lateinit var recyclerView: RecyclerView
     lateinit var commentList: ArrayList<Comment>
@@ -30,13 +37,16 @@ class TourInfoActivity : AppCompatActivity() {
 
     private lateinit var database: DatabaseReference
     lateinit var tourName: String
+    lateinit var tourId: String
+
+    private lateinit var mMap: GoogleMap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_tour_info)
         tourName = intent.getStringExtra("tourName")
-        val tourId = intent.getStringExtra("tourID")
+        tourId = intent.getStringExtra("tourID")
 
         //Setting title to name of tour
         val setTourName = findViewById<TextView>(R.id.tour_name)
@@ -93,6 +103,9 @@ class TourInfoActivity : AppCompatActivity() {
             }
         }
 
+        //Getting the map for the tour
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.tourinfo_map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
 
         // Comments recyclerview
         viewAllComments = findViewById(R.id.tv_comments)
@@ -117,6 +130,46 @@ class TourInfoActivity : AppCompatActivity() {
             //intent.putExtra("context", context);
             startActivity(intent)
         }
+    }
+
+    //Where to display markers for tour
+    override fun onMapReady(googleMap: GoogleMap) {
+
+        mMap = googleMap
+        mMap.uiSettings.isZoomControlsEnabled=true
+        mMap.setMinZoomPreference(14f)
+
+        //setting the map to Purdue campus
+        FirebaseFirestore.getInstance().collection("schools").document("Purdue").get().addOnSuccessListener {
+            val schoolLoc = it["coordinates"] as GeoPoint
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(schoolLoc.latitude,schoolLoc.longitude)))
+        }
+
+        FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { docu ->
+            if (docu != null){
+                var tourLoc: ArrayList<String> = docu["locations"] as ArrayList<String>
+                tourLoc?.let {
+                    for (i in it){
+                        FirebaseFirestore.getInstance().collection("locations").get().addOnSuccessListener { loc ->
+                            for (l in loc){
+                                if (l["name"] == i){
+                                    val geomarker = l["coordinates"] as GeoPoint
+                                    val ltlg = LatLng(geomarker.latitude, geomarker.longitude)
+                                    mMap.addMarker(MarkerOptions().position(ltlg).title("Tour Spot"))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+//        val locations = FirebaseFirestore.getInstance().collection("locations").get()
+//            .addOnSuccessListener { locations ->
+//                for (loc in locations.documents) {
+//                    if (loc["name"] as String == title as String) {
+//                        location_id = loc.id
     }
 
     override fun onStart() {

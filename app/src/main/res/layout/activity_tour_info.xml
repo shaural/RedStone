@@ -29,8 +29,15 @@
         android:id="@+id/total_likes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Total likes:"
-        android:layout_marginLeft="35dp"/>
+        android:layout_marginLeft="35dp"
+        android:text="Total likes:" />
+
+    <fragment
+        android:id="@+id/tourinfo_map"
+        class="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="350dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"/>
 
     <RelativeLayout
         android:id="@+id/buttons"
