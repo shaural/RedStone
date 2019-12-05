@@ -137,7 +137,7 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
 
         mMap = googleMap
         mMap.uiSettings.isZoomControlsEnabled=true
-        mMap.setMinZoomPreference(14f)
+        mMap.setMinZoomPreference(13f)
 
         //setting the map to Purdue campus
         FirebaseFirestore.getInstance().collection("schools").document("Purdue").get().addOnSuccessListener {
