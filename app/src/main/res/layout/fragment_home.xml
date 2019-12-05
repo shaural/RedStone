@@ -15,15 +15,6 @@
         android:text="Welcome to Red Stone !!"
         android:id="@+id/welcome"/>
 
-    <!--
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="vertical" />
-
-    -->
-
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/home_vp_tab"
         android:layout_below="@id/welcome"
@@ -38,6 +29,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:id="@+id/fab_qrcode"
+        app:srcCompat="@drawable/ic_btn_qrcode"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="25dp"
         />
 </RelativeLayout>
 

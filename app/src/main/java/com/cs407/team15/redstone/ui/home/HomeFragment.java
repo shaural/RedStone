@@ -22,6 +22,7 @@ import com.cs407.team15.redstone.model.AdminPost;
 import com.cs407.team15.redstone.model.Notices;
 import com.cs407.team15.redstone.ui.adminpage.PostAdapter;
 import com.cs407.team15.redstone.ui.adminpage.TabsPagerAdapter;
+import com.cs407.team15.redstone.ui.publicboard.PublicBoardActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -43,6 +44,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,6 +59,8 @@ public class HomeFragment extends Fragment {
     private ViewPager viewPager;
     private TabsPagerAdapter tabsPagerAdapter;
     private TabLayout mTabLayout;
+    private FloatingActionButton fab;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -71,6 +76,15 @@ public class HomeFragment extends Fragment {
         mTabLayout.setupWithViewPager(viewPager);
         mTabLayout.getTabAt(3).setIcon(R.drawable.ic_notification);
 
+        fab = v.findViewById(R.id.fab_qrcode);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                IntentIntegrator.forSupportFragment(HomeFragment.this).initiateScan();
+            }
+        });
+
         return v;
     }
 
@@ -79,5 +93,23 @@ public class HomeFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if(result != null) {
+            if(result.getContents() == null) {
+                Toast.makeText(getActivity(), "Cancelled", Toast.LENGTH_LONG).show();
+            } else {
+                if (result.getContents().equals("PUBLIC_BOARD")) {
+                    Intent intent = new Intent(getActivity(), PublicBoardActivity.class);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(getActivity(), "Cannot recognize this QR code", Toast.LENGTH_LONG).show();
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
 
 }
