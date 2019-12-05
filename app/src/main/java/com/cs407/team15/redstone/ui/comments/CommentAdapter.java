@@ -33,6 +33,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageViewHolder> {
@@ -98,20 +99,26 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                     if (holder.like.getTag().equals("like")) {
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(position)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).setValue(true);
+                        addNotification(comment.getPublisherid(),comment.getCommentid(), "liked your comment", comment.getLocationId());
 
                     } else {
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(position)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).removeValue();
+                        deleteNotifications(comment.getCommentid(), firebaseUser.getUid());
+
                     }
                 }
                 else {
                     if (holder.like.getTag().equals("like")) {
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(0)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).setValue(true);
+                        addNotification(comment.getPublisherid(),comment.getCommentid(), "liked your comment", comment.getLocationId());
 
                     } else {
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(0)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).removeValue();
+                        deleteNotifications(comment.getCommentid(), firebaseUser.getUid());
+
                     }
                 }
             }
@@ -157,6 +164,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
+                                                    deleteNotifications(comment.getCommentid(), firebaseUser.getUid());
                                                     Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
                                                 }
                                             }
@@ -318,6 +326,40 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             }
         });
 
+    }
+
+    private void addNotification(String userid, String commentid, String text, String postID){
+        Log.e(TAG, "notification sent to " + userid + "from " + postid);
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid);
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("userid", firebaseUser.getUid());
+        hashMap.put("userEmail", firebaseUser.getEmail());
+        hashMap.put("text", text);
+        hashMap.put("commentid", commentid); // will be the key in Table
+        hashMap.put("postid", postID);
+        hashMap.put("ispost", true);
+
+        reference.push().setValue(hashMap);
+    }
+
+    private void deleteNotifications(final String postid, String userid){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid);
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    if (snapshot.child("commentid").getValue().equals(postid)){
+                        snapshot.getRef().removeValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
 

@@ -1,6 +1,7 @@
 package com.cs407.team15.redstone.ui.adminpage;
 
 
+import android.app.Notification;
 import android.content.Context;
 import android.os.Bundle;
 
@@ -21,12 +22,16 @@ import android.widget.TextView;
 
 import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.AdminPost;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 
 public class OtherFragment extends Fragment {
@@ -53,6 +58,7 @@ public class OtherFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         prepareData();
+        //readNotifications();
 
     }
 
@@ -105,5 +111,8 @@ public class OtherFragment extends Fragment {
                 });
 
     }
+
+
+
 
 }

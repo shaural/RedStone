@@ -3,6 +3,7 @@ package com.cs407.team15.redstone.model
 import android.util.Log
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ServerTimestamp
@@ -10,6 +11,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.FileReader
+import java.util.HashMap
 import kotlin.reflect.KClass
 
 
@@ -77,8 +79,10 @@ data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
                         val locationName = location.get(NAME) as String
                         val message = "$locationName has been removed due to receiving too many flags."
                       
-                        val notice = hashMapOf(MESSAGE to message, IS_DISMISSED to false)
-                        Notices.submitNotice("System", "Location Removed", message, locationCreator)
+                        // val notice = hashMapOf(MESSAGE to message, IS_DISMISSED to false)
+                        //Notices.submitNotice("System", "Location Removed", message, locationCreator)
+                        addNotification(locationCreator, message)
+
 
                         // Delete all of the location's flags and then the location itself
                         val locationFlags = location.reference.collection(FLAGGING_USERS).get().await().documents
@@ -146,5 +150,21 @@ data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
                 // Sort alphabetically by tour name, ignoring case
                 .sortedBy { location -> location.name.toUpperCase() }
         }
+
+        private fun addNotification(userid: String, text: String) {
+            val reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid)
+            val key: String = reference.key!!
+            val hashMap = HashMap<String, Any>()
+            hashMap["userid"] = "System"
+            hashMap["text"] = text
+            hashMap["commentid"] = key // will be the key in Table
+            hashMap["ispost"] = false
+
+            reference.push().setValue(hashMap)
+        }
     }
+
+
+
+
 }

@@ -160,7 +160,6 @@ public class PostPageActivity extends AppCompatActivity {
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if (task.isSuccessful()){
                                                         finish();
-                                                        //deletePost(id, firebaseUser.getUid());
                                                     }
                                                 }
                                             });
@@ -206,38 +205,13 @@ public class PostPageActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
-            case android.R.id.home:{ //toolbar의 back키 눌렀을 때 동작
+            case android.R.id.home:{
                 finish();
                 return true;
             }
         }
         return super.onOptionsItemSelected(item);
     }
-
-//    private void deletePost(final String postid, String userid){
-//        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid);
-//        reference.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-//                    if (snapshot.child("postid").getValue().equals(postid)){
-//                        snapshot.getRef().removeValue()
-//                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                    @Override
-//                                    public void onComplete(@NonNull Task<Void> task) {
-//                                        Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
-//                                    }
-//                                });
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
-//    }
 
     /**
      * Edit a description of the post
