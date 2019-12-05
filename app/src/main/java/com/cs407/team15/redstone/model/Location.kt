@@ -1,9 +1,11 @@
 package com.cs407.team15.redstone.model
 
 import android.util.Log
+import android.view.View
 import com.google.firebase.FirebaseException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.*
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.ServerTimestamp
@@ -12,6 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.FileReader
 import java.util.HashMap
+import java.util.*
 import kotlin.reflect.KClass
 
 
@@ -161,6 +164,50 @@ data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
             hashMap["ispost"] = false
 
             reference.push().setValue(hashMap)
+        }
+      
+        // Get all GPS points where the amount of degrees that the user has to rotate either
+        // clockwise or counterclockwise from their current position and direction in order to
+        // face the given GPS point is no greater than the given maximum rotation.
+        fun getLocationsInFrontOfCamera(gpsPoints: List<android.location.Location>,
+                                        currentPosition: android.location.Location,
+                                        maxDegreesOffset: Float): List<android.location.Location> {
+            return gpsPoints.filter { gpsPoint -> run {
+                val bearing = currentPosition.bearingTo(gpsPoint)
+                val userDirection = currentPosition.bearing
+                // Compute the minimum number of degrees needed to rotate clockwise or counterclockwise
+                // from the current direction and compare to the maximum permitted
+                Math.min(Math.abs(bearing - userDirection), Math.abs(360f - Math.abs(bearing - userDirection))) <= maxDegreesOffset
+                }
+            }
+        }
+
+        // Get the GPS point from the provided list that is closed to the specified current position
+        fun getNearestLocation(gpsPoints: List<android.location.Location>,
+                               currentPosition: android.location.Location): android.location.Location? {
+            return gpsPoints.minBy { gpsPoint -> currentPosition.distanceTo(gpsPoint) }
+        }
+
+        // Start watching the set of comments for the specified location. When the list of comments
+        // changes, the specified callback will be invoked with the updated list of comments.
+        // When you want to stop watching the set of comments, invoke the callback returned from
+        // this function.
+        fun watchCommentsForLocation(location_id: String, callback: (List<Comment>)->Unit): ()->Unit {
+            val comments = mutableListOf<Comment>()
+            val locationCommentsReference = FirebaseDatabase.getInstance()
+                .getReference("Comments").child("location").child(location_id)
+            val listener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    comments.clear()
+                    comments.addAll(dataSnapshot.children.map{ snapshot -> snapshot.getValue(Comment::class.java)!!})
+                    callback(comments)
+                }
+                override fun onCancelled(e: DatabaseError) {
+                    System.out.println("Should be unreachable")
+                }
+            }
+            locationCommentsReference.addValueEventListener(listener)
+            return {locationCommentsReference.removeEventListener(listener)}
         }
     }
 

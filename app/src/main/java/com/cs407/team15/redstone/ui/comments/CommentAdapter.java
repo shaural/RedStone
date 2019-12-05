@@ -1,7 +1,11 @@
 package com.cs407.team15.redstone.ui.comments;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,12 +17,21 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Comment;
 import com.cs407.team15.redstone.model.User;
+import com.cs407.team15.redstone.ui.location.LocationPage;
+import com.cs407.team15.redstone.ui.profile.UserCommentsFragment;
+import com.cs407.team15.redstone.ui.viewtours.TourInfoActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,6 +49,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageViewHolder> {
     private String TAG = getClass().toString();
     private Context mContext;
@@ -48,6 +63,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
     private boolean onePathAndPost;
+
+    private int vgId;
 
     /**
      * Comment Adapter
@@ -88,6 +105,58 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         getUserInfo(holder.image_profile, holder.username, comment.getPublisher());
         isLiked(comment.getCommentid(), holder.like,position);
         getLikesCount(comment.getCommentid(), holder.like_count, position);
+
+        /**
+         * will take user to location or tour page
+         */
+        holder.comment.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final View v2 = v;
+                if (mComment.get(position).getPath().equals("tour")) {
+                    //need tour name and tour id
+                    final String locId = mComment.get(position).getLocationId();//assuming the implementation is correct, this should be the tour id
+                    db.collection("tours").document(locId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            String title = (String)documentSnapshot.get("name");
+                            //fragment stuff
+                            Bundle bundle = new Bundle();
+                            Intent in = new Intent(mContext, TourInfoActivity.class);
+                            in.putExtra("tourName", title);
+                            in.putExtra("tourID", locId);
+                            startActivity(mContext,in,bundle);
+                        }
+                    });
+                }
+                else if (mComment.get(position).getPath().equals("location")) {
+                    //title
+                    String locId = mComment.get(position).getLocationId(); // use this in a query to get the location and start the location page fragment
+                    //String title;
+                    db.collection("locations").document(locId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                        @SuppressLint("ResourceType")
+                        @Override
+                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                            String title = (String)documentSnapshot.get("name");
+                            FragmentManager fm = ((FragmentActivity)mContext).getSupportFragmentManager();
+
+                            FragmentTransaction ft = fm.beginTransaction();
+                            LocationPage lp = new LocationPage();
+                            Bundle bundle = new Bundle();
+                            bundle.putString("title", title);
+                            lp.setArguments(bundle);
+                            ft.replace(R.id.nav_host_fragment, lp);
+                            ft.addToBackStack(null);
+                            ft.commit();
+                        }
+                    });
+                    //pass in title
+                }
+                else {
+
+                }
+            }
+        });
 
         /**
          * On Click like the comment

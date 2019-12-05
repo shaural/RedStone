@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.ui.ar.ARFragment
@@ -16,6 +17,7 @@ class FreeRoamFragment : Fragment() {
     lateinit var nextFrag : Fragment
     lateinit var arFrag : Fragment
     lateinit var mapFrag : Fragment
+    var fragmentContainerID: Int? = null
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -25,22 +27,26 @@ class FreeRoamFragment : Fragment() {
         arFrag = ARFragment()
         mapFrag = TourFragment()
         nextFrag = arFrag
-        activity!!.supportFragmentManager.beginTransaction()
-            .replace(id, nextFrag, "ARFragment")
-//            .addToBackStack(null) //maybe should add
-            .commit()
         return root
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        fragmentContainerID = view!!.findViewById<FrameLayout>(R.id.fragmentContainer)!!.id
+        activity!!.supportFragmentManager.beginTransaction()
+            .replace(fragmentContainerID!!, nextFrag, "ARFragment")
+//            .addToBackStack(null) //maybe should add
+            .commit()
+
         var btn_ar = getView()!!.findViewById(R.id.launch_ar_fragment) as Button
         var btn_map = getView()!!.findViewById(R.id.launch_map_fragment) as Button
 
         btn_ar.setOnClickListener{
             if (!isAR) {
+                mapFrag.onPause()
                 nextFrag = arFrag
                 activity!!.supportFragmentManager.beginTransaction()
-                    .replace(id, nextFrag, "ARFragment")
+                    .replace(fragmentContainerID!!, nextFrag, "ARFragment")
 //                    .addToBackStack(null) //maybe should add
                     .commit()
                 isAR = !isAR
@@ -48,14 +54,20 @@ class FreeRoamFragment : Fragment() {
         }
         btn_map.setOnClickListener{
             if (isAR) {
+                arFrag.onPause()
                 nextFrag = mapFrag
                 activity!!.supportFragmentManager.beginTransaction()
-                    .replace(id, nextFrag, "MapFragment")
+                    .replace(fragmentContainerID!!, nextFrag, "MapFragment")
 //                    .addToBackStack(null) //maybe should add
                     .commit()
                 isAR = !isAR
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        (if (isAR) arFrag else mapFrag).onPause()
     }
 
     override fun onDestroy() {
