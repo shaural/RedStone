@@ -30,8 +30,10 @@ import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.location_display.view.*
+import kotlinx.android.synthetic.main.nav_header_main.*
 import kotlinx.coroutines.*
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
 
@@ -90,6 +92,11 @@ class LocationPage : Fragment(), CoroutineScope {
         btn_flag = root.btn_flag
         val user = FirebaseAuth.getInstance().currentUser
 
+        //Initialize all tag related items
+        var tagText = root.location_tag
+        var addTagBtn = root.btn_add_tag
+        var deleteTagBtn = root.btn_delete_tag
+
         user?.let{
             uid = user.uid
         }
@@ -114,12 +121,22 @@ class LocationPage : Fragment(), CoroutineScope {
             root.loaction_name.text = title
             val mainRoot = inflater.inflate(R.layout.app_bar_main, container, false)
 
-            val locations = FirebaseFirestore.getInstance().collection("locations").get()
-                .addOnSuccessListener { locations ->
-                    for (loc in locations.documents) {
+            val locations = FirebaseFirestore.getInstance().collection("locations")
+            locations.get().addOnSuccessListener { locations ->
+                for (loc in locations.documents) {
                         if (loc["name"] as String == title as String) {
                             location_id = loc.id
                             publisher_id = loc["user_id"] as String
+
+                            //Display the location's tags
+                            var locTags = arrayListOf<String>()
+                            FirebaseFirestore.getInstance().collection("locations").document(location_id).collection("tags").get().addOnSuccessListener { t ->
+                                for (tNames in t){
+                                    locTags.add(tNames["name"].toString())
+                                }
+                                val tagL = "Tags: " + locTags.joinToString(separator = ", ")
+                                tagText.setText(tagL)
+                            }
 
                             // If the location is new enough to have vertices representing its
                             // polygonal form, then draw the polygon representing the location's
