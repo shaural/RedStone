@@ -60,6 +60,10 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
 
         val setTags = findViewById<TextView>(R.id.tag)
 
+        val setDistance = findViewById<TextView>(R.id.text_distance)
+
+        val setTime = findViewById<TextView>(R.id.text_time)
+
         //Like button pressing
         var ue = FirebaseAuth.getInstance().currentUser!!.email as String
         if (tourId != null) {
@@ -115,6 +119,26 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
                 tourTags = doc["tags"] as ArrayList<String>
                 val tagL = "Tags: " + tourTags.joinToString(separator = ", ")
                 setTags.setText(tagL)
+            }
+        }
+
+        //Displaying tour distance and time
+        FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+            if (doc != null){
+                val tourDist = "Distance: " + doc["distance"] + " mi"
+                setDistance.setText(tourDist)
+                val tourTime = ((doc["distance"] as Double)*24).toInt()
+                var tourTimeStr: String
+                if (tourTime >= 60){
+                    //tourTimeStr = (((doc["distance"] as Double).toInt())/60).toString() + " hr " + ((doc["distance"] as Int)%60).toString() + "min"
+                    tourTimeStr = (tourTime/60).toString() + " hr " + (tourTime%60).toString() + " min"
+                } else if (tourTime < 60 && tourTime >= 0){
+                    //tourTimeStr = ((doc["distance"] as Double)).toString() + "min"
+                    tourTimeStr = tourTime.toString() + " min"
+                } else {
+                    tourTimeStr = "Time Unavailable"
+                }
+                setTime.setText("Time: " + tourTimeStr)
             }
         }
 
@@ -192,6 +216,7 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
             }
         }
 
+        //Delete tag(s) button
         deleteTagBtn.setOnClickListener {
             FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
                 if (doc != null) {
