@@ -9,55 +9,71 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
             <androidx.appcompat.widget.AppCompatImageView
                 android:layout_width="25dp"
                 android:layout_height="25dp"
-                android:id="@+id/image_profile"
+                android:id="@+id/admin_profile"
                 android:layout_margin="10dp"
                 android:src="@drawable/ic_person_img"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/username"
-                android:layout_gravity="center_vertical"
+                android:id="@+id/post_username"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:text="admin"
-                android:textColor="@color/colorPrimaryDark"/>
-        </LinearLayout>
+                android:layout_toEndOf="@id/admin_profile"
+                android:layout_centerVertical="true"
+                android:textColor="#6093FF"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:textColor="#FF5945"
+                android:layout_alignParentEnd="true"
+                android:layout_marginEnd="10dp"
+                android:id="@+id/tv_category"/>
+        </RelativeLayout>
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/post_image" />
+                android:layout_height="0dp"
+                android:id="@+id/post_image"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                android:visibility="gone"/>
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
         <LinearLayout
+            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/createdtime"
+                android:id="@+id/post_createdtime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="2019 - 08 - 26 - 11:00" />
+                android:textColor="#D9D9D9"/>
 
             <TextView
+                android:layout_marginTop="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:textColor="@color/colorPrimaryDark"
-                android:text="blah blah"
-                android:id="@+id/description"/>
+                android:textColor="#BEBEBE"
+                android:id="@+id/post_description"/>
         </LinearLayout>
 
 
