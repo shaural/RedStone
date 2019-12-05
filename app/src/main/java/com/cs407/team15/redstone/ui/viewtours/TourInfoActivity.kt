@@ -157,7 +157,7 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
                                     val geomarker = l["coordinates"] as GeoPoint
                                     val ltlg = LatLng(geomarker.latitude, geomarker.longitude)
                                     val markerIcon = BitmapDescriptorFactory.fromResource(R.drawable.marker)
-                                    mMap.addMarker(MarkerOptions().position(ltlg).title("Tour Spot").icon(markerIcon))
+                                    mMap.addMarker(MarkerOptions().position(ltlg).title(l["name"] as String).icon(markerIcon))
                                 }
                             }
                         }
