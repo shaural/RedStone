@@ -26,6 +26,7 @@ import com.google.firebase.firestore.*
 import kotlinx.android.synthetic.main.location_display.view.*
 import kotlinx.coroutines.tasks.await
 import java.lang.StringBuilder
+import java.lang.reflect.Field
 import java.util.*
 import kotlin.Comparator
 import kotlin.collections.ArrayList
@@ -187,6 +188,51 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
                         val adialog = builder.create()
                         adialog.show()
                     }
+                }
+            }
+        }
+
+        deleteTagBtn.setOnClickListener {
+            FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+                if (doc != null) {
+                    tourTags = doc["tags"] as ArrayList<String>
+
+                    val tagsArr = arrayOfNulls<String>(tourTags.size)
+                    tourTags.toArray(tagsArr)
+                    val checkTags = BooleanArray(tourTags.size) { i -> false }
+
+                    val builder = AlertDialog.Builder(this)
+                    builder.setMultiChoiceItems(tagsArr, checkTags) { dialog, which, isChecked ->
+                        checkTags[which] = isChecked
+                    }
+
+                    builder.setPositiveButton("Add") { dialog, which ->
+                        var addingTagsArr = ArrayList<String>()
+                        for (i in checkTags.indices) {
+                            val checked = checkTags[i]
+                            if (checked) {
+                                addingTagsArr.add(tourTags[i])
+                            }
+                        }
+
+                        //addingTagsArray stores all tags to be added
+                        var addingTagsArray = arrayOfNulls<String>(addingTagsArr.size)
+                        addingTagsArr.toArray(addingTagsArray)
+
+                        for (deletingTag in addingTagsArray) {
+                            FirebaseFirestore.getInstance().collection("tours").document(tourId).update("tags", FieldValue.arrayRemove(deletingTag as String))
+                        }
+
+                        FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+                            if (doc != null){
+                                tourTags = doc["tags"] as ArrayList<String>
+                                val tagL = "Tags: " + tourTags.joinToString(separator = ", ")
+                                setTags.setText(tagL)
+                            }
+                        }
+                    }
+                    val adialog = builder.create()
+                    adialog.show()
                 }
             }
         }
