@@ -27,6 +27,7 @@ import kotlinx.android.synthetic.main.location_display.view.*
 import kotlinx.coroutines.tasks.await
 import java.util.*
 import kotlin.Comparator
+import kotlin.collections.ArrayList
 
 class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
 
@@ -54,6 +55,8 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
 
         val setVoteCount = findViewById<TextView>(R.id.total_likes)
         setVoteCount.setText(tourId)
+
+        val setTags = findViewById<TextView>(R.id.tag)
 
         //Like button pressing
         var ue = FirebaseAuth.getInstance().currentUser!!.email as String
@@ -100,6 +103,15 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
                         }
                     }
                 }
+            }
+        }
+
+        //Tags of tour
+        FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+            if (doc != null){
+                val tourTags: ArrayList<String> = doc["tags"] as ArrayList<String>
+                val tagL = "Tags: " + tourTags.joinToString(separator = ", ")
+                setTags.setText(tagL)
             }
         }
 
