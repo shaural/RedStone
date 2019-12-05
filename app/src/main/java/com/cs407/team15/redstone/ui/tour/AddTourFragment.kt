@@ -242,6 +242,7 @@ class AddTourFragment : Fragment(){
             }
             distance = Math.floor(distance * 100) / 100
         }
+        val time = (distance*24)
 
         // create tour object
         val newTour = Tour(name, type, user_id, hammer, locationsOTStr, tagsOnTour, initialVotes, distance)
@@ -251,10 +252,10 @@ class AddTourFragment : Fragment(){
             .add(newTour)
             .addOnSuccessListener { documentReference ->
                 Log.d(TAG, "DocumentSnapshot written with ID: ${documentReference.id}")
+                db.collection("tours").document(documentReference.id).update(mapOf("time" to time))
             }
             .addOnFailureListener { e ->
                 Log.w(TAG, "Error adding document", e)
-
             }
 
         //go to viewTours

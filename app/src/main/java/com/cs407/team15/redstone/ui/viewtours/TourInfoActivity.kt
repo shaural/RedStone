@@ -231,7 +231,7 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
                         checkTags[which] = isChecked
                     }
 
-                    builder.setPositiveButton("Add") { dialog, which ->
+                    builder.setPositiveButton("Delete") { dialog, which ->
                         var addingTagsArr = ArrayList<String>()
                         for (i in checkTags.indices) {
                             val checked = checkTags[i]
