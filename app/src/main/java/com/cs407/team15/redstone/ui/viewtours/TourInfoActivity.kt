@@ -137,6 +137,7 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
 
         mMap = googleMap
         mMap.uiSettings.isZoomControlsEnabled=true
+        //lower the number, higher the zoom
         mMap.setMinZoomPreference(13f)
 
         //setting the map to Purdue campus
@@ -164,13 +165,6 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
                 }
             }
         }
-
-
-//        val locations = FirebaseFirestore.getInstance().collection("locations").get()
-//            .addOnSuccessListener { locations ->
-//                for (loc in locations.documents) {
-//                    if (loc["name"] as String == title as String) {
-//                        location_id = loc.id
     }
 
     override fun onStart() {
