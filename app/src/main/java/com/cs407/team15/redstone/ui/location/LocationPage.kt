@@ -1,5 +1,6 @@
 package com.cs407.team15.redstone.ui.location
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -27,6 +28,7 @@ import com.cs407.team15.redstone.ui.comments.CommentsActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.location_display.view.*
@@ -130,13 +132,80 @@ class LocationPage : Fragment(), CoroutineScope {
 
                             //Display the location's tags
                             var locTags = arrayListOf<String>()
-                            FirebaseFirestore.getInstance().collection("locations").document(location_id).collection("tags").get().addOnSuccessListener { t ->
+                            val lt = FirebaseFirestore.getInstance().collection("locations").document(location_id).collection("tags")
+                            lt.get().addOnSuccessListener { t ->
                                 for (tNames in t){
                                     locTags.add(tNames["name"].toString())
                                 }
                                 val tagL = "Tags: " + locTags.joinToString(separator = ", ")
                                 tagText.setText(tagL)
                             }
+
+                            //Adding tag to location
+                            addTagBtn.setOnClickListener {
+                                lt.get().addOnSuccessListener { t ->
+                                    //getting all currently associated tags
+                                    for (tNames in t){
+                                        locTags.add(tNames["name"].toString())
+                                    }
+
+                                    var storeTags = ArrayList<String>()
+                                    FirebaseFirestore.getInstance().collection("tags").get().addOnSuccessListener { tagNames ->
+                                        for (n in tagNames.documents){
+                                            var flag = 0
+                                            var stringStorage = n["name"] as String
+                                            for (tt in locTags){
+                                                if (tt == n["name"]){
+                                                    flag = 1
+                                                }
+                                            }
+                                            if (flag == 0){
+                                                storeTags.add(stringStorage)
+                                            }
+                                        }
+
+                                        val tagsArr = arrayOfNulls<String>(storeTags.size)
+                                        storeTags.toArray(tagsArr)
+                                        val checkTags = BooleanArray(storeTags.size) {i -> false}
+
+                                        val builder = AlertDialog.Builder(context)
+                                        builder.setMultiChoiceItems(tagsArr, checkTags) {dialog, which, isChecked ->
+                                            checkTags[which] = isChecked
+                                        }
+
+                                        builder.setPositiveButton("Add") { dialog, which ->
+                                            var addingTagsArr = ArrayList<String>()
+                                            for (i in checkTags.indices) {
+                                                val checked = checkTags[i]
+                                                if (checked) {
+                                                    addingTagsArr.add(storeTags[i])
+                                                }
+                                            }
+
+                                            var addingTagsArray = arrayOfNulls<String>(addingTagsArr.size)
+                                            addingTagsArr.toArray(addingTagsArray)
+
+                                            for (addTag in addingTagsArray) {
+                                                lt.add(hashMapOf("name" to addTag.toString()))
+                                            }
+
+                                            var locTags = arrayListOf<String>()
+                                            val lt = FirebaseFirestore.getInstance().collection("locations").document(location_id).collection("tags")
+                                            lt.get().addOnSuccessListener { t ->
+                                                for (tNames in t){
+                                                    locTags.add(tNames["name"].toString())
+                                                }
+                                                val tagL = "Tags: " + locTags.joinToString(separator = ", ")
+                                                tagText.setText(tagL)
+                                            }
+                                        }
+                                        val adialog = builder.create()
+                                        adialog.show()
+                                    }
+                                }
+                            }
+
+                            //Deleting tag from location
 
                             // If the location is new enough to have vertices representing its
                             // polygonal form, then draw the polygon representing the location's
