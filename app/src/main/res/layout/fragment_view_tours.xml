@@ -57,10 +57,10 @@
         android:text="@string/search_by_hammer_user" />
 
     <Switch
-        android:id="@+id/distanceSwitch"
-        android:layout_width="200dp"
-        android:layout_height="wrap_content"
-        android:text="Sort by Distance" />
+    android:id="@+id/distanceSwitch"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:text="Sort by Distance/Time" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tourList"

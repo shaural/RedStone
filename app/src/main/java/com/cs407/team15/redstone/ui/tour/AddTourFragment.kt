@@ -242,7 +242,7 @@ class AddTourFragment : Fragment(){
             }
             distance = Math.floor(distance * 100) / 100
         }
-        val time = (distance*24)
+        val time = (distance*24).toInt()
 
         // create tour object
         val newTour = Tour(name, type, user_id, hammer, locationsOTStr, tagsOnTour, initialVotes, distance)
