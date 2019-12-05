@@ -1,6 +1,7 @@
 package com.cs407.team15.redstone.ui.adminpage;
 
-
+import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -15,21 +16,18 @@ import android.widget.TextView;
 
 import com.cs407.team15.redstone.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link AdFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class AdFragment extends Fragment {
+
+public class NotificationFragment extends Fragment {
     private final String TAG = getClass().toString();
 
-    public AdFragment() {
+
+    public NotificationFragment() {
         // Required empty public constructor
     }
 
 
-    public static AdFragment newInstance() {
-        return new AdFragment();
+    public static NotificationFragment newInstance() {
+        return new NotificationFragment();
     }
 
     @Override
@@ -42,10 +40,8 @@ public class AdFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View root = inflater.inflate(R.layout.fragment_ad, container, false);
-
+        View root = inflater.inflate(R.layout.fragment_notification, container, false);
 
         return root;
     }
-
 }

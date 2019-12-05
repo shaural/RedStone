@@ -8,13 +8,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.cs407.team15.redstone.R;
-import com.cs407.team15.redstone.ui.home.NotificationFragment;
 
 public class TabsPagerAdapter extends FragmentPagerAdapter {
 
     @StringRes
     private static final int[] TAB_TITLES =
-            new int[] { R.string.tab_text_1, R.string.tab_text_2, R.string.tab_text_3, R.string.tab_text_4};
+            new int[] { R.string.tab_text_1, R.string.tab_text_2, R.string.tab_text_3 };
     private final Context mContext;
 
     public TabsPagerAdapter(Context context, FragmentManager fm) {
@@ -26,13 +25,11 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return FeaturesFragment.newInstance();
+                return NotificationFragment.newInstance();
             case 1:
                 return AdFragment.newInstance();
             case 2:
                 return OtherFragment.newInstance();
-            case 3:
-                return NotificationFragment.newInstance();
             default:
                 return null;
         }
@@ -46,7 +43,7 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        // Show 4 total pages.
-        return 4;
+        // Show 3 total pages.
+        return 3;
     }
 }
