@@ -151,6 +151,11 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
             // get next from queue
             setNextDestination()
         }
+        var btnPrevLoc = findViewById<Button>(R.id.btn_prev_location)
+        btnPrevLoc.setOnClickListener{
+            // get next from queue
+            setPrevDestination()
+        }
     }
 
     fun setNextDestination() {
@@ -184,12 +189,6 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
             // show alert dialog
             alert.show()
         }
-//        if (latLangQ.peek() == null) {
-//            Toast.makeText(this, "Tour Completed!", Toast.LENGTH_LONG)
-//            this.finish()
-//            val intent = Intent(this, MainActivity::class.java)
-//            startActivity(intent)
-//        }
         if (indexLoc < latLangQ.size) {
             val locVar = Location("")
             locVar.latitude = latLangQ[indexLoc].latitude
@@ -203,6 +202,23 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
             tvNextLocName.text = locQ[indexLoc]
         }
     }
+
+    fun setPrevDestination() {
+        if (indexLoc != 0) {
+            indexLoc--
+            val locVar = Location("")
+            locVar.latitude = latLangQ[indexLoc].latitude
+            locVar.longitude = latLangQ[indexLoc].longitude
+            var dir = curLocation.bearingTo(locVar)
+            if (dir < 0) {
+                dir += 360
+            }
+            bear = dir
+            distMiles = curLocation.distanceTo(locVar)
+            tvNextLocName.text = locQ[indexLoc]
+        }
+    }
+
     // Code for orientation sensors
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
         // Do something here if sensor accuracy changes.
