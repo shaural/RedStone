@@ -1,5 +1,6 @@
 package com.cs407.team15.redstone.ui.viewtours
 
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -10,6 +11,8 @@ import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.ui.ar.ARFragment
 import com.cs407.team15.redstone.ui.tour.TourFragment
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import java.util.*
 
@@ -20,9 +23,12 @@ class TourStartActivity : AppCompatActivity(){
     lateinit var arFrag : Fragment
     lateinit var mapFrag : Fragment
     lateinit var locQ : Queue<String>
+    lateinit var latLangQ : Queue<LatLng>
+    private lateinit var fusedLocationCleint : FusedLocationProviderClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         locQ = LinkedList<String>()
+        latLangQ = LinkedList<LatLng>()
         setContentView(R.layout.activity_tour_start)
         val tourLocations = intent.getStringArrayListExtra("locations")
         val tourLatLang = intent.getParcelableArrayListExtra<LatLng>("latLang")
@@ -32,9 +38,26 @@ class TourStartActivity : AppCompatActivity(){
         for (loc in tourLocations) {
             locQ.add(loc)
         }
+        for (latl in tourLatLang) {
+            latLangQ.add(latl)
+        }
         val tvNextLoc = findViewById<TextView>(R.id.tv_next_loc_container)
         tvNextLoc.text = locQ.peek()
         tourLocations.forEach { loc -> Log.d("lol", loc) }
+
+        // get direction using bearings
+        fusedLocationCleint = LocationServices.getFusedLocationProviderClient(this)
+        fusedLocationCleint.lastLocation
+            .addOnSuccessListener { location : Location? ->
+                // Got last known location. In some rare situations this can be null.
+                val locVar = Location("")
+                locVar.latitude = latLangQ.peek().latitude
+                locVar.longitude = latLangQ.peek().longitude
+                val dir = location?.bearingTo(locVar)
+                Log.d("lol-dir", dir.toString())
+            }
+
+        // Fragment management
         arFrag = ARFragment()
         mapFrag = TourFragment()
         nextFrag = arFrag
