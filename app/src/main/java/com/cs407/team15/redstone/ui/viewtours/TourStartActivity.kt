@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
@@ -20,6 +21,8 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import java.util.*
+import kotlin.properties.Delegates
+
 
 class TourStartActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var sensorManager: SensorManager
@@ -38,13 +41,28 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
     private lateinit var fusedLocationCleint : FusedLocationProviderClient
     var bear : Float = 0f
     var rot : Float = 0f
+    lateinit var ivArr : ImageView
+    lateinit var tvDist : TextView
+    var arrow_angle : Float by Delegates.observable(0f) { _, oldValue, newValue ->
+//        Log.d("lol-old", oldValue.toString())
+//        Log.d("lol-new", newValue.toString())
+        ivArr.rotation = 180 + newValue
+    }
+    var distMiles : Float by Delegates.observable(0f) {_, oldValue, newValue ->
+//        Log.d("lol-old", oldValue.toString())
+//        Log.d("lol-new", newValue.toString())
+        tvDist.text = newValue.toString()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+//        ivArr.visibility =
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager // to get orientation of device
         locQ = LinkedList<String>()
         latLangQ = LinkedList<LatLng>()
         setContentView(R.layout.activity_tour_start)
+        ivArr = findViewById<ImageView>(R.id.iv_arrow)
+        tvDist = findViewById<TextView>(R.id.tv_dist_to_loc_container)
         val tourLocations = intent.getStringArrayListExtra("locations")
         val tourLatLang = intent.getParcelableArrayListExtra<LatLng>("latLang")
         val tourName = intent.getStringExtra("tourName")
@@ -73,6 +91,7 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
                     dir += 360
                 }
                 bear = dir
+                distMiles = location.distanceTo(locVar)
 //                Log.d("lol-dir", dir.toString())
             }
 
@@ -115,17 +134,13 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
                 isAR = !isAR
             }
         }
-//        updateOrientationAngles()
-//        Log.d("lol-azumat", orientationAngles[0].toString())
-//        val rotation = - orientationAngles[0] * 360 / (2 * Math.PI)
-//        Log.d("lol-rotation", rotation.toString())
     }
 
     // Code for orientation sensors
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
         // Do something here if sensor accuracy changes.
         // You must implement this callback in your code.
-        Log.d("lol-change", "accuracy changed");
+        Log.d("lol-change", "accuracy changed")
     }
 
     override fun onResume() {
@@ -161,6 +176,8 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
 
         // Don't receive any more updates from either sensor.
         sensorManager.unregisterListener(this)
+
+        //TODO stop anchoring as app crashes when change to map
     }
 
     // Get readings from accelerometer and magnetometer. To simplify calculations,
@@ -181,6 +198,7 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
         if (angleBetween < 0) {
             angleBetween += 360
         }
+        arrow_angle = angleBetween
 //        Log.d("lol-diff", angleBetween.toString())
     }
 

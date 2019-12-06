@@ -38,11 +38,20 @@ android:layout_height="match_parent">
             android:id="@+id/launch_map_fragment_tour"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="100dp"
             android:layout_marginBottom="45dp"
             android:background="@color/btn_def"
             android:padding="5dp"
             android:text="@string/btn_map" />
+        <ImageView
+            android:rotation="180"
+            android:layout_width="25pt"
+            android:layout_height="25pt"
+            android:src="@drawable/arrow"
+            android:visibility="visible"
+            android:id="@+id/iv_arrow"/>
 <!--        <LinearLayout-->
 <!--            android:layout_width="match_parent"-->
 <!--            android:layout_height="match_parent"-->
@@ -95,7 +104,7 @@ android:layout_height="match_parent">
             android:id="@+id/tv_dist_to_loc_unit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=" mi"
+            android:text=" meters"
             android:textSize="16sp"/>
     </LinearLayout>
     <LinearLayout
