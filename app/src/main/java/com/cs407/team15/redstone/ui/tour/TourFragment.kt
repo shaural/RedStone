@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 
-class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener{
+class TourFragment : Fragment(), OnMapReadyCallback{
     val MAXIMUM_VERTICES_IN_LOCATION = 10
 
     var isAddLocationClicked = false
@@ -86,23 +86,35 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
             }
         }
     }
-    override fun onMarkerClick(marker:Marker?):Boolean{
-        // Only show location details if we are not currently selecting points on the map as part
-        // of a new location
-        if (!isAddLocationClicked) {
+//    override fun onMarkerClick(marker:Marker?):Boolean{
+//        // Only show location details if we are not currently selecting points on the map as part
+//        // of a new location
+//        if (!isAddLocationClicked) {
+//            val frag = fragmentManager!!.beginTransaction()
+//            val bundle = Bundle()
+//            bundle.putString("title",marker?.title)
+//            val loc=LocationPage()
+//            loc.arguments=bundle
+//            frag.replace((view!!.parent as ViewGroup).id, loc)
+//            frag.addToBackStack(null)
+//            frag.commit()
+//        }
+//        return true // Keep map from centering on tapped location
+//    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        googleMap.setOnInfoWindowClickListener( GoogleMap.OnInfoWindowClickListener {
+            if (!isAddLocationClicked) {
             val frag = fragmentManager!!.beginTransaction()
             val bundle = Bundle()
-            bundle.putString("title",marker?.title)
-            val loc=LocationPage()
-            loc.arguments=bundle
+            bundle.putString("title",it.title)
+            val loc = LocationPage()
+            loc.arguments = bundle
             frag.replace((view!!.parent as ViewGroup).id, loc)
             frag.addToBackStack(null)
             frag.commit()
         }
-        return true // Keep map from centering on tapped location
-    }
-    override fun onMapReady(googleMap: GoogleMap) {
-
+        })
         mMap = googleMap
         mMap.uiSettings.isZoomControlsEnabled=true
         mMap.setMinZoomPreference(14f)
@@ -115,7 +127,7 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
         )
         mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(activity, R.raw.mapstyle))
         GlobalScope.launch { addAllKnownLocations() }
-        mMap.setOnMarkerClickListener(this)
+//        mMap.setOnMarkerClickListener(this)
         mMap.setOnMapClickListener(
             object : GoogleMap.OnMapClickListener {
                 override fun onMapClick(location: LatLng?) {
