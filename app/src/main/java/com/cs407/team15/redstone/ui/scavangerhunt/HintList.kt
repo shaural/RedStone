@@ -192,7 +192,7 @@ public class HintList : Fragment(),onWinListener {
         }
     fun submitSchool(){
 
-    FirebaseFirestore.getInstance().collection("scavager").document(idScav).set(winScav, SetOptions.merge())
+    FirebaseFirestore.getInstance().collection("scavanger").document(idScav).set(winScav, SetOptions.merge())
 
     }
     }
