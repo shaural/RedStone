@@ -1,6 +1,7 @@
 package com.cs407.team15.redstone.ui.viewtours
 
 import android.content.Context
+import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -8,12 +9,10 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.cs407.team15.redstone.MainActivity
 import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.ui.ar.ARFragment
 import com.cs407.team15.redstone.ui.tour.TourFragment
@@ -43,6 +42,8 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
     var rot : Float = 0f
     lateinit var ivArr : ImageView
     lateinit var tvDist : TextView
+    lateinit var curLocation: Location
+    private lateinit var tvNextLocName : TextView
     var arrow_angle : Float by Delegates.observable(0f) { _, oldValue, newValue ->
 //        Log.d("lol-old", oldValue.toString())
 //        Log.d("lol-new", newValue.toString())
@@ -67,6 +68,7 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
         val tourLatLang = intent.getParcelableArrayListExtra<LatLng>("latLang")
         val tourName = intent.getStringExtra("tourName")
         val tvTourName = findViewById<TextView>(R.id.tv_tour_name)
+        tvNextLocName = findViewById(R.id.tv_next_loc_container)
         tvTourName.text = tourName
         for (loc in tourLocations) {
             locQ.add(loc)
@@ -92,6 +94,7 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
                 }
                 bear = dir
                 distMiles = location.distanceTo(locVar)
+                curLocation = locVar
 //                Log.d("lol-dir", dir.toString())
             }
 
@@ -134,8 +137,43 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
                 isAR = !isAR
             }
         }
+        var btnNextLoc = findViewById<Button>(R.id.btn_next_location)
+        btnNextLoc.setOnClickListener{
+            // get next from queue
+            setNextDestination()
+        }
     }
 
+    fun setNextDestination() {
+        latLangQ.remove()
+        locQ.remove()
+        if (locQ.isEmpty()) {
+            // tour done
+            // TODO decide what to do when completed
+            Toast.makeText(this, "Tour Completed!", Toast.LENGTH_LONG)
+            this.finish()
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+//        if (latLangQ.peek() == null) {
+//            Toast.makeText(this, "Tour Completed!", Toast.LENGTH_LONG)
+//            this.finish()
+//            val intent = Intent(this, MainActivity::class.java)
+//            startActivity(intent)
+//        }
+        if (latLangQ.peek() != null) {
+            val locVar = Location("")
+            locVar.latitude = latLangQ.peek().latitude
+            locVar.longitude = latLangQ.peek().longitude
+            var dir = curLocation.bearingTo(locVar)
+            if (dir < 0) {
+                dir += 360
+            }
+            bear = dir
+            distMiles = curLocation.distanceTo(locVar)
+            tvNextLocName.text = locQ.peek()
+        }
+    }
     // Code for orientation sensors
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
         // Do something here if sensor accuracy changes.
