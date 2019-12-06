@@ -1,6 +1,8 @@
-package com.cs407.team15.redstone.ui.adminpage;
+package com.cs407.team15.redstone.ui.publicboard;
 
 import android.content.Context;
+import android.os.Bundle;
+
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
@@ -9,27 +11,33 @@ import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.cs407.team15.redstone.R;
 
-public class TabsPagerAdapter extends FragmentPagerAdapter {
+public class PbTabsPagerAdapter extends FragmentPagerAdapter {
 
     @StringRes
     private static final int[] TAB_TITLES =
-            new int[] { R.string.tab_text_1, R.string.tab_text_2, R.string.tab_text_3 };
+            new int[] { R.string.pb_tab_text_1, R.string.pb_tab_text_2};
     private final Context mContext;
+    private String location;
 
-    public TabsPagerAdapter(Context context, FragmentManager fm) {
+    public PbTabsPagerAdapter(Context context, FragmentManager fm, String location) {
         super(fm);
         mContext = context;
+        this.location = location;
     }
 
     @Override
     public Fragment getItem(int position) {
+        Bundle bundle = new Bundle();
+        bundle.putString("area", location);
         switch (position) {
             case 0:
-                return NotificationFragment.newInstance();
+                PostingFragment postingFragment = new PostingFragment();
+                postingFragment.setArguments(bundle);
+                return postingFragment;
             case 1:
-                return AdFragment.newInstance();
-            case 2:
-                return OtherFragment.newInstance();
+                PbAdsFragment adsfragment = new PbAdsFragment();
+                adsfragment.setArguments(bundle);
+                return adsfragment;
             default:
                 return null;
         }
@@ -43,7 +51,7 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        // Show 3 total pages.
-        return 3;
+        return 2;
     }
+
 }

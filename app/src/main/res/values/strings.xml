@@ -84,13 +84,22 @@
     <!--    Free Roam-->
     <string name="btn_ar">AR</string>
     <string name="btn_map">Map</string>
+    <string name="byLikes">Sort by likes instead\nof date</string>
+    <string name="hammerOnly">Hammer user\ncomments only</string>
 
     <!-- Comments -->
     <string name="sort_btn">Sort</string>
     <string name="search_tours_by_location">Search tours by location</string>
 
     <!-- Admin Page -->
-    <string name="tab_text_1">Notification</string>
+    <string name="tab_text_1">WHAT\'S NEW</string>
     <string name="tab_text_2">AD</string>
-    <string name="tab_text_3">Others</string>
+    <string name="tab_text_3">OTHERS</string>
+    <string name="tab_text_4"></string>
+    <string name="title_activity_post_page">PostPageActivity</string>
+
+    <!-- Public Board -->
+    <string name="pb_tab_text_1">WALL</string>
+    <string name="pb_tab_text_2">AD</string>
+
 </resources>

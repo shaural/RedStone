@@ -1,7 +1,6 @@
 package com.cs407.team15.redstone.ui.comments;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,8 +16,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -28,8 +25,8 @@ import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Comment;
 import com.cs407.team15.redstone.model.User;
 import com.cs407.team15.redstone.ui.location.LocationPage;
-import com.cs407.team15.redstone.ui.profile.UserCommentsFragment;
 import com.cs407.team15.redstone.ui.viewtours.TourInfoActivity;
+import com.cs407.team15.redstone.utility.NotificationTool;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -46,6 +43,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static androidx.core.content.ContextCompat.startActivity;
@@ -86,10 +84,6 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
     }
 
 
-
-    //public CommentAdapter(Context context, )
-
-
     @NonNull
     @Override
     public CommentAdapter.ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -103,6 +97,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         email = firebaseUser.getEmail();
         final Comment comment = mComment.get(position);
+
+        NotificationTool notificationTool = new NotificationTool(firebaseUser, comment.getLocationId());
 
         holder.comment.setText(comment.getComment());
         getUserInfo(holder.image_profile, holder.username, comment.getPublisher());
@@ -171,7 +167,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                     if (holder.like.getTag().equals("like")) {
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(position)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).setValue(true);
-
+                        addNotification(comment.getPublisherid(),comment.getCommentid(), "liked your comment", comment.getLocationId());
                     } else {
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(position)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).removeValue();
@@ -181,7 +177,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                     if (holder.like.getTag().equals("like")) {
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(0)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).setValue(true);
-
+                        //addNotification(comment.getPublisherid(),comment.getCommentid(), "liked your comment", comment.getLocationId());
+                        notificationTool.addNotification(comment.getPublisherid(), "liked your comment", true);
                     } else {
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(0)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).removeValue();
@@ -230,6 +227,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
                                                 if (task.isSuccessful()) {
+                                                    deleteNotifications(comment.getCommentid(), firebaseUser.getUid());
                                                     Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
                                                 }
                                             }
@@ -391,6 +389,40 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
             }
         });
 
+    }
+
+    private void addNotification(String userid, String commentid, String text, String postID){
+        Log.e(TAG, "notification sent to " + userid + "from " + postid);
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid);
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("userid", firebaseUser.getUid());
+        hashMap.put("userEmail", firebaseUser.getEmail());
+        hashMap.put("text", text);
+        hashMap.put("commentid", commentid); // will be the key in Table
+        hashMap.put("postid", postID);
+        hashMap.put("ispost", true);
+
+        reference.push().setValue(hashMap);
+    }
+
+    private void deleteNotifications(final String postid, String userid){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid);
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    if (snapshot.child("commentid").getValue().equals(postid)){
+                        snapshot.getRef().removeValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
 

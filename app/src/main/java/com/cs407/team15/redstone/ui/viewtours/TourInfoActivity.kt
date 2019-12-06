@@ -1,9 +1,13 @@
 package com.cs407.team15.redstone.ui.viewtours
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.util.Log
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -13,15 +17,26 @@ import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Comment
 import com.cs407.team15.redstone.ui.comments.CommentSectionAdapter
 import com.cs407.team15.redstone.ui.comments.CommentsActivity
-import com.google.firebase.firestore.FirebaseFirestore
+import com.cs407.team15.redstone.utility.NotificationTool
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import com.google.firebase.firestore.SetOptions
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.*
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.core.Tag
+import com.google.firebase.firestore.*
 import kotlinx.android.synthetic.main.location_display.view.*
+import kotlinx.coroutines.tasks.await
+import java.lang.StringBuilder
+import java.lang.reflect.Field
 import java.util.*
 import kotlin.Comparator
+import kotlin.collections.ArrayList
 
-class TourInfoActivity : AppCompatActivity() {
+class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
 
     lateinit var recyclerView: RecyclerView
     lateinit var commentList: ArrayList<Comment>
@@ -30,13 +45,21 @@ class TourInfoActivity : AppCompatActivity() {
 
     private lateinit var database: DatabaseReference
     lateinit var tourName: String
+    lateinit var tourId: String
+
+    private lateinit var notificationTool: NotificationTool
+    private lateinit var  firebaseUser: FirebaseUser
+
+    private lateinit var mMap: GoogleMap
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_tour_info)
         tourName = intent.getStringExtra("tourName")
-        val tourId = intent.getStringExtra("tourID")
+        tourId = intent.getStringExtra("tourID")
 
         //Setting title to name of tour
         val setTourName = findViewById<TextView>(R.id.tour_name)
@@ -44,6 +67,16 @@ class TourInfoActivity : AppCompatActivity() {
 
         val setVoteCount = findViewById<TextView>(R.id.total_likes)
         setVoteCount.setText(tourId)
+
+        val setTags = findViewById<TextView>(R.id.tag)
+
+        val setDistance = findViewById<TextView>(R.id.text_distance)
+
+        val setTime = findViewById<TextView>(R.id.text_time)
+
+        firebaseUser = FirebaseAuth.getInstance().currentUser!!
+
+        notificationTool = NotificationTool(firebaseUser, tourId)
 
         //Like button pressing
         var ue = FirebaseAuth.getInstance().currentUser!!.email as String
@@ -56,43 +89,252 @@ class TourInfoActivity : AppCompatActivity() {
                 val likeButton = findViewById<Button>(R.id.like_btn)
                 var voteCountString = "Total likes: " + voteCount.toString()
                 setVoteCount.setText(voteCountString)
+                likeButton.setText("LIKE")
 
-                //disabling button if user already liked
+                //"Unlike" button if user already liked
                 selectedTour.collection("users_liked").get().addOnSuccessListener { user ->
                     for (u in user.documents) {
                         if (u["email"] as String == ue) {
-                            flag = 1
-                            likeButton.isEnabled = false
-                            likeButton.isClickable = false
+                            likeButton.setText("UNLIKE")
+                            break
                         }
                     }
                 }
 
-                //Updating vote count
+                //Update vote count on like/unlike button click
                 likeButton.setOnClickListener {
-                    val newVoteCount = voteCount + 1
-                    val updateVote = hashMapOf("votes" to newVoteCount)
-                    selectedTour.set(updateVote, SetOptions.merge())
-                    voteCountString = "Total likes: " + newVoteCount.toString()
-                    setVoteCount.setText(voteCountString)
+                    selectedTour.get().addOnSuccessListener { tou ->
+                        var newVoteCount = tou["votes"] as Long
+                        val userData = hashMapOf("email" to ue)
+                        //add user to users_liked
+                        if (likeButton.text.toString().equals("LIKE")){
+                            likeButton.setText("UNLIKE")
+                            newVoteCount += 1
+                            selectedTour.update("votes", newVoteCount)
+                            val totalVotesStr = "Total likes: " + newVoteCount.toString()
+                            setVoteCount.setText(totalVotesStr)
 
-                    //checking if user has already liked the tour
-                    val data = hashMapOf("email" to ue)
-                    var flag = 0;
-                    selectedTour.collection("users_liked").get().addOnSuccessListener { user ->
-                        for (u in user.documents) {
-                            if (u["email"] as String == ue){
-                                flag = 1
+                            //adding user to users_liked
+                            selectedTour.collection("users_liked").add(hashMapOf("email" to ue))
+
+                            // send Notification
+                            var tourOwner: String
+                            FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { d ->
+                                tourOwner = d["user_id"].toString()
+                                notificationTool.addNotification(tourOwner, "liked your tour", false)
                             }
+
                         }
-                        if (flag == 0){
-                            selectedTour.collection("users_liked").document().set(data)
+                        //equals "UNLIKE" -> delete from users_liked
+                        else{
+                            likeButton.setText("LIKE")
+                            newVoteCount -= 1
+                            selectedTour.update("votes", newVoteCount)
+                            val totalVotesStr = "Total likes: " + newVoteCount.toString()
+                            setVoteCount.setText(totalVotesStr)
+
+                            //deleting user from users_liked
+                            selectedTour.collection("users_liked").get().addOnSuccessListener { user ->
+                                for (u in user.documents){
+                                    if (u["email"].toString().equals(ue)){
+                                        selectedTour.collection("users_liked").document(u.id).delete().addOnSuccessListener {
+                                            Log.d("TAG",  "deleted")
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
+        //Tags of tour
+        var tourTags: ArrayList<String>
+        FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+            if (doc != null){
+                tourTags = doc["tags"] as ArrayList<String>
+                val tagL = "Tags: " + tourTags.joinToString(separator = ", ")
+                setTags.setText(tagL)
+            }
+        }
+
+        //Displaying tour distance and time
+        FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+            if (doc != null){
+                val tourDist = "Distance: " + doc["distance"] + " mi"
+                setDistance.setText(tourDist)
+                val tourTime = ((doc["distance"] as Double)*24).toInt()
+                var tourTimeStr: String
+                if (tourTime >= 60){
+                    //tourTimeStr = (((doc["distance"] as Double).toInt())/60).toString() + " hr " + ((doc["distance"] as Int)%60).toString() + "min"
+                    tourTimeStr = (tourTime/60).toString() + " hr " + (tourTime%60).toString() + " min"
+                } else if (tourTime < 60 && tourTime >= 0){
+                    //tourTimeStr = ((doc["distance"] as Double)).toString() + "min"
+                    tourTimeStr = tourTime.toString() + " min"
+                } else {
+                    tourTimeStr = "Time Unavailable"
+                }
+                setTime.setText("Time: " + tourTimeStr)
+            }
+        }
+
+//        val showLocationBtn = findViewById<Button>(R.id.btn_tour_locations)
+//        showLocationBtn.setOnClickListener {
+//            var tourLocations: ArrayList<String>
+//            FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+//            if (doc != null){
+//                tourLocations = doc["locations"] as ArrayList<String>
+//                val builder = AlertDialog.Builder(this)
+//                val locToStr = "You will visit " + tourLocations.joinToString(separator = ", ") + "."
+//                builder.setMessage(locToStr).setCancelable(false).setPositiveButton("OK",  DialogInterface.OnClickListener{
+//                        dialog, id -> dialog.cancel()
+//                })
+//                val alert = builder.create()
+//                alert.setTitle("Touring Locations: ")
+//                alert.show()
+//            }
+//        }
+
+        val showLocationBtn = findViewById<Button>(R.id.btn_tour_locations)
+        showLocationBtn.setOnClickListener {
+            var tourLocations: ArrayList<String>
+            FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+                if (doc != null){
+                    tourLocations = doc["locations"] as ArrayList<String>
+                    val builder = AlertDialog.Builder(this)
+                    val locToStr = "You will visit " + tourLocations.joinToString(separator = ", ") + "."
+                    builder.setMessage(locToStr)
+                    val alert = builder.create()
+                    alert.setTitle("Touring Locations: ")
+                    alert.show()
+                }
+            }
+        }
+
+        //Adding functions to add tag and delete tag buttons
+        val addTagBtn = findViewById<Button>(R.id.btn_add_tag)
+        val deleteTagBtn = findViewById<Button>(R.id.btn_delete_tag)
+        addTagBtn.setOnClickListener {
+
+            FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+                if (doc != null) {
+                    tourTags = doc["tags"] as ArrayList<String>
+
+                    var storeTags = ArrayList<String>()
+                    FirebaseFirestore.getInstance().collection("tags").get().addOnSuccessListener { tagNames ->
+                        for (n in tagNames.documents){
+
+                            //Storing tag names to storeTags
+                            var flag = 0
+                            var stringStorage = n["name"] as String
+                            for (tt in tourTags) {
+
+                                //make sure that duplicate tags aren't shown
+                                if (tt == n["name"]){
+                                    flag = 1
+                                }
+                            }
+                            if (flag == 0){
+                                storeTags.add(stringStorage)
+                            } else {
+                                flag = 0
+                            }
+
+                        }
+
+                        val tagsArr = arrayOfNulls<String>(storeTags.size)
+                        storeTags.toArray(tagsArr)
+                        val checkTags = BooleanArray(storeTags.size) {i -> false}
+
+                        //Storing which tags are checked to add
+                        val builder = AlertDialog.Builder(this)
+                        builder.setMultiChoiceItems(tagsArr, checkTags) {dialog, which, isChecked ->
+                            checkTags[which] = isChecked
+                        }
+
+                        builder.setPositiveButton("Add") {dialog, which ->
+                            var addingTagsArr = ArrayList<String>()
+                            for (i in checkTags.indices) {
+                                val checked = checkTags[i]
+                                if (checked) {
+                                    addingTagsArr.add(storeTags[i])
+                                }
+                            }
+
+                            //addingTagsArray stores all tags to be added
+                            var addingTagsArray = arrayOfNulls<String>(addingTagsArr.size)
+                            addingTagsArr.toArray(addingTagsArray)
+
+                            for (addingTag in addingTagsArray) {
+                                FirebaseFirestore.getInstance().collection("tours").document(tourId).update("tags", FieldValue.arrayUnion(addingTag as String))
+                            }
+
+                            //update the UI
+                            FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+                                if (doc != null){
+                                    tourTags = doc["tags"] as ArrayList<String>
+                                    val tagL = "Tags: " + tourTags.joinToString(separator = ", ")
+                                    setTags.setText(tagL)
+                                }
+                            }
+                        }
+                        val adialog = builder.create()
+                        adialog.show()
+                    }
+                }
+            }
+        }
+
+        //Delete tag(s) button
+        deleteTagBtn.setOnClickListener {
+            FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+                if (doc != null) {
+                    tourTags = doc["tags"] as ArrayList<String>
+
+                    val tagsArr = arrayOfNulls<String>(tourTags.size)
+                    tourTags.toArray(tagsArr)
+                    val checkTags = BooleanArray(tourTags.size) { i -> false }
+
+                    val builder = AlertDialog.Builder(this)
+                    builder.setMultiChoiceItems(tagsArr, checkTags) { dialog, which, isChecked ->
+                        checkTags[which] = isChecked
+                    }
+
+                    builder.setPositiveButton("Delete") { dialog, which ->
+                        var addingTagsArr = ArrayList<String>()
+                        for (i in checkTags.indices) {
+                            val checked = checkTags[i]
+                            if (checked) {
+                                addingTagsArr.add(tourTags[i])
+                            }
+                        }
+
+                        //addingTagsArray stores all tags to be added
+                        var addingTagsArray = arrayOfNulls<String>(addingTagsArr.size)
+                        addingTagsArr.toArray(addingTagsArray)
+
+                        for (deletingTag in addingTagsArray) {
+                            FirebaseFirestore.getInstance().collection("tours").document(tourId).update("tags", FieldValue.arrayRemove(deletingTag as String))
+                        }
+
+                        FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+                            if (doc != null){
+                                tourTags = doc["tags"] as ArrayList<String>
+                                val tagL = "Tags: " + tourTags.joinToString(separator = ", ")
+                                setTags.setText(tagL)
+                            }
+                        }
+                    }
+                    val adialog = builder.create()
+                    adialog.show()
+                }
+            }
+        }
+
+        //Getting the map for the tour
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.tourinfo_map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
 
         // Comments recyclerview
         viewAllComments = findViewById(R.id.tv_comments)
@@ -116,6 +358,41 @@ class TourInfoActivity : AppCompatActivity() {
             intent.putExtra("publisherid", ue)
             //intent.putExtra("context", context);
             startActivity(intent)
+        }
+    }
+
+    //Where to display markers for tour
+    override fun onMapReady(googleMap: GoogleMap) {
+
+        mMap = googleMap
+        mMap.uiSettings.isZoomControlsEnabled=true
+        //lower the number, higher the zoom
+        mMap.setMinZoomPreference(13f)
+
+        //setting the map to Purdue campus
+        FirebaseFirestore.getInstance().collection("schools").document("Purdue").get().addOnSuccessListener {
+            val schoolLoc = it["coordinates"] as GeoPoint
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(schoolLoc.latitude,schoolLoc.longitude)))
+        }
+
+        FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { docu ->
+            if (docu != null){
+                var tourLoc: ArrayList<String> = docu["locations"] as ArrayList<String>
+                tourLoc?.let {
+                    for (i in it){
+                        FirebaseFirestore.getInstance().collection("locations").get().addOnSuccessListener { loc ->
+                            for (l in loc){
+                                if (l["name"] == i){
+                                    val geomarker = l["coordinates"] as GeoPoint
+                                    val ltlg = LatLng(geomarker.latitude, geomarker.longitude)
+                                    val markerIcon = BitmapDescriptorFactory.fromResource(R.drawable.marker)
+                                    mMap.addMarker(MarkerOptions().position(ltlg).title(l["name"] as String).icon(markerIcon))
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

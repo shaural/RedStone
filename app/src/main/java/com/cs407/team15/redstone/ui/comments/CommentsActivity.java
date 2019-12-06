@@ -178,9 +178,6 @@ public class CommentsActivity extends AppCompatActivity implements AdapterView.O
         postid = intent.getStringExtra("postid"); // location ID
         publisherid = intent.getStringExtra("publisherid");
         path = intent.getStringExtra("path");
-        Log.e(TAG, "PATH:" + path);
-        Log.e(TAG, "Author:"+ publisherid);
-        Log.e(TAG, "Postid: "+ postid);
 
         // Recycler View init and attach adapter
         recyclerView = findViewById(R.id.recycler_view);

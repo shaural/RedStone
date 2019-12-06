@@ -59,7 +59,7 @@ internal constructor(context: Context, private val mData: List<String>) :
             }
             .addOnFailureListener {
                 exception ->
-                System.out.println("EERROR")
+                System.out.println("ERROR")
             }
     }
 
@@ -67,7 +67,15 @@ internal constructor(context: Context, private val mData: List<String>) :
         FirebaseFirestore.getInstance().collection("tours").whereEqualTo("name", mData[position])
             .get().addOnSuccessListener { documents ->
                 for (document in documents) {
-                    holder.myMilesView.text = document["distance"].toString() + " mi"
+                    var tourTimeStr = ""
+                    val tourTime: Int = (document["time"] as Long).toInt()
+                    if (tourTime >= 60){
+                        tourTimeStr = (tourTime/60).toString() + "h " + (tourTime%60).toString() + "m"
+                    }
+                    else if (tourTime < 60 && tourTime >= 0) {
+                        tourTimeStr = tourTime.toString() + " min"
+                    }
+                    holder.myMilesView.text = (tourTimeStr + " " + document["distance"].toString() + " mi")
                 }
             }
             .addOnFailureListener {

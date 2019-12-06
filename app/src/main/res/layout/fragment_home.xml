@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -13,15 +12,35 @@
         android:textSize="20dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:text="Welcome to Red Stone !!" />
+        android:text="Welcome to Red Stone !!"
+        android:id="@+id/welcome"/>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/home_vp_tab"
+        android:layout_below="@id/welcome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="vertical" />
+        android:background="?attr/colorPrimary"
+        />
 
+    <androidx.viewpager.widget.ViewPager
+        android:layout_below="@id/home_vp_tab"
+        android:id="@+id/home_vp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        />
 
-</LinearLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:id="@+id/fab_qrcode"
+        app:srcCompat="@drawable/ic_btn_qrcode"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_margin="25dp"
+        />
+</RelativeLayout>
 
 
