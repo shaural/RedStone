@@ -41,7 +41,6 @@ public class FeaturesFragment extends Fragment {
         // Required empty public constructor
     }
 
-
     public static FeaturesFragment newInstance() {
         return new FeaturesFragment();
     }
@@ -70,12 +69,9 @@ public class FeaturesFragment extends Fragment {
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-
-
         mAdapter = new PostAdapter(getActivity(), postArrayList, category, path, null);
 
         recyclerView.setAdapter(mAdapter);
-
 
         return root;
     }
@@ -97,14 +93,13 @@ public class FeaturesFragment extends Fragment {
 
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             Post post = snapshot.getValue(Post.class);
-                            Log.e(TAG, post.getPostid()+": "+post.getCategory());
+                            //Log.e(TAG, post.getPostid()+": "+post.getCategory());
                             if (post.getCategory().equals(category)) {
                                 postArrayList.add(post);
                             }
                         }
                         mAdapter.notifyDataSetChanged();
                     }
-
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {

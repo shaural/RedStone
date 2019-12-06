@@ -100,7 +100,7 @@ public class AdFragment extends Fragment {
 
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             Post post = snapshot.getValue(Post.class);
-                            Log.e(TAG, post.getPostid()+": "+post.getCategory());
+                            //Log.e(TAG, post.getPostid()+": "+post.getCategory());
                             if (post.getCategory().equals(category)) {
                                 postArrayList.add(post);
                             }

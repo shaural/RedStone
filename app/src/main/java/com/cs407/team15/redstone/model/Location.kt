@@ -83,7 +83,6 @@ data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
                         val message = "$locationName has been removed due to receiving too many flags."
                       
                         // val notice = hashMapOf(MESSAGE to message, IS_DISMISSED to false)
-                        //Notices.submitNotice("System", "Location Removed", message, locationCreator)
                         addNotification(locationCreator, message)
 
 

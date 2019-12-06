@@ -32,7 +32,6 @@
         <activity android:name=".ui.post.PostActivity" />
         <activity android:name=".ui.adminpage.adminActivity" />
         <activity android:name=".ui.comments.CommentsActivity" />
-        <activity android:name=".ui.home.NoticeActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
