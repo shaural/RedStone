@@ -1,6 +1,7 @@
 package com.cs407.team15.redstone.ui.viewtours
 
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -9,7 +10,11 @@ import android.hardware.SensorManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
-import android.widget.*
+import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.MainActivity
@@ -19,7 +24,6 @@ import com.cs407.team15.redstone.ui.tour.TourFragment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
-import java.util.*
 import kotlin.properties.Delegates
 
 
@@ -35,8 +39,9 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
     lateinit var nextFrag : Fragment
     lateinit var arFrag : Fragment
     lateinit var mapFrag : Fragment
-    lateinit var locQ : Queue<String>
-    lateinit var latLangQ : Queue<LatLng>
+    lateinit var locQ : ArrayList<String>
+    lateinit var latLangQ : ArrayList<LatLng>
+    var indexLoc = 0
     private lateinit var fusedLocationCleint : FusedLocationProviderClient
     var bear : Float = 0f
     var rot : Float = 0f
@@ -44,6 +49,7 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
     lateinit var tvDist : TextView
     lateinit var curLocation: Location
     private lateinit var tvNextLocName : TextView
+    lateinit var tourName : String
     var arrow_angle : Float by Delegates.observable(0f) { _, oldValue, newValue ->
 //        Log.d("lol-old", oldValue.toString())
 //        Log.d("lol-new", newValue.toString())
@@ -59,25 +65,27 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
         super.onCreate(savedInstanceState)
 //        ivArr.visibility =
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager // to get orientation of device
-        locQ = LinkedList<String>()
-        latLangQ = LinkedList<LatLng>()
+        locQ = ArrayList<String>()
+        latLangQ = ArrayList<LatLng>()
         setContentView(R.layout.activity_tour_start)
         ivArr = findViewById<ImageView>(R.id.iv_arrow)
         tvDist = findViewById<TextView>(R.id.tv_dist_to_loc_container)
         val tourLocations = intent.getStringArrayListExtra("locations")
         val tourLatLang = intent.getParcelableArrayListExtra<LatLng>("latLang")
-        val tourName = intent.getStringExtra("tourName")
+        tourName = intent.getStringExtra("tourName")
         val tvTourName = findViewById<TextView>(R.id.tv_tour_name)
         tvNextLocName = findViewById(R.id.tv_next_loc_container)
         tvTourName.text = tourName
-        for (loc in tourLocations) {
-            locQ.add(loc)
-        }
-        for (latl in tourLatLang) {
-            latLangQ.add(latl)
-        }
+//        for (loc in tourLocations) {
+//            locQ.add(loc)
+//        }
+//        for (latl in tourLatLang) {
+//            latLangQ.add(latl)
+//        }
+        locQ = tourLocations
+        latLangQ = tourLatLang
         val tvNextLoc = findViewById<TextView>(R.id.tv_next_loc_container)
-        tvNextLoc.text = locQ.peek()
+        tvNextLoc.text = locQ[indexLoc]
 //        tourLocations.forEach { loc -> Log.d("lol", loc) }
 
         // get direction using bearings
@@ -86,8 +94,8 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
             .addOnSuccessListener { location : Location? ->
                 // Got last known location. In some rare situations this can be null.
                 val locVar = Location("")
-                locVar.latitude = latLangQ.peek().latitude
-                locVar.longitude = latLangQ.peek().longitude
+                locVar.latitude = latLangQ[indexLoc].latitude
+                locVar.longitude = latLangQ[indexLoc].longitude
                 var dir = location!!.bearingTo(locVar)
                 if (dir < 0) {
                     dir += 360
@@ -95,6 +103,7 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
                 bear = dir
                 distMiles = location.distanceTo(locVar)
                 curLocation = locVar
+                checkArrived()
 //                Log.d("lol-dir", dir.toString())
             }
 
@@ -145,15 +154,35 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
     }
 
     fun setNextDestination() {
-        latLangQ.remove()
-        locQ.remove()
-        if (locQ.isEmpty()) {
+        indexLoc++
+        if (locQ.size == indexLoc) {
             // tour done
             // TODO decide what to do when completed
-            Toast.makeText(this, "Tour Completed!", Toast.LENGTH_LONG)
-            this.finish()
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            val dialogBuilder = AlertDialog.Builder(this)
+            dialogBuilder.setMessage("Congratulations! You have completed the " + tourName + " tour.")
+                // if the dialog is cancelable
+                .setCancelable(false)
+                // positive button text and action
+                .setPositiveButton("Proceed", DialogInterface.OnClickListener {
+                        dialog, id -> run{
+                    this.finish()
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                }})
+//                // negative button text and action
+                .setNegativeButton("Cancel", DialogInterface.OnClickListener {
+                        dialog, id -> run{
+                    indexLoc--
+                    dialog.cancel()
+                }
+                })
+
+            // create dialog box
+            val alert = dialogBuilder.create()
+            // set title for alert dialog box
+            alert.setTitle("Tour Completed")
+            // show alert dialog
+            alert.show()
         }
 //        if (latLangQ.peek() == null) {
 //            Toast.makeText(this, "Tour Completed!", Toast.LENGTH_LONG)
@@ -161,17 +190,17 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
 //            val intent = Intent(this, MainActivity::class.java)
 //            startActivity(intent)
 //        }
-        if (latLangQ.peek() != null) {
+        if (indexLoc < latLangQ.size) {
             val locVar = Location("")
-            locVar.latitude = latLangQ.peek().latitude
-            locVar.longitude = latLangQ.peek().longitude
+            locVar.latitude = latLangQ[indexLoc].latitude
+            locVar.longitude = latLangQ[indexLoc].longitude
             var dir = curLocation.bearingTo(locVar)
             if (dir < 0) {
                 dir += 360
             }
             bear = dir
             distMiles = curLocation.distanceTo(locVar)
-            tvNextLocName.text = locQ.peek()
+            tvNextLocName.text = locQ[indexLoc]
         }
     }
     // Code for orientation sensors
@@ -256,5 +285,30 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
         SensorManager.getOrientation(rotationMatrix, orientationAngles)
 
         // "mOrientationAngles" now has up-to-date information.
+    }
+
+    fun checkArrived() {
+        if (distMiles < 20) {
+            // threshold of arrival met
+            val dialogBuilder = AlertDialog.Builder(this)
+            dialogBuilder.setMessage("You have reached: " + locQ[indexLoc])
+                // if the dialog is cancelable
+                .setCancelable(false)
+                // positive button text and action
+                .setPositiveButton("Proceed", DialogInterface.OnClickListener {
+                    dialog, id -> setNextDestination()
+                })
+//                // negative button text and action
+//                .setNegativeButton("Cancel", DialogInterface.OnClickListener {
+//                        dialog, id -> dialog.cancel()
+//                })
+
+            // create dialog box
+            val alert = dialogBuilder.create()
+            // set title for alert dialog box
+            alert.setTitle("Location Reached")
+            // show alert dialog
+            alert.show()
+        }
     }
 }
