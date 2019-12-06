@@ -111,15 +111,26 @@ class AddTourFragment : Fragment() {
         buttonCreateTour.setOnClickListener {
             addNewTour()
         }
+
         autoGen.setOnClickListener(View.OnClickListener {
-            if (tagsOnTour.size == 0) {
-                val toast = Toast.makeText(context, "Select a tag", Toast.LENGTH_SHORT);
-                toast.show()
-                autoGen.setChecked(false);
-            } else {
-                GlobalScope.launch { autogenerate() }
+            if (autoGen.isChecked) {
+                if (tagsOnTour.size == 0) {
+                    val toast = Toast.makeText(context, "Select a tag", Toast.LENGTH_SHORT);
+                    toast.show()
+                    autoGen.setChecked(false);
+                } else {
+                    GlobalScope.launch { autogenerate() }
 
 
+                }
+            }
+            else {
+                finalLocations.clear()
+                tourList.clear()
+                locPairings.clear()
+                locationsOTStr.clear()
+                locationsOnTour.clear()
+                locationsAdapter!!.notifyDataSetChanged()
             }
         })
 
