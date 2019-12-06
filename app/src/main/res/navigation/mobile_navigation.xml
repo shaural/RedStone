@@ -71,4 +71,15 @@
         android:label="Location"
         tools:layout="@layout/location_display"
         />
+    <fragment
+        android:id="@+id/nav_view_scavanger"
+        android:name="com.cs407.team15.redstone.ui.scavangerhunt.ViewScavanger"
+        android:label="View Scavengerhunts"
+        tools:layout="@layout/fragment_scav_list"
+        />
+    <fragment
+        android:id="@+id/nav_add_scavanger"
+        android:name="com.cs407.team15.redstone.ui.scavangerhunt.AddScavanger"
+        android:label="Add Scavanger"
+        tools:layout="@layout/fragment_addscav" />
 </navigation>

@@ -102,4 +102,10 @@
     <string name="pb_tab_text_1">WALL</string>
     <string name="pb_tab_text_2">AD</string>
 
+    <!-- Scavanger -->
+    <string name="save_tour">Create Scavanger Hunt</string>
+    <string name="start_scavanger">GO</string>
+    <string name="scavanger_name">Scavange Name</string>
+    <string name="scavanger_uid">Scavange UID</string>
+
 </resources>
