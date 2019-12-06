@@ -99,7 +99,7 @@ public class NotificationFragment extends Fragment {
 
             Notification notification = notificationList.get(position);
             Log.e(TAG, "remove attempt:" + notification.getPostid());
-            deleteNotifications(notification.getNotificationId(), notification.getUserid(), position);
+            deleteNotifications(notification.getNotificationId(), firebaseUser.getUid(), position);
 
         }
     };
