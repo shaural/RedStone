@@ -42,6 +42,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import org.w3c.dom.Text
 
 // A great deal of this code comes from following the example in the HelloSceneForm sample AR Core
 // application provided by Google:
@@ -53,7 +54,7 @@ class ARFragment : Fragment(), SensorEventListener {
     // We only show comments for the nearest location in front of the camera. This is the maximum number
     // of degrees that a user needs to turn to directly face a location considered in front of the
     // camera. The larger the value, the looser our definition of "in front of" becomes.
-    private val MAX_POINTING_DEGREES_OFFSET = 60F
+    private val MAX_POINTING_DEGREES_OFFSET = 45F
 
     private var arFragment: ArFragment? = null // Google's ArFragment != this class
     private var currentPosition: Pose? = null // Camera's current position in space
@@ -139,6 +140,9 @@ class ARFragment : Fragment(), SensorEventListener {
         }
         arFragment!!.arSceneView.scene.addOnUpdateListener(sceneOnUpdate)
 
+        // Create the ar view for location name and tags
+        ViewRenderable.builder().setView(context!!, displayed_text_view).build()
+            .thenAccept { renderable -> textViewTemplate = renderable }
         // Create the pool of ar text views to hold comments
         repeat(MAXIMUM_COMMENTS_ON_SCREEN) {
             val commentView = layoutInflater.inflate(R.layout.comment_item, null)
@@ -307,7 +311,7 @@ class ARFragment : Fragment(), SensorEventListener {
         return
     }
     private fun getNearestLocation() {
-        if (dbCompleted && currentLocation != null && azimuthSet) {
+        if (dbCompleted && currentLocation != null && currentPosition != null && azimuthSet) {
             val nearestLocation =
                 com.cs407.team15.redstone.model.Location.getNearestLocation(
 
@@ -330,20 +334,19 @@ class ARFragment : Fragment(), SensorEventListener {
                 val new_id_str = map_gp_id[minVal].orEmpty()
                 val locationChanged = cur_id_str != new_id_str
                 cur_id_str = new_id_str
-                if (locationChanged) {
-                    locationChanged()
-                }
-                getTags(cur_id_str!!)
                 location_name = db_val.substring(0, db_val.indexOf('-'))
                 location_desc = db_val.substring(db_val.indexOf('-') + 1, db_val.length)
-                displayed_text_view.tv_ar_text.text = location_name
-                displayed_text_view.tv_ar_desc.text = location_desc
-                ViewRenderable.builder().setView(context!!, displayed_text_view).build()
-                    .thenAccept { renderable -> textViewTemplate = renderable }
+                textViewTemplate.view.findViewById<TextView>(R.id.tv_ar_text).text = location_name
+                textViewTemplate.view.findViewById<TextView>(R.id.tv_ar_desc).text = location_desc
+                getTags(cur_id_str!!) {
+                    if (locationChanged) {
+                        locationChanged()
+                    }
+                }
             }
         }
     }
-    private fun getTags(idstr: String) {
+    private fun getTags(idstr: String, next: ()->Unit) {
         var ar_tags = ArrayList<String>()
         db!!.collection("locations").document(idstr).collection("tags").get().addOnCompleteListener { col ->
             if (col != null) {
@@ -351,13 +354,13 @@ class ARFragment : Fragment(), SensorEventListener {
                     ar_tags.add(t["name"].toString())
                     Log.d("lol", "DocumentSnapshot data: ${t["name"]}")
                 }
-                displayTags(ar_tags)
+                displayTags(ar_tags, next)
             } else {
                 Log.d("lol", "No such document")
             }
         }
     }
-    private fun displayTags(tagsList: ArrayList<String>) {
+    private fun displayTags(tagsList: ArrayList<String>, next: () -> Unit) {
         var str = ""
         var max_len = 0
         tagsList.forEach { item ->
@@ -370,6 +373,7 @@ class ARFragment : Fragment(), SensorEventListener {
         displayed_text_view.tv_ar_tags.width = 30 * max_len
         displayed_text_view.tv_ar_tags.height = tagsList.size * 75
         displayed_text_view.tv_ar_tags.visibility = View.VISIBLE
+        next()
     }
 
     private fun stopShowingAllComments() {
@@ -379,6 +383,7 @@ class ARFragment : Fragment(), SensorEventListener {
             (node.parent as AnchorNode).anchor!!.detach()
             arFragment!!.arSceneView.scene.removeChild(node.parent)
         }}
+        nodesForComments.clear()
         // Add all the AR text views that were in use back into the available pool
         availableArCommentViewPool.addAll(inUseArCommentViewPool)
         inUseArCommentViewPool.clear()
@@ -417,43 +422,81 @@ class ARFragment : Fragment(), SensorEventListener {
     }
 
     private fun hideAnyExistingCommentsAndShowSortedCommentsForLocation(newLocationID: String, byLikes: Boolean, hammerOnly: Boolean) {
+
+
         stopShowingAllComments()
         // Stop watching comments for the old location (if there was one)
         stopWatchingCommentsCallback?.invoke()
+
+        val camera = arFragment!!.arSceneView.scene.camera
+        val oneMeterForward = Vector3(camera.forward).apply { y = 0F; normalized() }
+        val oneMeterLeft = Vector3(camera.left).apply { y = 0F; normalized() }
+        val oneMeterUp = Vector3(camera.up).apply { x = 0F; z = 0F; normalized() }
+        val currentPositionVector = Vector3(
+            currentPosition!!.tx(),
+            currentPosition!!.ty(),
+            currentPosition!!.tz()
+        )
+
+        val arTextView = availableArCommentViewPool.firstOrNull()
+        if (arTextView != null) {
+            val anchor = arFragment!!.arSceneView.session!!.createAnchor(currentPosition)
+            val anchorNode = AnchorNode(anchor)
+            anchorNode.setParent(arFragment!!.arSceneView.scene)
+            val textViewTemplateNode = Node()
+            textViewTemplateNode.setParent(anchorNode)
+            availableArCommentViewPool.remove(arTextView)
+            inUseArCommentViewPool.add(arTextView)
+            arTextView.view.findViewById<TextView>(R.id.comment).text = location_name
+            textViewTemplateNode.renderable = arTextView
+            nodesForComments.add(textViewTemplateNode)
+            var nodeToBePositioned = listOf(textViewTemplateNode)
+            arrangeComments(nodeToBePositioned, currentPositionVector, oneMeterForward, oneMeterLeft, oneMeterUp)
+        }
+
         // Start watching comments for the new location. When the set of comments for the location
         // is changed, all visible comments are removed, and the updated list is sorted and displayed
         stopWatchingCommentsCallback = com.cs407.team15.redstone.model.Location.watchCommentsForLocation(newLocationID)
             { comments ->
-                stopShowingAllComments()
-                val camera = arFragment!!.arSceneView.scene.camera
-                val oneMeterForward = Vector3(camera.forward).apply { y = 0F; normalized() }
-                val oneMeterLeft = Vector3(camera.left).apply { y = 0F; normalized() }
-                val oneMeterUp = Vector3(camera.up).apply { x = 0F; z = 0F; normalized() }
-                val nodesToBePositioned = mutableListOf<Node>()
-                val anchor = arFragment!!.arSceneView.session!!.createAnchor(currentPosition)
-                val anchorNode = AnchorNode(anchor)
-                val currentPositionVector = Vector3(
-                    currentPosition!!.tx(),
-                    currentPosition!!.ty(),
-                    currentPosition!!.tz()
-                )
-                applySortingToComments(comments, byLikes, hammerOnly).forEach { comment ->
+                if (comments.size != 0) {
+                    stopShowingAllComments()
+                    val anchor = arFragment!!.arSceneView.session!!.createAnchor(currentPosition)
+                    val anchorNode = AnchorNode(anchor)
+                    // Show the location name and tag while we wait for any comments to load
+                    val nodesToBePositioned = mutableListOf<Node>()
+                    applySortingToComments(comments, byLikes, hammerOnly).forEach { comment ->
+                        val arTextView = availableArCommentViewPool.firstOrNull()
+                        if (arTextView != null && arFragment!!.arSceneView.arFrame?.camera?.trackingState == TrackingState.TRACKING) {
+                            availableArCommentViewPool.remove(arTextView)
+                            inUseArCommentViewPool.add(arTextView)
+                            anchorNode.setParent(arFragment!!.arSceneView.scene)
+                            val textViewNode = Node()
+                            textViewNode.setParent(anchorNode)
+                            arTextView.view.findViewById<TextView>(R.id.comment).text = comment.comment
+                            arTextView.view.findViewById<TextView>(R.id.username).text = userIDToUsername[comment.publisher]
+                            arTextView.view.findViewById<TextView>(R.id.tv_total).text = comment.like.toString()
+                            textViewNode.renderable = arTextView
+                            nodesForComments.add(textViewNode)
+                            nodesToBePositioned.add(textViewNode)
+                        }
+                    }
+
+
                     val arTextView = availableArCommentViewPool.firstOrNull()
-                    if (arTextView != null && arFragment!!.arSceneView.arFrame?.camera?.trackingState == TrackingState.TRACKING) {
+                    if (arTextView != null) {
+                        val textViewTemplateNode = Node()
+                        textViewTemplateNode.setParent(anchorNode)
                         availableArCommentViewPool.remove(arTextView)
                         inUseArCommentViewPool.add(arTextView)
-                        anchorNode.setParent(arFragment!!.arSceneView.scene)
-                        val textViewNode = Node()
-                        textViewNode.setParent(anchorNode)
-                        arTextView.view.findViewById<TextView>(R.id.comment).text = comment.comment
-                        arTextView.view.findViewById<TextView>(R.id.username).text = userIDToUsername[comment.publisher]
-                        arTextView.view.findViewById<TextView>(R.id.tv_total).text = comment.like.toString()
-                        textViewNode.renderable = arTextView
-                        nodesForComments.add(textViewNode)
-                        nodesToBePositioned.add(textViewNode)
+                        arTextView.view.findViewById<TextView>(R.id.comment).text = location_name
+                        textViewTemplateNode.renderable = arTextView
+                        nodesForComments.add(textViewTemplateNode)
+                        nodesToBePositioned.add(0, textViewTemplateNode)
                     }
+
+                    arrangeComments(nodesToBePositioned, currentPositionVector, oneMeterForward, oneMeterLeft, oneMeterUp)
+
                 }
-                arrangeComments(nodesToBePositioned, currentPositionVector, oneMeterForward, oneMeterLeft, oneMeterUp)
         }
     }
 
@@ -479,6 +522,8 @@ class ARFragment : Fragment(), SensorEventListener {
             // #4 #5 #6
             translateInMeters(node, arrayOf(2.0 * (position / 6).toDouble(), -1.5 * (position % 3).toDouble(), -((position % 6) / 3).toDouble()))
         }
+
+
     }
 
     private suspend fun fetchListOfHammerUsers() {
@@ -518,7 +563,7 @@ class ARFragment : Fragment(), SensorEventListener {
             // from 0 to 360
             azimuth = ((Math.toDegrees(orientationAngles[0].toDouble()).toInt() + 360) % 360).toFloat()
             azimuthSet = true
-            view!!.findViewById<Switch>(R.id.byLikesSwitch).text = "${azimuth}"
+            //view!!.findViewById<Switch>(R.id.byLikesSwitch).text = "${azimuth}"
         }
     }
 
