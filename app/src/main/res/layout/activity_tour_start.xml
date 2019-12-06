@@ -51,6 +51,7 @@ android:layout_height="match_parent">
             android:layout_height="25pt"
             android:src="@drawable/arrow"
             android:visibility="visible"
+            android:tint="@color/GREEN"
             android:id="@+id/iv_arrow"/>
 <!--        <LinearLayout-->
 <!--            android:layout_width="match_parent"-->
