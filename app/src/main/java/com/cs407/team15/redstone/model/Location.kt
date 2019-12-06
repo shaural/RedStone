@@ -170,13 +170,16 @@ data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
         // face the given GPS point is no greater than the given maximum rotation.
         fun getLocationsInFrontOfCamera(gpsPoints: List<android.location.Location>,
                                         currentPosition: android.location.Location,
+                                        currentAzimuth: Float,
                                         maxDegreesOffset: Float): List<android.location.Location> {
             return gpsPoints.filter { gpsPoint -> run {
                 val bearing = currentPosition.bearingTo(gpsPoint)
-                val userDirection = currentPosition.bearing
+                val userDirection = currentAzimuth
                 // Compute the minimum number of degrees needed to rotate clockwise or counterclockwise
                 // from the current direction and compare to the maximum permitted
-                Math.min(Math.abs(bearing - userDirection), Math.abs(360f - Math.abs(bearing - userDirection))) <= maxDegreesOffset
+                val angleFromUser = Math.min(Math.abs(bearing - userDirection), Math.abs(360f - Math.abs(bearing - userDirection)))
+                val isInFrontOfCamera = angleFromUser <= maxDegreesOffset
+                isInFrontOfCamera
                 }
             }
         }
