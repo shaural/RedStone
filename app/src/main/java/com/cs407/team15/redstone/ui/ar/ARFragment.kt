@@ -14,7 +14,10 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.CompoundButton
+import android.widget.Switch
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -23,10 +26,7 @@ import com.cs407.team15.redstone.model.Comment
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.tasks.OnCompleteListener
-import com.google.ar.core.HitResult
-import com.google.ar.core.Plane
-import com.google.ar.core.Pose
-import com.google.ar.core.TrackingState
+import com.google.ar.core.*
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.FrameTime
 import com.google.ar.sceneform.HitTestResult
@@ -39,7 +39,6 @@ import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.QuerySnapshot
 import kotlinx.android.synthetic.main.basic_tour_text_view.view.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import org.w3c.dom.Text
@@ -458,7 +457,20 @@ class ARFragment : Fragment(), SensorEventListener {
         // is changed, all visible comments are removed, and the updated list is sorted and displayed
         stopWatchingCommentsCallback = com.cs407.team15.redstone.model.Location.watchCommentsForLocation(newLocationID)
             { comments ->
-                if (comments.size != 0) {
+//                stopShowingAllComments()
+//                val camera = arFragment!!.arSceneView.scene.camera
+//                val oneMeterForward = Vector3(camera.forward).apply { y = 0F; normalized() }
+//                val oneMeterLeft = Vector3(camera.left).apply { y = 0F; normalized() }
+//                val oneMeterUp = Vector3(camera.up).apply { x = 0F; z = 0F; normalized() }
+//                val nodesToBePositioned = mutableListOf<Node>()
+////                val anchor = arFragment!!.arSceneView.session!!.createAnchor(currentPosition)
+//                val frag = arFragment
+//                var anchor : Anchor? = null
+//                if (frag != null) {
+//                    val sess = frag.arSceneView.session
+//                    if(sess != null && currentPosition != null) {
+//                        anchor = sess.createAnchor(currentPosition)
+                if (comments.isNotEmpty()) {
                     stopShowingAllComments()
                     val anchor = arFragment!!.arSceneView.session!!.createAnchor(currentPosition)
                     val anchorNode = AnchorNode(anchor)
@@ -497,6 +509,41 @@ class ARFragment : Fragment(), SensorEventListener {
                     arrangeComments(nodesToBePositioned, currentPositionVector, oneMeterForward, oneMeterLeft, oneMeterUp)
 
                 }
+//                if (anchor != null) {
+//                    val anchorNode = AnchorNode(anchor)
+//                    val currentPositionVector = Vector3(
+//                        currentPosition!!.tx(),
+//                        currentPosition!!.ty(),
+//                        currentPosition!!.tz()
+//                    )
+//
+//                    applySortingToComments(comments, byLikes, hammerOnly).forEach { comment ->
+//                        val arTextView = availableArCommentViewPool.firstOrNull()
+//                        if (arTextView != null && arFragment!!.arSceneView.arFrame?.camera?.trackingState == TrackingState.TRACKING) {
+//                            availableArCommentViewPool.remove(arTextView)
+//                            inUseArCommentViewPool.add(arTextView)
+//                            anchorNode.setParent(arFragment!!.arSceneView.scene)
+//                            val textViewNode = Node()
+//                            textViewNode.setParent(anchorNode)
+//                            arTextView.view.findViewById<TextView>(R.id.comment).text =
+//                                comment.comment
+//                            arTextView.view.findViewById<TextView>(R.id.username).text =
+//                                userIDToUsername[comment.publisher]
+//                            arTextView.view.findViewById<TextView>(R.id.tv_total).text =
+//                                comment.like.toString()
+//                            textViewNode.renderable = arTextView
+//                            nodesForComments.add(textViewNode)
+//                            nodesToBePositioned.add(textViewNode)
+//                        }
+//                    }
+//                    arrangeComments(
+//                        nodesToBePositioned,
+//                        currentPositionVector,
+//                        oneMeterForward,
+//                        oneMeterLeft,
+//                        oneMeterUp
+//                    )
+//                }
         }
     }
 

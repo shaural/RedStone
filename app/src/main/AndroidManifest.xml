@@ -59,6 +59,9 @@
             android:label="Tour Info"
             android:launchMode="singleTop" />
         <activity
+            android:name=".ui.viewtours.TourStartActivity"
+            android:label="Tour Start" />
+        <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
     </application>

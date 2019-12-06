@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_tour_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tour Name"
+        android:textSize="24sp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="5dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/launch_ar_fragment_tour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:layout_marginBottom="30dp"
+            android:background="@color/btn_def"
+            android:padding="5dp"
+            android:text="@string/btn_ar" />
+
+        <Button
+            android:id="@+id/launch_map_fragment_tour"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="100dp"
+            android:layout_marginBottom="30dp"
+            android:background="@color/btn_def"
+            android:padding="5dp"
+            android:text="@string/btn_map" />
+        <ImageView
+            android:rotation="180"
+            android:layout_width="25pt"
+            android:layout_height="25pt"
+            android:src="@drawable/arrow"
+            android:visibility="visible"
+            android:id="@+id/iv_arrow"/>
+<!--        <LinearLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:orientation="vertical" >-->
+
+<!--        </LinearLayout>-->
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/fragmentContainerTour"
+        android:layout_width="match_parent"
+        android:layout_height="500dp">
+    </FrameLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+        <Button
+            android:id="@+id/btn_next_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:padding="1dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:background="@color/btn_def"
+            android:text="Next Location" />
+            <Button
+                android:id="@+id/btn_prev_location"
+                android:layout_width="wrap_content"
+                android:layout_margin="5dp"
+                android:padding="1dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_height="wrap_content"
+                android:background="@color/btn_def"
+                android:text="Prev Location" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" >
+        <TextView
+            android:id="@+id/tv_dist_to_loc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Distance remaining: "
+            android:textSize="16sp"/>
+        <TextView
+            android:id="@+id/tv_dist_to_loc_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="16sp"/>
+        <TextView
+            android:id="@+id/tv_dist_to_loc_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" meters"
+            android:textSize="16sp"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" />
+    <TextView
+        android:id="@+id/tv_next_loc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Next Location:"
+        android:textSize="16sp"/>
+    <TextView
+        android:id="@+id/tv_next_loc_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Temp Container"
+        android:textSize="16sp"/>
+</LinearLayout>
+    </LinearLayout></LinearLayout>
+</androidx.appcompat.widget.LinearLayoutCompat>

@@ -1,15 +1,11 @@
 package com.cs407.team15.redstone.ui.viewtours
 
 import android.app.AlertDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,20 +14,19 @@ import com.cs407.team15.redstone.model.Comment
 import com.cs407.team15.redstone.ui.comments.CommentSectionAdapter
 import com.cs407.team15.redstone.ui.comments.CommentsActivity
 import com.cs407.team15.redstone.utility.NotificationTool
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.*
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.core.Tag
-import com.google.firebase.firestore.*
-import kotlinx.android.synthetic.main.location_display.view.*
-import kotlinx.coroutines.tasks.await
-import java.lang.StringBuilder
-import java.lang.reflect.Field
+import com.google.firebase.database.*
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.GeoPoint
 import java.util.*
 import kotlin.Comparator
 import kotlin.collections.ArrayList
@@ -46,6 +41,8 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
     private lateinit var database: DatabaseReference
     lateinit var tourName: String
     lateinit var tourId: String
+    lateinit var tourLocations : ArrayList<String>
+    lateinit var tourLatLng : ArrayList<LatLng>
 
     private lateinit var notificationTool: NotificationTool
     private lateinit var  firebaseUser: FirebaseUser
@@ -59,6 +56,7 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
 
         setContentView(R.layout.activity_tour_info)
         tourName = intent.getStringExtra("tourName")
+        Log.d("lol", tourName)
         tourId = intent.getStringExtra("tourID")
 
         //Setting title to name of tour
@@ -74,8 +72,18 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
 
         val setTime = findViewById<TextView>(R.id.text_time)
 
+        //Start tour btn clicked
+        tourLocations = ArrayList<String>()
+        tourLatLng = ArrayList<LatLng>()
+        var btnStartTour = findViewById<Button>(R.id.btn_start_tour)
+        btnStartTour.setOnClickListener {
+            val intent = Intent (this, TourStartActivity::class.java)
+            intent.putExtra("locations", tourLocations)
+            intent.putExtra("latLang", tourLatLng)
+            intent.putExtra("tourName", tourName)
+            startActivity(intent)
+        }
         firebaseUser = FirebaseAuth.getInstance().currentUser!!
-
         notificationTool = NotificationTool(firebaseUser, tourId)
 
         //Like button pressing
@@ -336,6 +344,7 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
         val mapFragment = supportFragmentManager.findFragmentById(R.id.tourinfo_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+
         // Comments recyclerview
         viewAllComments = findViewById(R.id.tv_comments)
         recyclerView = findViewById(R.id.recycler_view_comment)
@@ -360,7 +369,6 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
             startActivity(intent)
         }
     }
-
     //Where to display markers for tour
     override fun onMapReady(googleMap: GoogleMap) {
 
@@ -368,7 +376,7 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
         mMap.uiSettings.isZoomControlsEnabled=true
         //lower the number, higher the zoom
         mMap.setMinZoomPreference(13f)
-
+        mMap.isMyLocationEnabled = true
         //setting the map to Purdue campus
         FirebaseFirestore.getInstance().collection("schools").document("Purdue").get().addOnSuccessListener {
             val schoolLoc = it["coordinates"] as GeoPoint
@@ -387,6 +395,8 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
                                     val ltlg = LatLng(geomarker.latitude, geomarker.longitude)
                                     val markerIcon = BitmapDescriptorFactory.fromResource(R.drawable.marker)
                                     mMap.addMarker(MarkerOptions().position(ltlg).title(l["name"] as String).icon(markerIcon))
+                                    tourLocations.add(l["name"] as String)
+                                    tourLatLng.add(ltlg)
                                 }
                             }
                         }
