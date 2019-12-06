@@ -17,11 +17,28 @@ import androidx.navigation.ui.setupWithNavController
 import com.cs407.team15.redstone.ui.authentication.LoginActivity
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.auth.FirebaseAuth
+import android.widget.TextView
+import com.cs407.team15.redstone.model.User
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import com.google.firebase.auth.FirebaseUser
+
+
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var nav_user: TextView
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var nav_userEmail: TextView
     private var TAG:String = "CCC"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,14 +50,15 @@ class MainActivity : AppCompatActivity() {
         // Firebase auth
         firebaseAuth = FirebaseAuth.getInstance()
 
-//        val fab: FloatingActionButton = findViewById(R.id.fab)
-//        fab.setOnClickListener { view ->
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show()
-//        }
-
         val drawerLayout: DrawerLayout = findViewById(R.id.drawer_layout)
         val navView: NavigationView = findViewById(R.id.nav_view)
+
+
+        val hView = navView.getHeaderView(0)
+
+        nav_user = hView.findViewById(R.id.nav_profile_username)
+        nav_userEmail = hView.findViewById(R.id.nav_profile_useremail)
+        getUserInfo()
 
         val navController = findNavController(R.id.nav_host_fragment)
 
@@ -73,6 +91,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * To set username
+     */
+    private fun getUserInfo() {
+        var publisherid: String = FirebaseAuth.getInstance().currentUser!!.email.toString()
+
+        if (publisherid != null) {
+            Log.e(TAG, "User: $publisherid")
+            val fsdb = FirebaseFirestore.getInstance()
+            val docRef = fsdb.collection("users").document(publisherid)
+
+            docRef.get().addOnCompleteListener(OnCompleteListener<DocumentSnapshot> { task ->
+                if (task.isSuccessful) {
+                    val document = task.result
+                    if (document!!.exists()) {
+                        val me = document.toObject(User::class.java)
+                        nav_user.text = me!!.getUsername()
+                        nav_userEmail.text = me!!.getEmail()
+                    } else {
+                        nav_user.text = "no username"
+                        nav_userEmail.text = "no Email"
+                        Log.e(TAG, "No User document")
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.exception)
+                }
+            })
+        }
+    }
+
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
@@ -88,6 +136,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+
 
     // Sign out Action
     private fun signOut() {

@@ -70,7 +70,6 @@ public class AboutActivity extends Fragment {
         });
         //setContentView(R.layout.fragment_about_purdue);
         Button dismiss, home, blackboard, mypurdue, locations;
-        dismiss = (Button) view.findViewById(R.id.dismiss);
         home = (Button) view.findViewById(R.id.purduehome);
         blackboard = (Button) view.findViewById(R.id.bbbutton);
         mypurdue = (Button) view.findViewById(R.id.mypurdue);
@@ -91,12 +90,6 @@ public class AboutActivity extends Fragment {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(HomeUrl)));
-            }
-        });
-        dismiss.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().onBackPressed();
             }
         });
         locations.setOnClickListener(new View.OnClickListener() {
