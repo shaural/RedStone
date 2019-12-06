@@ -89,23 +89,23 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
 //        tourLocations.forEach { loc -> Log.d("lol", loc) }
 
         // get direction using bearings
-        fusedLocationCleint = LocationServices.getFusedLocationProviderClient(this)
-        fusedLocationCleint.lastLocation
-            .addOnSuccessListener { location : Location? ->
-                // Got last known location. In some rare situations this can be null.
-                val locVar = Location("")
-                locVar.latitude = latLangQ[indexLoc].latitude
-                locVar.longitude = latLangQ[indexLoc].longitude
-                var dir = location!!.bearingTo(locVar)
-                if (dir < 0) {
-                    dir += 360
-                }
-                bear = dir
-                distMiles = location.distanceTo(locVar)
-                curLocation = locVar
-                checkArrived()
-//                Log.d("lol-dir", dir.toString())
-            }
+//        fusedLocationCleint = LocationServices.getFusedLocationProviderClient(this)
+//        fusedLocationCleint.lastLocation
+//            .addOnSuccessListener { location : Location? ->
+//                // Got last known location. In some rare situations this can be null.
+//                val locVar = Location("")
+//                locVar.latitude = latLangQ[indexLoc].latitude
+//                locVar.longitude = latLangQ[indexLoc].longitude
+//                var dir = location!!.bearingTo(locVar)
+//                if (dir < 0) {
+//                    dir += 360
+//                }
+//                bear = dir
+//                distMiles = location.distanceTo(locVar)
+//                curLocation = locVar
+//                checkArrived()
+////                Log.d("lol-dir", dir.toString())
+//            }
 
         // Fragment management
         arFrag = ARFragment()
@@ -263,25 +263,57 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
         //TODO stop anchoring as app crashes when change to map
     }
 
+    var iter = 0
+    var rate = 10
     // Get readings from accelerometer and magnetometer. To simplify calculations,
     // consider storing these readings as unit vectors.
     override fun onSensorChanged(event: SensorEvent) {
-        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-            System.arraycopy(event.values, 0, accelerometerReading, 0, accelerometerReading.size)
-        } else if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
-            System.arraycopy(event.values, 0, magnetometerReading, 0, magnetometerReading.size)
+        if (iter == rate) {
+            if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                System.arraycopy(
+                    event.values,
+                    0,
+                    accelerometerReading,
+                    0,
+                    accelerometerReading.size
+                )
+            } else if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
+                System.arraycopy(event.values, 0, magnetometerReading, 0, magnetometerReading.size)
+            }
+            updateOrientationAngles()
+            var rotation = Math.toDegrees(orientationAngles[0].toDouble())
+            if (rotation < 0) {
+                rotation += 360
+            }
+            rot = rotation.toFloat()
+            var angleBetween = bear - rot
+            if (angleBetween < 0) {
+                angleBetween += 360
+            }
+            arrow_angle = angleBetween
+            // get direction using bearings
+            fusedLocationCleint = LocationServices.getFusedLocationProviderClient(this)
+            fusedLocationCleint.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    // Got last known location. In some rare situations this can be null.
+                    val locVar = Location("")
+                    locVar.latitude = latLangQ[indexLoc].latitude
+                    locVar.longitude = latLangQ[indexLoc].longitude
+                    var dir = location!!.bearingTo(locVar)
+                    if (dir < 0) {
+                        dir += 360
+                    }
+                    bear = dir
+                    distMiles = location.distanceTo(locVar)
+                    curLocation = locVar
+                    checkArrived()
+//                Log.d("lol-dir", dir.toString())
+                }
+            iter = 0
+        } else {
+            iter++
         }
-        updateOrientationAngles()
-        var rotation = Math.toDegrees(orientationAngles[0].toDouble())
-        if (rotation < 0) {
-            rotation += 360
-        }
-        rot = rotation.toFloat()
-        var angleBetween = bear - rot
-        if (angleBetween < 0) {
-            angleBetween += 360
-        }
-        arrow_angle = angleBetween
+
 //        Log.d("lol-diff", angleBetween.toString())
     }
 
