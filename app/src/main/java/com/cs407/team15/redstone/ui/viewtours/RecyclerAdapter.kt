@@ -7,11 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import java.lang.Math.toIntExact
 import androidx.recyclerview.widget.RecyclerView
-
 import com.cs407.team15.redstone.R
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.firestore.FirebaseFirestore
 
 class RecyclerAdapter
@@ -68,14 +65,20 @@ internal constructor(context: Context, private val mData: List<String>) :
             .get().addOnSuccessListener { documents ->
                 for (document in documents) {
                     var tourTimeStr = ""
-                    val tourTime: Int = (document["time"] as Long).toInt()
-                    if (tourTime >= 60){
-                        tourTimeStr = (tourTime/60).toString() + "h " + (tourTime%60).toString() + "m"
+                    val tourTime: Int
+                    if (document["time"] != null) {
+                        tourTime = (document["time"] as Long).toInt()
+                        if (tourTime >= 60) {
+                            tourTimeStr =
+                                (tourTime / 60).toString() + "h " + (tourTime % 60).toString() + "m"
+                        } else if (tourTime < 60 && tourTime >= 0) {
+                            tourTimeStr = tourTime.toString() + " min"
+                        }
+                        holder.myMilesView.text =
+                            (tourTimeStr + " " + document["distance"].toString() + " mi")
+                    } else {
+                        // should not come here but watever TODO fix`
                     }
-                    else if (tourTime < 60 && tourTime >= 0) {
-                        tourTimeStr = tourTime.toString() + " min"
-                    }
-                    holder.myMilesView.text = (tourTimeStr + " " + document["distance"].toString() + " mi")
                 }
             }
             .addOnFailureListener {
