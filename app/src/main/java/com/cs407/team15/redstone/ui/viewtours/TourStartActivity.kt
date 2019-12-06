@@ -264,11 +264,10 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
     }
 
     var iter = 0
-    var rate = 10
+    var rate = 20
     // Get readings from accelerometer and magnetometer. To simplify calculations,
     // consider storing these readings as unit vectors.
     override fun onSensorChanged(event: SensorEvent) {
-        if (iter == rate) {
             if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
                 System.arraycopy(
                     event.values,
@@ -291,6 +290,8 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
                 angleBetween += 360
             }
             arrow_angle = angleBetween
+        if (iter == rate) {
+
             // get direction using bearings
             fusedLocationCleint = LocationServices.getFusedLocationProviderClient(this)
             fusedLocationCleint.lastLocation
@@ -335,28 +336,35 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
         // "mOrientationAngles" now has up-to-date information.
     }
 
+    var alertShowing = false
     fun checkArrived() {
-        if (distMiles < 20) {
-            // threshold of arrival met
-            val dialogBuilder = AlertDialog.Builder(this)
-            dialogBuilder.setMessage("You have reached: " + locQ[indexLoc])
-                // if the dialog is cancelable
-                .setCancelable(false)
-                // positive button text and action
-                .setPositiveButton("Proceed", DialogInterface.OnClickListener {
-                    dialog, id -> setNextDestination()
-                })
+        if (!alertShowing) {
+            if (distMiles < 20) {
+                alertShowing = true
+                // threshold of arrival met
+                val dialogBuilder = AlertDialog.Builder(this)
+                dialogBuilder.setMessage("You have reached: " + locQ[indexLoc])
+                    // if the dialog is cancelable
+                    .setCancelable(false)
+                    // positive button text and action
+                    .setPositiveButton("Proceed", DialogInterface.OnClickListener { dialog, id ->
+                        setNextDestination()
+                        alertShowing = false
+                    })
 //                // negative button text and action
 //                .setNegativeButton("Cancel", DialogInterface.OnClickListener {
 //                        dialog, id -> dialog.cancel()
 //                })
 
-            // create dialog box
-            val alert = dialogBuilder.create()
-            // set title for alert dialog box
-            alert.setTitle("Location Reached")
-            // show alert dialog
-            alert.show()
+                // create dialog box
+                val alert = dialogBuilder.create()
+                // set title for alert dialog box
+                alert.setTitle("Location Reached")
+                // show alert dialog
+                alert.show()
+            }
+        } else {
+
         }
     }
 }
