@@ -48,19 +48,6 @@ public class LocationListFragment extends Fragment implements RecyclerAdapter.It
         //col = db.collection("locations");
         view = inflater.inflate(R.layout.fragment_location_list,
                 container, false);
-        Button dismiss = (Button) view.findViewById(R.id.loclistdismiss);
-        dismiss.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().onBackPressed();
-            }
-        });
-
-//        RecyclerView recyclerView = view.findViewById(R.id.locationlist);
-//        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-//        RecyclerAdapter adapter = new RecyclerAdapter(getContext(), locList);
-//        adapter.setClickListener(this);
-//        recyclerView.setAdapter(adapter);
         return view;
     }
 

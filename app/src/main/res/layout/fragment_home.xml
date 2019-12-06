@@ -5,14 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:textSize="20dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        android:text="Welcome to Red Stone !!"
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:src="@drawable/logo_sample"
+        android:background="#D9AE00"
         android:id="@+id/welcome"/>
 
     <com.google.android.material.tabs.TabLayout
@@ -36,7 +33,8 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:id="@+id/fab_qrcode"
-        app:srcCompat="@drawable/ic_btn_qrcode"
+        app:srcCompat="@drawable/ic_qr_code_scanner_white"
+        android:backgroundTint="#FF2E2E"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_margin="25dp"

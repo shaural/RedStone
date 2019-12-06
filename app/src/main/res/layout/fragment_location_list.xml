@@ -2,18 +2,21 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/locationlist"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/loclistdismiss"
-        android:layout_centerHorizontal="true"/>
-
-    <Button
-        android:id="@+id/loclistdismiss"
+    <TextView
+        android:id="@+id/intro"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:text="@string/btn_back" />
+        android:padding="5dp"
+        android:textSize="15sp"
+        android:text="Find locations you're interested in!"/>
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/locationlist"
+        android:layout_below="@id/intro"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"/>
+
 </RelativeLayout>
