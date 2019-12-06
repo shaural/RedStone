@@ -58,7 +58,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
 
     RecyclerAdapter(Context context, List<String> data, ArrayList<Comment> comments) {
         this.mInflater = LayoutInflater.from(context);
-        //this.mData = tourIDList;
+        //this.mData = data;
+
         this.tourIDList=data;
         this.comments = comments;
     }

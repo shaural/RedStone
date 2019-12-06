@@ -33,6 +33,10 @@
 <!--            android:icon="@drawable/ic_map_black_24dp"-->
 <!--            android:title="@string/menu_ar" />-->
         <item
+            android:id="@+id/nav_view_scavanger"
+            android:icon="@drawable/ic_directions_walk_black_24dp"
+            android:title="ViewScavanger" />
+        <item
             android:id="@+id/nav_free_roam"
             android:icon="@drawable/ic_map_black_24dp"
             android:title="@string/menu_free_roam" />

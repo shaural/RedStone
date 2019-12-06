@@ -10,16 +10,11 @@
         android:id="@+id/buttonCreateTour"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="161dp"
-        android:layout_marginTop="669dp"
-        android:layout_marginEnd="162dp"
+        android:layout_marginStart="90dp"
         android:layout_marginBottom="15dp"
         android:text="@string/create_tour"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/buttonCancelNewTour"
@@ -194,17 +189,19 @@
         android:scrollbars="vertical"
         app:layout_constraintBottom_toTopOf="@id/buttonCreateTour"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linearLayout4" />
+        app:layout_constraintTop_toBottomOf="@id/linearLayout4"
+        app:layout_constraintVertical_bias="0.0" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/scavanger_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="1dp"
+        android:layout_marginBottom="15dp"
         android:text="@string/save_tour"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/buttonCreateTour"
-        app:layout_constraintTop_toBottomOf="@+id/locationsRecyclerView" />
+        app:layout_constraintStart_toEndOf="@+id/buttonCreateTour" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

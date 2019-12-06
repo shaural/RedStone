@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
 
         // Add menu ID here if you need
         appBarConfiguration = AppBarConfiguration(setOf(
-            R.id.nav_home, R.id.nav_aboutpurdue, R.id.nav_locations, R.id.nav_tour,
+            R.id.nav_home, R.id.nav_aboutpurdue, R.id.nav_locations, R.id.nav_tour,R.id.nav_view,
             R.id.nav_free_roam, R.id.nav_profile), drawerLayout)
 
         setupActionBarWithNavController(navController, appBarConfiguration)

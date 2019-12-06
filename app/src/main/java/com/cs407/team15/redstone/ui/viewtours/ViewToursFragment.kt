@@ -15,7 +15,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cs407.team15.redstone.MainActivity
 import com.cs407.team15.redstone.R
+import com.cs407.team15.redstone.model.Scavanger
 import com.cs407.team15.redstone.model.Tour
+import com.cs407.team15.redstone.ui.scavangerhunt.AddHintList
+import com.cs407.team15.redstone.ui.scavangerhunt.ScavangerPage
+import com.cs407.team15.redstone.ui.viewtours.RecyclerAdapter.ItemClickListener
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -25,6 +29,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.lang.Boolean.FALSE
 import java.lang.Boolean.TRUE
+import java.util.ArrayList
 
 /**
  * A simple [Fragment] subclass.
@@ -34,17 +39,19 @@ import java.lang.Boolean.TRUE
  * Use the [ViewToursFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWatcher {
+class ViewToursFragment : Fragment(), ItemClickListener, TextWatcher {
 
     // Contains all the tours which the user is allowed to see
     var allTours: MutableList<Tour> = mutableListOf()
     // Contains the names of all tags, plus the special "any" option
     var allTags: MutableList<String> = mutableListOf()
+    var allScavangers:MutableList<Scavanger> = mutableListOf()
     val ANY = "any"
 
     var selectedFilterText = ""
     var selectedTag = ANY
     var selectedHammer = FALSE
+    var containerId=0
 
     //navigate to tour information
     override fun onItemClick(view: View, position: Int) {
@@ -74,8 +81,11 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        containerId=container!!.id
         GlobalScope.launch { getAndDisplayTourData() }
         GlobalScope.launch { getAndDisplayTagData() }
+//        GlobalScope.launch { getAndDisplayScavangerData() }
+
         return inflater.inflate(R.layout.fragment_view_tours, container, false)
     }
 
@@ -113,6 +123,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         // Filter out tours that the user is not allowed to see here, so that nowhere else on the
         // page will need to handle this filtering
         allTours.addAll(0, Tour.getAllTours().filter {tour -> Tour.canCurrentUserViewTour(tour)} )
+
         activity!!.runOnUiThread {
             reapplyFiltering()
             setupRecyclerView(allTours.map { tour -> tour.name })
@@ -166,6 +177,54 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         }
     }
 
+   /* suspend fun getAndDisplayScavangerData(){
+        val scavangers=FirebaseFirestore.getInstance().collection("scavanger").get().await()
+            .documents.map { scavanger -> Log.v("hello",scavanger.toString())
+
+            //String name,String uid,String type,Boolean hammer,List<String> locations,List<String> hints,List<String> tags,Integer votes
+            Scavanger(scavanger.getString("name"),scavanger.getString("uid"),
+                scavanger.getString("type"),scavanger.getBoolean("hammer"),
+                scavanger.get("locations") as List<String>,scavanger.get("hints")as List<String>,
+                scavanger.get("tags")as List<String>,scavanger.get("leaderboardTime")as ArrayList<Int>,
+                scavanger.get("leaderboardUsername") as ArrayList<String>,
+                (scavanger.get("votes") as Long).toInt()) }.sortedBy {scavanger -> scavanger.name.toUpperCase()  }
+        allScavangers.addAll(scavangers)
+
+        activity!!.runOnUiThread {
+        val recyclerView = view!!.findViewById<RecyclerView>(R.id.scavangerList)
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        val adapter = RecyclerAdapter(context as Context, allScavangers.map { scavanger -> scavanger.name })
+            val ad = object : ItemClickListener {
+                override fun onItemClick(view: View, position: Int) {
+                    val newScav=allScavangers.get(position)
+                    val addHintFrag = ScavangerPage()
+                    val fragTrans = fragmentManager!!.beginTransaction()
+                    val bundle = Bundle()
+
+                    bundle.putString("name",newScav.name)
+                    bundle.putString("uid",newScav.uid)
+                    bundle.putString("type",newScav.type)
+                    bundle.putBoolean("hammer",newScav.hammer)
+                    bundle.putStringArrayList("hints", ArrayList(newScav.hints))
+                    bundle.putStringArrayList("location", ArrayList<String>(newScav.locations))
+                    bundle.putStringArrayList("tags", ArrayList<String>(newScav.tags))
+                    bundle.putStringArrayList("leaderboardUsername",ArrayList<String>(newScav.leaderboardUsername))
+                    bundle.putIntegerArrayList("leaderboardTime",ArrayList(newScav.leaderboardTime))
+                    bundle.putInt("votes",(newScav.votes).toInt())
+                    addHintFrag.arguments=bundle
+
+                    fragTrans.replace(containerId, addHintFrag)
+                    fragTrans.addToBackStack(null)
+                    fragTrans.commit()
+                }
+            }
+            adapter.setClickListener(ad)
+        recyclerView.adapter = adapter
+        view!!.invalidate()}
+
+
+    }
+*/
     fun getHammerUsers(isChecked : Boolean) {
         if(isChecked){
             selectedHammer = TRUE

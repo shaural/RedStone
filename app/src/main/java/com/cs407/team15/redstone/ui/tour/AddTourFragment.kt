@@ -19,6 +19,7 @@ import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Location
 import com.cs407.team15.redstone.model.Tour
 import com.cs407.team15.redstone.model.User
+import com.cs407.team15.redstone.ui.scavangerhunt.AddHintList
 import com.cs407.team15.redstone.ui.tour.helper.ItemTouchHelperAdapter
 import com.cs407.team15.redstone.ui.tour.helper.SimpleItemTouchHelperCallback
 import com.cs407.team15.redstone.ui.viewtours.ViewToursFragment
@@ -27,7 +28,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.model.value.IntegerValue
 import com.toptoche.searchablespinnerlibrary.SearchableSpinner
+import kotlinx.android.synthetic.main.fragment_addtour.*
 import kotlinx.android.synthetic.main.fragment_addtour.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -65,6 +68,7 @@ class AddTourFragment : Fragment(){
         val tagsRecyclerView = view.findViewById<RecyclerView>(R.id.tagsRecyclerView)
         val cancelButton = view.findViewById<Button>(R.id.buttonCancelNewTour)
         val buttonCreateTour = view.findViewById<Button>(R.id.buttonCreateTour)
+        val buttonCreateScavanger = view.findViewById<Button>(R.id.scavanger_button)
 
         var layoutManager = LinearLayoutManager(activity)
         locationsRecyclerView.layoutManager = layoutManager
@@ -114,13 +118,27 @@ class AddTourFragment : Fragment(){
         //Location.getAllTours()
         if(title!=null||type!=null||tags!=null||locations!=null) {
             buttonCreateTour.setOnClickListener {
-                addNewTour(true,tourId!!)
+                addNewTour(true,false,tourId!!)
             }
         }else{
             buttonCreateTour.setOnClickListener {
-                addNewTour(false,null)
+                addNewTour(false,false,null)
             }
         }
+
+        if(title!=null||type!=null||tags!=null||locations!=null) {
+            buttonCreateScavanger.setOnClickListener {
+                addNewTour(true,true,tourId!!)
+            }
+        }else{
+            buttonCreateScavanger.setOnClickListener {
+                addNewTour(false,true,null)
+            }
+        }
+
+
+        //add Scavanger Button Action
+
         return view
     }
 
@@ -213,7 +231,28 @@ class AddTourFragment : Fragment(){
         dialog.show()
     }
 
-    fun addNewTour(isEdit:Boolean,tourId:String?) {
+    fun addNewScavanger(tour:Tour){
+        //go to Add Hint List Fragment
+        val addHintFrag = AddHintList()
+        val fragTransaction = fragmentManager!!.beginTransaction()
+        val bundle = Bundle()
+
+       bundle.putString("name",tour.name)
+        bundle.putString("uid",tour.user_id)
+        bundle.putString("type",tour.type)
+        bundle.putBoolean("hammer",tour.hammer)
+        bundle.putStringArrayList("locationsHintList",ArrayList(locationsOTStr))
+        bundle.putStringArrayList("location",ArrayList<String>(tour.locations))
+        bundle.putStringArrayList("tags",ArrayList<String>(tour.tags))
+        bundle.putInt("votes",(tour.votes).toInt())
+        addHintFrag.arguments=bundle
+
+        fragTransaction.replace(containerId, addHintFrag)
+        fragTransaction.addToBackStack(null)
+        fragTransaction.commit()
+    }
+
+    fun addNewTour(isEdit:Boolean,isScavanger:Boolean,tourId:String?) {
         val db = FirebaseFirestore.getInstance()
         var user = User()
 
@@ -257,7 +296,11 @@ class AddTourFragment : Fragment(){
 
         val initialVotes = 0
         val newTour = Tour(name, type, user_id, hammer, locationsOTStr, tagsOnTour, initialVotes)
-if(isEdit){
+        if(isScavanger){
+            addNewScavanger(newTour)
+            return
+        }
+else if(isEdit){
     db.collection("tours").document(tourId!!).set(newTour)
 }else {
     db.collection("tours")
