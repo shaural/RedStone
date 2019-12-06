@@ -24,12 +24,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup,android:icon">
-        <activity android:name=".ui.publicboard.PublicBoardActivity"></activity>
+        <activity android:name=".ui.publicboard.PublicBoardActivity" />
         <activity
-            android:name=".ui.adminpage.PostPageActivity"
+            android:name=".ui.post.PostPageActivity"
             android:label="@string/title_activity_post_page"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ui.adminpage.PostActivity" />
+        <activity android:name=".ui.post.PostActivity" />
         <activity android:name=".ui.adminpage.adminActivity" />
         <activity android:name=".ui.comments.CommentsActivity" />
         <activity android:name=".ui.home.NoticeActivity" />

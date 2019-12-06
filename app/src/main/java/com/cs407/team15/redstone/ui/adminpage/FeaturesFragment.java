@@ -15,7 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.cs407.team15.redstone.R;
-import com.cs407.team15.redstone.model.AdminPost;
+import com.cs407.team15.redstone.model.Post;
+import com.cs407.team15.redstone.ui.post.PostAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -27,10 +28,12 @@ import java.util.ArrayList;
 public class FeaturesFragment extends Fragment {
     private final String TAG = getClass().toString();
 
-    private ArrayList<AdminPost> postArrayList = new ArrayList<>();
+    private ArrayList<Post> postArrayList = new ArrayList<>();
     private RecyclerView recyclerView;
     private static Context context;
     private PostAdapter mAdapter;
+    private String category;
+    private String path;
 
     private FirebaseDatabase db;
 
@@ -46,12 +49,15 @@ public class FeaturesFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        prepareData();
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        category = "Features";
+        path = "admin";
+
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_feature, container, false);
 
@@ -64,17 +70,25 @@ public class FeaturesFragment extends Fragment {
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        mAdapter = new PostAdapter(getActivity(), postArrayList, "Features");
+
+
+        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path);
 
         recyclerView.setAdapter(mAdapter);
+
 
         return root;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        prepareData();
+    }
 
     private void prepareData() {
         db = FirebaseDatabase.getInstance();
-        db.getReference("AdminPost")
+        db.getReference(path)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -82,9 +96,9 @@ public class FeaturesFragment extends Fragment {
                         postArrayList.clear();
 
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                            AdminPost post = snapshot.getValue(AdminPost.class);
+                            Post post = snapshot.getValue(Post.class);
                             Log.e(TAG, post.getPostid()+": "+post.getCategory());
-                            if (post.getCategory().equals("Features")) {
+                            if (post.getCategory().equals(category)) {
                                 postArrayList.add(post);
                             }
                         }
