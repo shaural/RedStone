@@ -14,9 +14,11 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.cs407.team15.redstone.R
-import com.cs407.team15.redstone.model.Location
 import com.cs407.team15.redstone.ui.location.LocationPage
-import com.google.android.gms.maps.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.firestore.DocumentSnapshot
@@ -25,9 +27,6 @@ import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-
-
-
 
 
 class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener{
@@ -42,6 +41,9 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
     private var locationVertices: MutableList<GeoPoint> = mutableListOf()
     private val allLocations: MutableList<DocumentSnapshot> = mutableListOf()
     private var lastLineSegment: Polyline? = null
+    private var gotLocations = false
+    private lateinit var bunLocs : ArrayList<String>
+    private lateinit var bunLatLangs : ArrayList<LatLng>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,6 +53,12 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
         val root = inflater.inflate(R.layout.fragment_tour, container, false)
         val mapFragment = childFragmentManager.findFragmentById(R.id.tour_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        val bun : Bundle? = this.arguments
+        if (bun != null) {
+            gotLocations = true
+            bunLatLangs = bun.getParcelableArrayList<LatLng>("locLatLang") as ArrayList<LatLng>
+            bunLocs = bun.getStringArrayList("locNames") as ArrayList<String>
+        }
         return root
     }
     fun addLocation(location: LatLng, title:String, markerIcon: BitmapDescriptor){
@@ -64,11 +72,17 @@ class TourFragment : Fragment(), OnMapReadyCallback, GoogleMap.OnMarkerClickList
         val markerIcon = BitmapDescriptorFactory.fromResource(R.drawable.marker)
         // Now that the location data has been fetched, we can quickly add all the markers
         activity?.runOnUiThread {
-            for (location in allLocations) {
-                val title = location.get("name") as String
-                val gpsPoint = location.get("coordinates") as GeoPoint
-                val latLng = LatLng(gpsPoint.latitude, gpsPoint.longitude)
-                addLocation(latLng, title, markerIcon)
+            if (gotLocations) {
+                for((i, loc) in bunLocs.withIndex()) {
+                    (addLocation(bunLatLangs[i], loc, markerIcon))
+                }
+            } else {
+                for (location in allLocations) {
+                    val title = location.get("name") as String
+                    val gpsPoint = location.get("coordinates") as GeoPoint
+                    val latLng = LatLng(gpsPoint.latitude, gpsPoint.longitude)
+                    addLocation(latLng, title, markerIcon)
+                }
             }
         }
     }

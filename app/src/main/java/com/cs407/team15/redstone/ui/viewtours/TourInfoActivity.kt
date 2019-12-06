@@ -3,6 +3,7 @@ package com.cs407.team15.redstone.ui.viewtours
 import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -49,6 +50,7 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
 
         setContentView(R.layout.activity_tour_info)
         tourName = intent.getStringExtra("tourName")
+        Log.d("lol", tourName)
         tourId = intent.getStringExtra("tourID")
 
         //Setting title to name of tour
@@ -72,6 +74,7 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
             val intent = Intent (this, TourStartActivity::class.java)
             intent.putExtra("locations", tourLocations)
             intent.putExtra("latLang", tourLatLng)
+            intent.putExtra("tourName", tourName)
             startActivity(intent)
         }
 
