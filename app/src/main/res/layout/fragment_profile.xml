@@ -6,208 +6,229 @@
     android:layout_height="match_parent">
 
     <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="80dp"
+        android:src="@drawable/logo_sample"
+        android:id="@+id/profile_logo"/>
+
+    <ImageView
         android:id="@+id/user_type"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="390dp"
         android:layout_marginEnd="21dp"
-        android:layout_above="@id/tableLayout"
+        android:layout_below="@id/profile_logo"
         />
 
-    <TableLayout
-        android:id="@+id/tableLayout"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
+        android:layout_below="@id/user_type"
+        android:id="@+id/layout_table"
+        android:padding="5dp"
         >
 
-        <TableRow
+        <TableLayout
+            android:id="@+id/tableLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="16dp"
+            android:layout_centerHorizontal="true"
+            >
 
-            <TextView
-                android:id="@+id/profile_username_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/username"
-                android:textSize="18sp" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/profile_username"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textAlignment="textEnd"
-                android:textSize="18sp" />
-        </TableRow>
+                <TextView
+                    android:id="@+id/profile_username_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/username"
+                    android:textSize="18sp" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/profile_username"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textAlignment="textEnd"
+                    android:textSize="18sp" />
+            </TableRow>
 
-            <TextView
-                android:id="@+id/email_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/email"
-                android:textSize="18sp" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/profile_email"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textAlignment="textEnd"
-                android:textSize="18sp" />
-        </TableRow>
+                <TextView
+                    android:id="@+id/email_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/email"
+                    android:textSize="18sp" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/profile_email"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textAlignment="textEnd"
+                    android:textSize="18sp" />
+            </TableRow>
 
-            <TextView
-                android:id="@+id/recieved_like_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/likes"
-                android:textSize="18sp" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/recieved_like"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
-                android:textSize="18sp" />
-        </TableRow>
+                <TextView
+                    android:id="@+id/recieved_like_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/likes"
+                    android:textSize="18sp" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/recieved_like"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="textEnd"
+                    android:textSize="18sp" />
+            </TableRow>
 
-            <TextView
-                android:id="@+id/recieved_dislike_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/dislikes"
-                android:textSize="18sp" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/recieved_dislike"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
-                android:textSize="18sp" />
-        </TableRow>
+                <TextView
+                    android:id="@+id/recieved_dislike_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dislikes"
+                    android:textSize="18sp" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/recieved_dislike"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="textEnd"
+                    android:textSize="18sp" />
+            </TableRow>
 
-            <TextView
-                android:id="@+id/recieved_net_likes_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/netlikes"
-                android:textSize="18sp" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/recieved_net_likes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
-                android:textSize="18sp" />
-        </TableRow>
+                <TextView
+                    android:id="@+id/recieved_net_likes_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/netlikes"
+                    android:textSize="18sp" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/recieved_net_likes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="textEnd"
+                    android:textSize="18sp" />
+            </TableRow>
 
-            <TextView
-                android:id="@+id/user_likes_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/user_likes"
-                android:textSize="18sp" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/user_likes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="textEnd"
-                android:textSize="18sp" />
+                <TextView
+                    android:id="@+id/user_likes_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/user_likes"
+                    android:textSize="18sp" />
 
-        </TableRow>
+                <TextView
+                    android:id="@+id/user_likes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="textEnd"
+                    android:textSize="18sp" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            </TableRow>
 
-            <TextView
-                android:id="@+id/user_dislike_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/user_dislikes"
-                android:textSize="18sp" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/user_dislike"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textAlignment="textEnd"
-                android:textSize="18sp" />
-        </TableRow>
+                <TextView
+                    android:id="@+id/user_dislike_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/user_dislikes"
+                    android:textSize="18sp" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/user_dislike"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textAlignment="textEnd"
+                    android:textSize="18sp" />
+            </TableRow>
 
-            <TextView
-                android:id="@+id/textView12"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/user_netlikes"
-                android:textSize="18sp" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/user_net_likes"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textAlignment="textEnd"
-                android:textSize="18sp" />
-        </TableRow>
+                <TextView
+                    android:id="@+id/textView12"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/user_netlikes"
+                    android:textSize="18sp" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/user_net_likes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textAlignment="textEnd"
+                    android:textSize="18sp" />
+            </TableRow>
 
-            <TextView
-                android:id="@+id/hammerstatustext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Hammer User Status:"
-                android:textSize="18sp" />
-            <TextView
-                android:id="@+id/is_hammer_user"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:textAlignment="textEnd"
-                android:textSize="18sp" />
-        </TableRow>
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-    </TableLayout>
+                <TextView
+                    android:id="@+id/hammerstatustext"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hammer User Status:"
+                    android:textSize="18sp" />
+                <TextView
+                    android:id="@+id/is_hammer_user"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textAlignment="textEnd"
+                    android:textSize="18sp" />
+            </TableRow>
+
+        </TableLayout>
+
+    </RelativeLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/layout_view_mine"
-        android:layout_below="@id/tableLayout"
+        android:layout_below="@id/layout_table"
         android:layout_marginTop="20dp"
+        android:padding="5dp"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/usertourtext"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:padding="5dp"
             android:text="View Your Tours"
+            android:background="#E7A000"
             android:textSize="18sp" />
 
         <TextView
@@ -216,6 +237,9 @@
             android:layout_height="wrap_content"
             android:textAlignment="textStart"
             android:text="View Your Comments"
+            android:padding="5dp"
+            android:layout_marginTop="5dp"
+            android:background="#E7A000"
             android:textSize="18sp" />
 
     </LinearLayout>
