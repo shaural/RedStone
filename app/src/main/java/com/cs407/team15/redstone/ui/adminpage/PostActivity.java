@@ -32,8 +32,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
@@ -104,7 +107,7 @@ public class PostActivity extends AppCompatActivity {
         spinner = (Spinner)findViewById(R.id.category_spinner);
 
         final ArrayList<String> list = new ArrayList<>();
-        list.add("Notification");
+        list.add("Feature");
         list.add("Ads");
         list.add("Other");
 
@@ -168,6 +171,7 @@ public class PostActivity extends AppCompatActivity {
                         hashMap.put("postimage", miUrlOk);
                         hashMap.put("description", description.getText().toString());
                         hashMap.put("publisher", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                        hashMap.put("publisherid", FirebaseAuth.getInstance().getCurrentUser().getEmail());
                         hashMap.put("category", category);
                         hashMap.put("timestamp", ts);
 
@@ -191,21 +195,28 @@ public class PostActivity extends AppCompatActivity {
 
         } else {
             Toast.makeText(PostActivity.this, "No image selected", Toast.LENGTH_SHORT).show();
-            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("AdminPost");
 
-            String postid = reference.push().getKey();
-            Long tsLong = System.currentTimeMillis()/1000; // Timestamp
-            String ts = tsLong.toString();
+            if (category.equals("Notification")) {
 
-            HashMap<String, Object> hashMap = new HashMap<>();
-            hashMap.put("postid", postid);
-            hashMap.put("postimage", null);
-            hashMap.put("description", description.getText().toString());
-            hashMap.put("publisher", FirebaseAuth.getInstance().getCurrentUser().getUid());
-            hashMap.put("category", category);
-            hashMap.put("timestamp", ts);
 
-            reference.child(postid).setValue(hashMap);
+            } else {
+                DatabaseReference reference = FirebaseDatabase.getInstance().getReference("AdminPost");
+
+                String postid = reference.push().getKey();
+                Long tsLong = System.currentTimeMillis()/1000; // Timestamp
+                String ts = tsLong.toString();
+
+                HashMap<String, Object> hashMap = new HashMap<>();
+                hashMap.put("postid", postid);
+                hashMap.put("postimage", "");
+                hashMap.put("description", description.getText().toString());
+                hashMap.put("publisher", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                hashMap.put("publisherid", FirebaseAuth.getInstance().getCurrentUser().getEmail());
+                hashMap.put("category", category);
+                hashMap.put("timestamp", ts);
+
+                reference.child(postid).setValue(hashMap);
+            }
 
             pd.dismiss();
 
@@ -213,6 +224,49 @@ public class PostActivity extends AppCompatActivity {
             finish();
         }
     }
+
+    private void addNotification(String userid, String postid, String text){
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid);
+
+        Long tsLong = System.currentTimeMillis()/1000; // Timestamp
+        String ts = tsLong.toString();
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("postid", postid);
+        hashMap.put("postimage", "");
+        hashMap.put("description", text);
+        hashMap.put("publisher", FirebaseAuth.getInstance().getCurrentUser().getUid());
+        hashMap.put("publisherid", FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        hashMap.put("category", "Notification");
+        hashMap.put("timestamp", ts);
+
+        reference.push().setValue(hashMap);
+    }
+
+//    private void deleteNotifications(final String postid, String userid){
+//        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid);
+//        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+//                    if (snapshot.child("postid").getValue().equals(postid)){
+//                        snapshot.getRef().removeValue()
+//                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+//                                    @Override
+//                                    public void onComplete(@NonNull Task<Void> task) {
+//                                        Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
+//                                    }
+//                                });
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -232,5 +286,12 @@ public class PostActivity extends AppCompatActivity {
             startActivity(new Intent(PostActivity.this, adminActivity.class));
             finish();
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(PostActivity.this, adminActivity.class));
+        finish();
     }
 }

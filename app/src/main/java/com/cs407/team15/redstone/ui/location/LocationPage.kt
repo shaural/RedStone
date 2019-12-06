@@ -1,5 +1,6 @@
 package com.cs407.team15.redstone.ui.location
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -27,11 +28,14 @@ import com.cs407.team15.redstone.ui.comments.CommentsActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.app_bar_main.view.*
 import kotlinx.android.synthetic.main.location_display.view.*
+import kotlinx.android.synthetic.main.nav_header_main.*
 import kotlinx.coroutines.*
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.coroutines.CoroutineContext
 
 
@@ -90,6 +94,11 @@ class LocationPage : Fragment(), CoroutineScope {
         btn_flag = root.btn_flag
         val user = FirebaseAuth.getInstance().currentUser
 
+        //Initialize all tag related items
+        var tagText = root.location_tag
+        var addTagBtn = root.btn_add_tag
+        var deleteTagBtn = root.btn_delete_tag
+
         user?.let{
             uid = user.uid
         }
@@ -114,53 +123,181 @@ class LocationPage : Fragment(), CoroutineScope {
             root.loaction_name.text = title
             val mainRoot = inflater.inflate(R.layout.app_bar_main, container, false)
 
-            val locations = FirebaseFirestore.getInstance().collection("locations").get()
-                .addOnSuccessListener { locations ->
-                    for (loc in locations.documents) {
-                        if (loc["name"] as String == title as String) {
-                            location_id = loc.id
-                            publisher_id = loc["user_id"] as String
+            val locations = FirebaseFirestore.getInstance().collection("locations")
+            locations.get().addOnSuccessListener { locations ->
+                for (loc in locations.documents) {
+                    if (loc["name"] as String == title as String) {
+                        location_id = loc.id
+                        publisher_id = loc["user_id"] as String
 
-                            // If the location is new enough to have vertices representing its
-                            // polygonal form, then draw the polygon representing the location's
-                            // boundaries and draw the location's center, otherwise hide the
-                            // imageview that would have shown this information
-                            val locationShape = view!!.findViewById<ImageView>(R.id.locationShape)
-                            if (loc.contains("polygonImageXCoordinates")) {
-                                val polygonImageXCoordinates = loc["polygonImageXCoordinates"] as List<Double>
-                                val polygonImageYCoordinates = loc["polygonImageYCoordinates"] as List<Double>
-
-                                locationShape.setImageBitmap(drawLocationShapeAsBitmap(polygonImageXCoordinates,
-                                    polygonImageYCoordinates, true, 150, 150))
+                        //Display the location's tags
+                        var locTags = arrayListOf<String>()
+                        val lt = FirebaseFirestore.getInstance().collection("locations").document(location_id).collection("tags")
+                        lt.get().addOnSuccessListener { t ->
+                            for (tNames in t){
+                                locTags.add(tNames["name"].toString())
                             }
-                            else {
-                                locationShape.visibility = View.GONE
-                            }
+                            val tagL = "Tags: " + locTags.joinToString(separator = ", ")
+                            tagText.setText(tagL)
+                        }
 
-                            GlobalScope.launch(Dispatchers.IO + handler) {
-                                corout(true)
-                            }
+                        //Adding tag to location
+                        addTagBtn.setOnClickListener {
+                            lt.get().addOnSuccessListener { t ->
+                                //getting all currently associated tags
+                                for (tNames in t){
+                                    locTags.add(tNames["name"].toString())
+                                }
 
-                            root.location_description.text = loc["description"] as String
-                            //coordinates, timestamp,userid, name, description,image_src
+                                var storeTags = ArrayList<String>()
+                                FirebaseFirestore.getInstance().collection("tags").get().addOnSuccessListener { tagNames ->
+                                    for (n in tagNames.documents){
+                                        var flag = 0
+                                        var stringStorage = n["name"] as String
+                                        for (tt in locTags){
+                                            if (tt == n["name"]){
+                                                flag = 1
+                                            }
+                                        }
+                                        if (flag == 0){
+                                            storeTags.add(stringStorage)
+                                        }
+                                    }
+
+                                    val tagsArr = arrayOfNulls<String>(storeTags.size)
+                                    storeTags.toArray(tagsArr)
+                                    val checkTags = BooleanArray(storeTags.size) {i -> false}
+
+                                    val builder = AlertDialog.Builder(context)
+                                    builder.setMultiChoiceItems(tagsArr, checkTags) {dialog, which, isChecked ->
+                                        checkTags[which] = isChecked
+                                    }
+
+                                    builder.setPositiveButton("Add") { dialog, which ->
+                                        var addingTagsArr = ArrayList<String>()
+                                        for (i in checkTags.indices) {
+                                            val checked = checkTags[i]
+                                            if (checked) {
+                                                addingTagsArr.add(storeTags[i])
+                                            }
+                                        }
+
+                                        var addingTagsArray = arrayOfNulls<String>(addingTagsArr.size)
+                                        addingTagsArr.toArray(addingTagsArray)
+
+                                        for (addTag in addingTagsArray) {
+                                            lt.add(hashMapOf("name" to addTag.toString()))
+                                        }
+
+                                        locTags = arrayListOf<String>()
+                                        val lt = FirebaseFirestore.getInstance().collection("locations").document(location_id).collection("tags")
+                                        lt.get().addOnSuccessListener { t ->
+                                            for (tNames in t){
+                                                locTags.add(tNames["name"].toString())
+                                            }
+                                            val tagL = "Tags: " + locTags.joinToString(separator = ", ")
+                                            tagText.setText(tagL)
+                                        }
+                                    }
+                                    val adialog = builder.create()
+                                    adialog.show()
+                                }
+                            }
+                        }
+
+                        //Deleting tag from location
+                        deleteTagBtn.setOnClickListener {
+                            lt.get().addOnSuccessListener { t ->
+                                //getting all currently associated tags
+                                for (tNames in t) {
+                                    locTags.add(tNames["name"].toString())
+                                }
+
+                                val tagsArr = arrayOfNulls<String>(locTags.size)
+                                locTags.toArray(tagsArr)
+                                val checkTags = BooleanArray(locTags.size)
+
+                                val builder = AlertDialog.Builder(context)
+                                builder.setMultiChoiceItems(tagsArr, checkTags) {dialog, which, isChecked ->
+                                    checkTags[which] = isChecked
+                                }
+
+                                builder.setPositiveButton("Delete") { dialog, which ->
+                                    var addingTagsArr = ArrayList<String>()
+                                    for (i in checkTags.indices) {
+                                        val checked = checkTags[i]
+                                        if (checked) {
+                                            addingTagsArr.add(locTags[i])
+                                        }
+                                    }
+
+                                    var addingTagsArray = arrayOfNulls<String>(addingTagsArr.size)
+                                    addingTagsArr.toArray(addingTagsArray)
+
+                                    for (deletingTag in addingTagsArray) {
+                                        lt.get().addOnSuccessListener { t ->
+                                            for (tt in t) {
+                                                if (tt["name"].toString().equals(deletingTag.toString())) {
+                                                    lt.document(tt.id).delete()
+                                                }
+                                            }
+                                        }
+                                    }
+                                    locTags = arrayListOf<String>()
+                                    val lt = FirebaseFirestore.getInstance().collection("locations").document(location_id).collection("tags")
+                                    lt.get().addOnSuccessListener { t ->
+                                        for (tNames in t){
+                                            locTags.add(tNames["name"].toString())
+                                        }
+                                        val tagL = "Tags: " + locTags.joinToString(separator = ", ")
+                                        tagText.setText(tagL)
+                                    }
+                                }
+                                val adialog = builder.create()
+                                adialog.show()
+                            }
+                        }
+
+                        // If the location is new enough to have vertices representing its
+                        // polygonal form, then draw the polygon representing the location's
+                        // boundaries and draw the location's center, otherwise hide the
+                        // imageview that would have shown this information
+                        val locationShape = view!!.findViewById<ImageView>(R.id.locationShape)
+                        if (loc.contains("polygonImageXCoordinates")) {
+                            val polygonImageXCoordinates = loc["polygonImageXCoordinates"] as List<Double>
+                            val polygonImageYCoordinates = loc["polygonImageYCoordinates"] as List<Double>
+
+                            locationShape.setImageBitmap(drawLocationShapeAsBitmap(polygonImageXCoordinates,
+                                polygonImageYCoordinates, true, 150, 150))
+                        }
+                        else {
+                            locationShape.visibility = View.GONE
+                        }
+
+                        GlobalScope.launch(Dispatchers.IO + handler) {
+                            corout(true)
+                        }
+
+                        root.location_description.text = loc["description"] as String
+                        //coordinates, timestamp,userid, name, description,image_src
 
 //                            //sets image of location if there is a image
-                            var locationImage = root.location_image
-                            var url = loc["image_src"] as String?
-                            if (url != null) {
-                                var storage = FirebaseStorage.getInstance()
-                                var imageStorage = storage.getReferenceFromUrl(url)
-                                Glide.with(view!!.context).load(imageStorage).into(locationImage)
-                            } else {
-                                locationImage.setImageResource(R.drawable.background_bell_tower)
-                            }
+                        var locationImage = root.location_image
+                        var url = loc["image_src"] as String?
+                        if (url != null) {
+                            var storage = FirebaseStorage.getInstance()
+                            var imageStorage = storage.getReferenceFromUrl(url)
+                            Glide.with(view!!.context).load(imageStorage).into(locationImage)
+                        } else {
+                            locationImage.setImageResource(R.drawable.background_bell_tower)
+                        }
 //                            var locationImage = root.location_image
 //                            locationImage.setImageResource(R.drawable.background_bell_tower)
 
-                        }
-
                     }
+
                 }
+            }
 
 
 

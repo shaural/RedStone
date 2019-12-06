@@ -18,13 +18,48 @@
             android:layout_height="wrap_content"
             android:text="Location"
             android:textAlignment="center"
-            android:textSize="24dp"/>
+            android:textSize="24dp"
+            android:layout_marginTop="12dp"/>
+
+
+        <TextView
+            android:id="@+id/location_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/loaction_name"
+            android:layout_marginTop="5dp"
+            android:text="Tags: "
+            android:layout_centerHorizontal="true"/>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/tag_btn"
+            android:layout_below="@id/location_tag"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btn_add_tag"
+                android:layout_width="65dp"
+                android:layout_height="33dp"
+                android:text="Add Tag"
+                android:textSize="10dp"/>
+
+            <Button
+                android:id="@+id/btn_delete_tag"
+                android:layout_width="81dp"
+                android:layout_height="33dp"
+                android:layout_marginLeft="20dp"
+                android:layout_toRightOf="@+id/btn_add_tag"
+                android:text="Delete Tag"
+                android:textSize="10dp" />
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/location_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/loaction_name">
+            android:layout_below="@id/tag_btn">
 
             <!-- Need to adjust width/height properly -->
             <ImageView
@@ -32,7 +67,7 @@
                 android:layout_centerHorizontal="true"
                 android:layout_width="281dp"
                 android:layout_height="176dp"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="3dp"
                 app:srcCompat="@drawable/background_bell_tower" />
 
             <ImageView
@@ -48,9 +83,9 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@id/locationShape"
                 android:layout_marginStart="25dp"
-                android:layout_marginTop="25dp"
+                android:layout_marginTop="15dp"
                 android:layout_marginEnd="25dp"
-                android:layout_marginBottom="25dp"
+                android:layout_marginBottom="15dp"
                 android:text="Description" />
         </RelativeLayout>
 
