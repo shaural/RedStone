@@ -76,7 +76,7 @@ public class AdFragment extends Fragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
 
-        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path);
+        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path, null);
 
         recyclerView.setAdapter(mAdapter);
 

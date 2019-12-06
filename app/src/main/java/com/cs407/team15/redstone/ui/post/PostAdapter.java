@@ -23,6 +23,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -44,13 +45,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ImageViewHolde
 
     private FirebaseUser firebaseUser;
     private FirebaseFirestore db;
+    private DatabaseReference reference;
 
-    public PostAdapter (Context context, List<Post> posts, String category, String path) {
-        mContext = context;
-        mPost = posts;
-        this.category = category;
-        this.path = path;
-    }
+//    public PostAdapter (Context context, List<Post> posts, String category, String path) {
+//        mContext = context;
+//        mPost = posts;
+//        this.category = category;
+//        this.path = path;
+//    }
 
     public PostAdapter (Context context, List<Post> posts, String category, String path, String location) {
         mContext = context;
@@ -76,6 +78,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ImageViewHolde
     public void onBindViewHolder(@NonNull final PostAdapter.ImageViewHolder holder, final int position) {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         email = firebaseUser.getEmail();
+
+        Log.e(TAG, "!@#" + path + " " + location);
+        if (path.equals("admin")) {
+            reference = FirebaseDatabase.getInstance().getReference(path);
+
+        } else if (path.equals("public")) {
+            reference = FirebaseDatabase.getInstance().getReference(path).child(location);
+        }
 
         final Post post = mPost.get(position);
 
@@ -115,40 +125,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ImageViewHolde
                     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "Yes",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
-                                    if (path.equals("admin")) {
-                                        FirebaseDatabase.getInstance().getReference(path)
-                                                .child(post.getPostid())
-                                                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
-                                                }
+                                    reference.child(post.getPostid())
+                                            .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
                                             }
-                                        });
-
-                                        if (post.getPostimage() != null) {
-
                                         }
-                                        dialog.dismiss();
-                                    } else if (path.equals("public")) {
-                                        FirebaseDatabase.getInstance().getReference(path).child(location)
-                                                .child(post.getPostid())
-                                                .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                if (task.isSuccessful()) {
-                                                    Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
-                                                }
-                                            }
-                                        });
+                                    });
 
-                                        if (post.getPostimage() != null) {
+                                    if (post.getPostimage() != null) {
 
-                                        }
-                                        dialog.dismiss();
                                     }
-
+                                    dialog.dismiss();
                                 }
                             });
                     alertDialog.show();

@@ -72,7 +72,7 @@ public class FeaturesFragment extends Fragment {
 
 
 
-        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path);
+        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path, null);
 
         recyclerView.setAdapter(mAdapter);
 

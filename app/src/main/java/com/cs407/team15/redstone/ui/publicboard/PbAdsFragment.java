@@ -56,10 +56,7 @@ public class PbAdsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         category = "Ads";
         path = "public";
-
         location = this.getArguments().getString("area");
-
-        Log.e(TAG, location);
 
         prepareData();
     }
@@ -78,8 +75,7 @@ public class PbAdsFragment extends Fragment {
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-
-        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path);
+        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path, location);
 
         recyclerView.setAdapter(mAdapter);
 

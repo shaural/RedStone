@@ -73,7 +73,7 @@ public class OtherFragment extends Fragment {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
 
-        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path);
+        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path, null);
 
         recyclerView.setAdapter(mAdapter);
         return root;
