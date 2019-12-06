@@ -17,20 +17,21 @@
 
     <application
         android:allowBackup="true"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:replace="android:allowBackup,android:icon">
+        <activity android:name=".ui.publicboard.PublicBoardActivity" />
         <activity
-            android:name=".ui.adminpage.PostPageActivity"
+            android:name=".ui.post.PostPageActivity"
             android:label="@string/title_activity_post_page"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity android:name=".ui.adminpage.PostActivity" />
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".ui.post.PostActivity" />
         <activity android:name=".ui.adminpage.adminActivity" />
         <activity android:name=".ui.comments.CommentsActivity" />
-        <activity android:name=".ui.home.NoticeActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
