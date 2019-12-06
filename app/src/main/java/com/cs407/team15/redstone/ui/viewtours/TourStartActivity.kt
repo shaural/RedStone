@@ -297,17 +297,19 @@ class TourStartActivity : AppCompatActivity(), SensorEventListener {
             fusedLocationCleint.lastLocation
                 .addOnSuccessListener { location: Location? ->
                     // Got last known location. In some rare situations this can be null.
-                    val locVar = Location("")
-                    locVar.latitude = latLangQ[indexLoc].latitude
-                    locVar.longitude = latLangQ[indexLoc].longitude
-                    var dir = location!!.bearingTo(locVar)
-                    if (dir < 0) {
-                        dir += 360
+                    if (indexLoc < latLangQ.size) {
+                        val locVar = Location("")
+                        locVar.latitude = latLangQ[indexLoc].latitude
+                        locVar.longitude = latLangQ[indexLoc].longitude
+                        var dir = location!!.bearingTo(locVar)
+                        if (dir < 0) {
+                            dir += 360
+                        }
+                        bear = dir
+                        distMiles = location.distanceTo(locVar)
+                        curLocation = locVar
+                        checkArrived()
                     }
-                    bear = dir
-                    distMiles = location.distanceTo(locVar)
-                    curLocation = locVar
-                    checkArrived()
 //                Log.d("lol-dir", dir.toString())
                 }
             iter = 0
