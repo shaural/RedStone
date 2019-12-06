@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.firebase.database.core.Tag
 import com.google.firebase.firestore.*
 import kotlinx.android.synthetic.main.location_display.view.*
 import kotlinx.coroutines.tasks.await
@@ -75,37 +77,53 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
                 val likeButton = findViewById<Button>(R.id.like_btn)
                 var voteCountString = "Total likes: " + voteCount.toString()
                 setVoteCount.setText(voteCountString)
+                likeButton.setText("LIKE")
 
-                //disabling button if user already liked
+                //"Unlike" button if user already liked
                 selectedTour.collection("users_liked").get().addOnSuccessListener { user ->
                     for (u in user.documents) {
                         if (u["email"] as String == ue) {
-                            flag = 1
-                            likeButton.isEnabled = false
-                            likeButton.isClickable = false
+                            likeButton.setText("UNLIKE")
+                            break
                         }
                     }
                 }
 
-                //Updating vote count
+                //Update vote count on like/unlike button click
                 likeButton.setOnClickListener {
-                    val newVoteCount = voteCount + 1
-                    val updateVote = hashMapOf("votes" to newVoteCount)
-                    selectedTour.set(updateVote, SetOptions.merge())
-                    voteCountString = "Total likes: " + newVoteCount.toString()
-                    setVoteCount.setText(voteCountString)
+                    selectedTour.get().addOnSuccessListener { tou ->
+                        var newVoteCount = tou["votes"] as Long
+                        val userData = hashMapOf("email" to ue)
+                        //add user to users_liked
+                        if (likeButton.text.toString().equals("LIKE")){
+                            likeButton.setText("UNLIKE")
+                            newVoteCount += 1
+                            selectedTour.update("votes", newVoteCount)
+                            val totalVotesStr = "Total likes: " + newVoteCount.toString()
+                            setVoteCount.setText(totalVotesStr)
 
-                    //checking if user has already liked the tour
-                    val data = hashMapOf("email" to ue)
-                    var flag = 0;
-                    selectedTour.collection("users_liked").get().addOnSuccessListener { user ->
-                        for (u in user.documents) {
-                            if (u["email"] as String == ue){
-                                flag = 1
-                            }
+                            //adding user to users_liked
+                            selectedTour.collection("users_liked").add(hashMapOf("email" to ue))
+
                         }
-                        if (flag == 0){
-                            selectedTour.collection("users_liked").document().set(data)
+                        //equals "UNLIKE" -> delete from users_liked
+                        else{
+                            likeButton.setText("LIKE")
+                            newVoteCount -= 1
+                            selectedTour.update("votes", newVoteCount)
+                            val totalVotesStr = "Total likes: " + newVoteCount.toString()
+                            setVoteCount.setText(totalVotesStr)
+
+                            //deleting user from users_liked
+                            selectedTour.collection("users_liked").get().addOnSuccessListener { user ->
+                                for (u in user.documents){
+                                    if (u["email"].toString().equals(ue)){
+                                        selectedTour.collection("users_liked").document(u.id).delete().addOnSuccessListener {
+                                            Log.d("TAG",  "deleted")
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
