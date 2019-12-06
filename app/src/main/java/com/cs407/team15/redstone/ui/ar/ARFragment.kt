@@ -1,7 +1,12 @@
 package com.cs407.team15.redstone.ui.ar
 
+import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.os.Bundle
 import android.util.Log
@@ -41,10 +46,14 @@ import kotlinx.coroutines.tasks.await
 // A great deal of this code comes from following the example in the HelloSceneForm sample AR Core
 // application provided by Google:
 // https://github.com/google-ar/sceneform-android-sdk/blob/master/samples/hellosceneform/app/src/main/java/com/google/ar/sceneform/samples/hellosceneform/HelloSceneformActivity.java
-class ARFragment : Fragment() {
+class ARFragment : Fragment(), SensorEventListener {
     private val TAG: String = ARFragment::class.java.simpleName
     private val MIN_OPENGL_VERSION = 3.0
     private val MAXIMUM_COMMENTS_ON_SCREEN = 30
+    // We only show comments for the nearest location in front of the camera. This is the maximum number
+    // of degrees that a user needs to turn to directly face a location considered in front of the
+    // camera. The larger the value, the looser our definition of "in front of" becomes.
+    private val MAX_POINTING_DEGREES_OFFSET = 60F
 
     private var arFragment: ArFragment? = null // Google's ArFragment != this class
     private var currentPosition: Pose? = null // Camera's current position in space
@@ -66,6 +75,16 @@ class ARFragment : Fragment() {
     private val hammerUserIDs = mutableListOf<String>()
     private val userIDToUsername = mutableMapOf<String, String>()
 
+    private var sensorManager: SensorManager? = null
+    private val accelerometerReading = FloatArray(3)
+    private val magnetometerReading = FloatArray(3)
+    private var accelerometerRead = false
+    private var magnetometerRead = false
+    private val rotationMatrix = FloatArray(9)
+    private val orientationAngles = FloatArray(3)
+    private var azimuth = 0F
+    private var azimuthSet = false
+
     // When we start watching the set of comments for a particular location, we get a callback
     // that we need to call when we want to stop watching
     private var stopWatchingCommentsCallback: (()->Unit)? = null
@@ -86,6 +105,7 @@ class ARFragment : Fragment() {
         GlobalScope.launch { fetchMapOfUserIDsToUsernames() }
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
         getLocationFromDB()
+        sensorManager = activity!!.getSystemService(Activity.SENSOR_SERVICE) as SensorManager
         if (!isThisDeviceSupported()) {
             return
         }
@@ -112,7 +132,7 @@ class ARFragment : Fragment() {
                 frameNumber += 1
                 // This is reached about once every 8 seconds on my machine. The frequency doesn't
                 // really matter as long as it is between 1 - 10 seconds.
-                if (frameNumber % 100 == 0) {
+                if (frameNumber % 10 == 0) {
                     updateLocation { }
                 }
             }
@@ -179,8 +199,22 @@ class ARFragment : Fragment() {
         updateLocation {  }
     }
 
+    override fun onResume() {
+        super.onResume()
+        // From https://developer.android.com/guide/topics/sensors/sensors_position
+        // We need these to have access to the user's current azimuth
+        val accelerometerSensor = sensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        sensorManager!!.registerListener(this, accelerometerSensor, SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI)
+        val magneticSensor = sensorManager!!.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+        sensorManager!!.registerListener(this, magneticSensor, SensorManager.SENSOR_DELAY_NORMAL, SensorManager.SENSOR_DELAY_UI)
+    }
+
     override fun onPause() {
         super.onPause()
+        sensorManager?.unregisterListener(this)
+        accelerometerRead = false
+        magnetometerRead = false
+        azimuthSet = false
         stopWatchingCommentsCallback?.invoke()
         arFragment!!.onPause()
     }
@@ -273,13 +307,17 @@ class ARFragment : Fragment() {
         return
     }
     private fun getNearestLocation() {
-        if (dbCompleted && currentLocation != null) {
-            val nearestLocation = com.cs407.team15.redstone.model.Location.getNearestLocation(
+        if (dbCompleted && currentLocation != null && azimuthSet) {
+            val nearestLocation =
+                com.cs407.team15.redstone.model.Location.getNearestLocation(
+
+                    com.cs407.team15.redstone.model.Location.getLocationsInFrontOfCamera(
                 locations_db.keys.map { run {
                     val location = Location("");
                     location.latitude = it.latitude;
                     location.longitude = it.longitude;
-                    location }}, currentLocation!!)
+                    location }}, currentLocation!!, azimuth, MAX_POINTING_DEGREES_OFFSET), currentLocation!!
+                )
             if (nearestLocation == null) {
                 return
             }
@@ -458,4 +496,31 @@ class ARFragment : Fragment() {
             // Map user id to username if there is one and email address otherwise
             forEach{ user -> userIDToUsername.put(user.id, user.getString("username") ?: user.getString("email")!!) }
     }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    override fun onSensorChanged(event: SensorEvent) {
+        // This code is from https://developer.android.com/guide/topics/sensors/sensors_position
+        if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+            System.arraycopy(event.values, 0, accelerometerReading, 0, accelerometerReading.size)
+            accelerometerRead = true
+        }
+        else if (event.sensor.type == Sensor.TYPE_MAGNETIC_FIELD) {
+            System.arraycopy(event.values, 0, magnetometerReading, 0, magnetometerReading.size)
+            magnetometerRead = true
+        }
+        // Once we have a reading from each sensor, we can update the calculate the current azimuth
+        // and update it anytime we get up-to-date sensor readings
+        if (accelerometerRead && magnetometerRead) {
+            SensorManager.getRotationMatrix(rotationMatrix, null, accelerometerReading, magnetometerReading)
+            SensorManager.getOrientation(rotationMatrix, orientationAngles)
+            // Azimuth is given as a value in radians from -pi to +pi. Convert to a degree value
+            // from 0 to 360
+            azimuth = ((Math.toDegrees(orientationAngles[0].toDouble()).toInt() + 360) % 360).toFloat()
+            azimuthSet = true
+            view!!.findViewById<Switch>(R.id.byLikesSwitch).text = "${azimuth}"
+        }
+    }
+
+
 }

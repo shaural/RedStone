@@ -124,7 +124,7 @@ class ViewToursFragment : Fragment(), RecyclerAdapter.ItemClickListener, TextWat
         // Filter out tours that the user is not allowed to see here, so that nowhere else on the
         // page will need to handle this filtering
         allTours.addAll(0, Tour.getAllTours().filter {tour -> Tour.canCurrentUserViewTour(tour)} )
-        activity!!.runOnUiThread {
+        activity?.runOnUiThread {
             reapplyFiltering()
             setupRecyclerView(allTours.map { tour -> tour.name })
         }
