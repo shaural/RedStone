@@ -155,14 +155,14 @@ data class Location(val coordinates: GeoPoint = GeoPoint(0.0,0.0),
 
         private fun addNotification(userid: String, text: String) {
             val reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid)
-            val key: String = reference.key!!
+            val key: String = reference.push().key!!
             val hashMap = HashMap<String, Any>()
             hashMap["userid"] = "System"
             hashMap["text"] = text
-            hashMap["commentid"] = key // will be the key in Table
+            hashMap["notification"] = key // will be the key in Table
             hashMap["ispost"] = false
 
-            reference.push().setValue(hashMap)
+            reference.child(key).setValue(hashMap)
         }
       
         // Get all GPS points where the amount of degrees that the user has to rotate either

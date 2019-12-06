@@ -47,13 +47,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ImageViewHolde
     private FirebaseFirestore db;
     private DatabaseReference reference;
 
-//    public PostAdapter (Context context, List<Post> posts, String category, String path) {
-//        mContext = context;
-//        mPost = posts;
-//        this.category = category;
-//        this.path = path;
-//    }
-
     public PostAdapter (Context context, List<Post> posts, String category, String path, String location) {
         mContext = context;
         mPost = posts;
