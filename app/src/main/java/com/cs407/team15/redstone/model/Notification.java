@@ -2,18 +2,18 @@ package com.cs407.team15.redstone.model;
 
 public class Notification {
     private String userid;
-    private String commentid; // notification id
+    private String notificationId; // notification id
     private String userEmail;
     private String text;
     private String postid; // location id
     private boolean ispost;
 
-    public Notification(String userid, String userEmail, String text, String postid, String commentid, boolean ispost) {
+    public Notification(String userid, String userEmail, String text, String postid, String notificationId, boolean ispost) {
         this.userid = userid;
         this.userEmail = userEmail;
         this.text = text;
         this.postid = postid;
-        this.commentid = commentid;
+        this.notificationId = notificationId;
         this.ispost = ispost;
     }
 
@@ -52,12 +52,12 @@ public class Notification {
         this.postid = postid;
     }
 
-    public String getCommentid() {
-        return commentid;
+    public String getNotificationId() {
+        return notificationId;
     }
 
-    public void setCommentid(String commentid) {
-        this.commentid = commentid;
+    public void setNotificationId(String notificationId) {
+        this.notificationId = notificationId;
     }
 
     public boolean isIspost() {
