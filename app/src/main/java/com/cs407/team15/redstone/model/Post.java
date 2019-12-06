@@ -2,7 +2,7 @@ package com.cs407.team15.redstone.model;
 
 import java.io.Serializable;
 
-public class AdminPost implements Serializable {
+public class Post implements Serializable {
 
     private String postid;
     private String postimage;
@@ -11,8 +11,9 @@ public class AdminPost implements Serializable {
     private String publisherid;
     private String category;
     private String timestamp;
+    private String path;
 
-    public AdminPost(String postid, String postimage, String description, String publisher, String category, String timestamp, String publisherid) {
+    public Post(String postid, String postimage, String description, String publisher, String category, String timestamp, String publisherid, String path) {
         this.postid = postid;
         this.postimage = postimage;
         this.description = description;
@@ -20,9 +21,10 @@ public class AdminPost implements Serializable {
         this.category = category;
         this.timestamp = timestamp;
         this.publisherid = publisherid;
+        this.path = path;
     }
 
-    public AdminPost() {
+    public Post() {
     }
 
     public String getPublisherid() {
@@ -81,5 +83,11 @@ public class AdminPost implements Serializable {
         this.timestamp = timestamp;
     }
 
+    public String getPath() {
+        return path;
+    }
 
+    public void setPath(String path) {
+        this.path = path;
+    }
 }

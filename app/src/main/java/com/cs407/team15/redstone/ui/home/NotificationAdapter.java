@@ -2,7 +2,6 @@ package com.cs407.team15.redstone.ui.home;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +10,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.cs407.team15.redstone.R;
@@ -20,14 +18,11 @@ import com.cs407.team15.redstone.model.User;
 import com.cs407.team15.redstone.ui.comments.CommentsActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
-
-import static android.content.Context.MODE_PRIVATE;
 
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.ImageViewHolder> {
@@ -109,7 +104,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     private void getUserInfo(final ImageView imageView, final TextView username, String publisherid){
 
         if (publisherid != null) {
-            Log.e(TAG, "User: " + publisherid);
             db = FirebaseFirestore.getInstance();
             DocumentReference docRef = db.collection("users").document(publisherid);
 

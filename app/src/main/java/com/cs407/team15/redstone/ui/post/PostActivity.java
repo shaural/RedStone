@@ -1,20 +1,14 @@
-package com.cs407.team15.redstone.ui.adminpage;
+package com.cs407.team15.redstone.ui.post;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
-import android.content.DialogInterface;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
@@ -27,24 +21,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cs407.team15.redstone.R;
+import com.cs407.team15.redstone.ui.adminpage.adminActivity;
+import com.cs407.team15.redstone.ui.publicboard.PublicBoardActivity;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 import com.theartofdev.edmodo.cropper.CropImage;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -63,12 +54,20 @@ public class PostActivity extends AppCompatActivity {
     private EditText description;
     private RelativeLayout image_add_layout;
 
+    private String path, location;
+
     private String category;
+
+    private Context mContext;
+
+    private DatabaseReference reference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post);
+
+        mContext = PostActivity.this;
 
         close = findViewById(R.id.close);
         image_added = findViewById(R.id.image_added);
@@ -77,14 +76,23 @@ public class PostActivity extends AppCompatActivity {
         description = findViewById(R.id.description);
         image_add_layout = findViewById(R.id.image_add_layout);
 
+        Intent intent = getIntent();
+        path = intent.getStringExtra("path");
+        location = intent.getStringExtra("area"); // Location
+        
+        if (path.equals("admin")) {
+            reference = FirebaseDatabase.getInstance().getReference(path);
+            storageRef = FirebaseStorage.getInstance().getReference(path);
+        } else if (path.equals("public")) {
+            reference = FirebaseDatabase.getInstance().getReference(path).child(location);
+            storageRef = FirebaseStorage.getInstance().getReference(path).child(location);
+        }
 
-        storageRef = FirebaseStorage.getInstance().getReference("posts");
 
         close.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(PostActivity.this, adminActivity.class));
-                finish();
+                goBack();
             }
         });
 
@@ -107,9 +115,15 @@ public class PostActivity extends AppCompatActivity {
         spinner = (Spinner)findViewById(R.id.category_spinner);
 
         final ArrayList<String> list = new ArrayList<>();
-        list.add("Feature");
-        list.add("Ads");
-        list.add("Other");
+
+        if (path.equals("admin")) {
+            list.add("Features");
+            list.add("Ads");
+            list.add("Other");
+        } else if (path.equals("public")){
+            list.add("Post");
+            list.add("Ads");
+        }
 
         //using ArrayAdapter
         spinnerAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, list);
@@ -160,8 +174,6 @@ public class PostActivity extends AppCompatActivity {
                         Uri downloadUri = task.getResult();
                         miUrlOk = downloadUri.toString();
 
-                        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("AdminPost");
-
                         String postid = reference.push().getKey();
                         Long tsLong = System.currentTimeMillis()/1000; // Timestamp
                         String ts = tsLong.toString();
@@ -179,8 +191,7 @@ public class PostActivity extends AppCompatActivity {
 
                         pd.dismiss();
 
-                        startActivity(new Intent(PostActivity.this, adminActivity.class));
-                        finish();
+                        goBack();
 
                     } else {
                         Toast.makeText(PostActivity.this, "Failed", Toast.LENGTH_SHORT).show();
@@ -200,8 +211,6 @@ public class PostActivity extends AppCompatActivity {
 
 
             } else {
-                DatabaseReference reference = FirebaseDatabase.getInstance().getReference("AdminPost");
-
                 String postid = reference.push().getKey();
                 Long tsLong = System.currentTimeMillis()/1000; // Timestamp
                 String ts = tsLong.toString();
@@ -220,8 +229,7 @@ public class PostActivity extends AppCompatActivity {
 
             pd.dismiss();
 
-            startActivity(new Intent(PostActivity.this, adminActivity.class));
-            finish();
+            goBack();
         }
     }
 
@@ -243,31 +251,6 @@ public class PostActivity extends AppCompatActivity {
         reference.push().setValue(hashMap);
     }
 
-//    private void deleteNotifications(final String postid, String userid){
-//        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid);
-//        reference.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-//                    if (snapshot.child("postid").getValue().equals(postid)){
-//                        snapshot.getRef().removeValue()
-//                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                    @Override
-//                                    public void onComplete(@NonNull Task<Void> task) {
-//                                        Toast.makeText(mContext, "Deleted!", Toast.LENGTH_SHORT).show();
-//                                    }
-//                                });
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//
-//            }
-//        });
-//    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -283,15 +266,30 @@ public class PostActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "Something gone wrong!", Toast.LENGTH_SHORT).show();
             image_add_layout.setVisibility(View.VISIBLE);
-            startActivity(new Intent(PostActivity.this, adminActivity.class));
-            finish();
+
+            goBack();
         }
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        startActivity(new Intent(PostActivity.this, adminActivity.class));
+        goBack();
+    }
+
+    private void goBack() {
+        Intent intent;
+        if (path.equals("admin")) {
+            intent = new Intent (mContext, adminActivity.class);
+            intent.putExtra("area", location);
+            intent.putExtra("path", "admin");
+            startActivity(intent);
+        } else if (path.equals("public")) {
+            intent = new Intent (mContext, PublicBoardActivity.class);
+            intent.putExtra("area", location);
+            intent.putExtra("path", "public");
+            startActivity(intent);
+        }
         finish();
     }
 }

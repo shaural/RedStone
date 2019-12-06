@@ -1,18 +1,15 @@
-package com.cs407.team15.redstone.ui.adminpage;
+package com.cs407.team15.redstone.ui.post;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.cs407.team15.redstone.model.AdminPost;
+import com.cs407.team15.redstone.model.Post;
 import com.cs407.team15.redstone.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -28,7 +25,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cs407.team15.redstone.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -63,6 +59,8 @@ public class PostPageActivity extends AppCompatActivity {
     private FirebaseDatabase db;
     private FirebaseUser firebaseUser;
     private FirebaseFirestore fsdb;
+    private String path, location;
+    private DatabaseReference reference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +90,17 @@ public class PostPageActivity extends AppCompatActivity {
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
+        Intent intent = getIntent();
+        path = intent.getStringExtra("path");
+        location = intent.getStringExtra("area");
+
+        if (path.equals("admin")) {
+            reference = FirebaseDatabase.getInstance().getReference(path);
+
+        } else if (path.equals("public")) {
+            reference = FirebaseDatabase.getInstance().getReference(path).child(location);
+        }
+
     }
 
     @Override
@@ -109,8 +118,9 @@ public class PostPageActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         if (intent.hasExtra("post")){
-            final AdminPost post = (AdminPost)intent.getSerializableExtra("post");
+            final Post post = (Post)intent.getSerializableExtra("post");
 
+            path = post.getPath();
             postid = post.getPostid();
 
             if (post.getPostimage().equals("")) {
@@ -153,8 +163,7 @@ public class PostPageActivity extends AppCompatActivity {
                                     return true;
                                 case R.id.post_delete:
                                     final String id = post.getPostid();
-                                    FirebaseDatabase.getInstance().getReference("AdminPost")
-                                            .child(post.getPostid()).removeValue()
+                                    reference.child(post.getPostid()).removeValue()
                                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
@@ -172,7 +181,6 @@ public class PostPageActivity extends AppCompatActivity {
 
                     popupMenu.inflate(R.menu.post_menu);
                     if (!post.getPublisher().equals(firebaseUser.getUid())){
-//                        postpage_btn_more.setVisibility(View.GONE);
                         popupMenu.getMenu().findItem(R.id.post_edit).setVisible(false);
                         popupMenu.getMenu().findItem(R.id.post_delete).setVisible(false);
                     }
@@ -239,8 +247,7 @@ public class PostPageActivity extends AppCompatActivity {
                         HashMap<String, Object> hashMap = new HashMap<>();
                         hashMap.put("description", editText.getText().toString());
 
-                        FirebaseDatabase.getInstance().getReference("AdminPost")
-                                .child(postid).updateChildren(hashMap)
+                        reference.child(postid).updateChildren(hashMap)
                                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
@@ -263,12 +270,11 @@ public class PostPageActivity extends AppCompatActivity {
     }
 
     private void getText(String postid, final EditText editText){
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("AdminPost")
-                .child(postid);
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+        reference.child(postid)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                editText.setText(dataSnapshot.getValue(AdminPost.class).getDescription());
+                editText.setText(dataSnapshot.getValue(Post.class).getDescription());
             }
 
             @Override

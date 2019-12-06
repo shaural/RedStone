@@ -1,7 +1,6 @@
 package com.cs407.team15.redstone.ui.comments;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,8 +16,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -28,8 +25,8 @@ import com.cs407.team15.redstone.R;
 import com.cs407.team15.redstone.model.Comment;
 import com.cs407.team15.redstone.model.User;
 import com.cs407.team15.redstone.ui.location.LocationPage;
-import com.cs407.team15.redstone.ui.profile.UserCommentsFragment;
 import com.cs407.team15.redstone.ui.viewtours.TourInfoActivity;
+import com.cs407.team15.redstone.utility.NotificationTool;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -101,6 +98,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
         email = firebaseUser.getEmail();
         final Comment comment = mComment.get(position);
 
+        NotificationTool notificationTool = new NotificationTool(firebaseUser, comment.getLocationId());
+
         holder.comment.setText(comment.getComment());
         getUserInfo(holder.image_profile, holder.username, comment.getPublisher());
         isLiked(comment.getCommentid(), holder.like,position);
@@ -169,25 +168,20 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.ImageVie
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(position)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).setValue(true);
                         addNotification(comment.getPublisherid(),comment.getCommentid(), "liked your comment", comment.getLocationId());
-
                     } else {
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(position)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).removeValue();
-                        deleteNotifications(comment.getCommentid(), firebaseUser.getUid());
-
                     }
                 }
                 else {
                     if (holder.like.getTag().equals("like")) {
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(0)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).setValue(true);
-                        addNotification(comment.getPublisherid(),comment.getCommentid(), "liked your comment", comment.getLocationId());
-
+                        //addNotification(comment.getPublisherid(),comment.getCommentid(), "liked your comment", comment.getLocationId());
+                        notificationTool.addNotification(comment.getPublisherid(), "liked your comment", true);
                     } else {
                         FirebaseDatabase.getInstance().getReference("Likes").child(path.get(0)).child(comment.getCommentid())
                                 .child(firebaseUser.getUid()).removeValue();
-                        deleteNotifications(comment.getCommentid(), firebaseUser.getUid());
-
                     }
                 }
             }

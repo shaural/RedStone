@@ -97,4 +97,9 @@
     <string name="tab_text_3">OTHERS</string>
     <string name="tab_text_4"></string>
     <string name="title_activity_post_page">PostPageActivity</string>
+
+    <!-- Public Board -->
+    <string name="pb_tab_text_1">WALL</string>
+    <string name="pb_tab_text_2">AD</string>
+
 </resources>

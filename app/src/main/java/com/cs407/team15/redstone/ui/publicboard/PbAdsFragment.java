@@ -1,6 +1,7 @@
-package com.cs407.team15.redstone.ui.adminpage;
+package com.cs407.team15.redstone.ui.publicboard;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -24,39 +25,45 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-
-public class FeaturesFragment extends Fragment {
+/**
+ * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * to handle interaction events.
+ * Use the {@link PbAdsFragment#newInstance} factory method to
+ * create an instance of this fragment.
+ */
+public class PbAdsFragment extends Fragment {
     private final String TAG = getClass().toString();
 
     private ArrayList<Post> postArrayList = new ArrayList<>();
     private RecyclerView recyclerView;
     private static Context context;
     private PostAdapter mAdapter;
-    private String category;
-    private String path;
-
     private FirebaseDatabase db;
 
-    public FeaturesFragment() {
+    private String category,path, location;
+
+    public PbAdsFragment() {
         // Required empty public constructor
     }
-
-    public static FeaturesFragment newInstance() {
-        return new FeaturesFragment();
+    public static PbAdsFragment newInstance() {
+        return new PbAdsFragment();
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        category = "Ads";
+        path = "public";
+        location = this.getArguments().getString("area");
 
+        prepareData();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        category = "Features";
-        path = "admin";
-
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_feature, container, false);
 
@@ -64,27 +71,21 @@ public class FeaturesFragment extends Fragment {
         recyclerView = (RecyclerView) root.findViewById(R.id.feature_rv);
         recyclerView.setHasFixedSize(true);
 
-
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path, null);
+        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path, location);
 
         recyclerView.setAdapter(mAdapter);
 
         return root;
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        prepareData();
     }
 
     private void prepareData() {
         db = FirebaseDatabase.getInstance();
-        db.getReference(path)
+        db.getReference(path).child(location)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -93,7 +94,7 @@ public class FeaturesFragment extends Fragment {
 
                         for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                             Post post = snapshot.getValue(Post.class);
-                            //Log.e(TAG, post.getPostid()+": "+post.getCategory());
+                            Log.e(TAG, post.getPostid()+": "+post.getCategory());
                             if (post.getCategory().equals(category)) {
                                 postArrayList.add(post);
                             }

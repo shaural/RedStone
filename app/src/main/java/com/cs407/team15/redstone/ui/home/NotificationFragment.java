@@ -99,18 +99,18 @@ public class NotificationFragment extends Fragment {
 
             Notification notification = notificationList.get(position);
             Log.e(TAG, "remove attempt:" + notification.getPostid());
-            deleteNotifications(notification.getCommentid(), firebaseUser.getUid(), position);
+            deleteNotifications(notification.getNotificationId(), firebaseUser.getUid(), position);
 
         }
     };
 
-    private void deleteNotifications(final String postid, String userid, int position){
+    private void deleteNotifications(final String key, String userid, int position){
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Notifications").child(userid);
         reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    if (snapshot.child("commentid").getValue().equals(postid)){
+                    if (snapshot.child("notificationId").getValue().equals(key)){
                         snapshot.getRef().removeValue();
                         notificationList.remove(position);
                         notificationAdapter.notifyItemRemoved(position);

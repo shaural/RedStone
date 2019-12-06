@@ -9,15 +9,16 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.cs407.team15.redstone.R;
+import com.cs407.team15.redstone.ui.home.TabsPagerAdapter;
+import com.cs407.team15.redstone.ui.post.PostActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
 public class adminActivity extends AppCompatActivity {
     private Context mContext;
 
     private ViewPager viewPager;
-    private TabsPagerAdapter tabsPagerAdapter;
+    private AdminTabsPagerAdapter tabsPagerAdapter;
     private TabLayout mTabLayout;
     private FloatingActionButton fab;
 
@@ -27,7 +28,7 @@ public class adminActivity extends AppCompatActivity {
         setContentView(R.layout.activity_admin);
         mContext = getApplicationContext();
 
-        tabsPagerAdapter = new TabsPagerAdapter(this, getSupportFragmentManager());
+        tabsPagerAdapter = new AdminTabsPagerAdapter(this, getSupportFragmentManager());
 
         viewPager = findViewById(R.id.view_pager);
         viewPager.setAdapter(tabsPagerAdapter);
@@ -40,6 +41,7 @@ public class adminActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(getApplicationContext(), PostActivity.class);
+                intent.putExtra("path", "admin");
                 startActivity(intent);
                 finish();
             }

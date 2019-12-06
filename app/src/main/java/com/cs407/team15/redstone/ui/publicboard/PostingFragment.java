@@ -1,4 +1,5 @@
-package com.cs407.team15.redstone.ui.adminpage;
+package com.cs407.team15.redstone.ui.publicboard;
+
 
 import android.content.Context;
 import android.os.Bundle;
@@ -24,25 +25,23 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-
-public class FeaturesFragment extends Fragment {
+public class PostingFragment extends Fragment {
     private final String TAG = getClass().toString();
 
     private ArrayList<Post> postArrayList = new ArrayList<>();
     private RecyclerView recyclerView;
     private static Context context;
     private PostAdapter mAdapter;
-    private String category;
-    private String path;
-
     private FirebaseDatabase db;
 
-    public FeaturesFragment() {
+    private String category, path, location;
+
+    public PostingFragment() {
         // Required empty public constructor
     }
 
-    public static FeaturesFragment newInstance() {
-        return new FeaturesFragment();
+    public static PostingFragment newInstance() {
+        return new PostingFragment();
     }
 
     @Override
@@ -54,8 +53,12 @@ public class FeaturesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        category = "Features";
-        path = "admin";
+        category = "Post";
+        path = "public";
+
+        location = this.getArguments().getString("area");
+        Log.e(TAG, location);
+
 
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_feature, container, false);
@@ -64,14 +67,16 @@ public class FeaturesFragment extends Fragment {
         recyclerView = (RecyclerView) root.findViewById(R.id.feature_rv);
         recyclerView.setHasFixedSize(true);
 
-
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path, null);
+
+        mAdapter = new PostAdapter(getActivity(), postArrayList, category, path, location);
 
         recyclerView.setAdapter(mAdapter);
+
+        //prepareData();
 
         return root;
     }
@@ -84,7 +89,7 @@ public class FeaturesFragment extends Fragment {
 
     private void prepareData() {
         db = FirebaseDatabase.getInstance();
-        db.getReference(path)
+        db.getReference(path).child(location)
                 .addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -100,6 +105,7 @@ public class FeaturesFragment extends Fragment {
                         }
                         mAdapter.notifyDataSetChanged();
                     }
+
 
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
