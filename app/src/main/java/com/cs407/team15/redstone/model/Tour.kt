@@ -8,6 +8,7 @@ import kotlinx.coroutines.tasks.await
 
 class Tour(val name: String, val type: String, val user_id: String, val hammer: Boolean, val locations: List<String>
            , val tags: List<String>, val votes: Number, val distance: Double) {
+
     companion object {
         const val TOURS = "tours"
         const val NAME = "name"
