@@ -17,6 +17,7 @@ import com.cs407.team15.redstone.R
 import com.cs407.team15.redstone.model.Comment
 import com.cs407.team15.redstone.ui.comments.CommentSectionAdapter
 import com.cs407.team15.redstone.ui.comments.CommentsActivity
+import com.cs407.team15.redstone.utility.NotificationTool
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.core.Tag
 import com.google.firebase.firestore.*
 import kotlinx.android.synthetic.main.location_display.view.*
@@ -45,7 +47,12 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
     lateinit var tourName: String
     lateinit var tourId: String
 
+    private lateinit var notificationTool: NotificationTool
+    private lateinit var  firebaseUser: FirebaseUser
+
     private lateinit var mMap: GoogleMap
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +73,10 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
         val setDistance = findViewById<TextView>(R.id.text_distance)
 
         val setTime = findViewById<TextView>(R.id.text_time)
+
+        firebaseUser = FirebaseAuth.getInstance().currentUser!!
+
+        notificationTool = NotificationTool(firebaseUser, tourId)
 
         //Like button pressing
         var ue = FirebaseAuth.getInstance().currentUser!!.email as String
@@ -105,6 +116,13 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
 
                             //adding user to users_liked
                             selectedTour.collection("users_liked").add(hashMapOf("email" to ue))
+
+                            // send Notification
+                            var tourOwner: String
+                            FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { d ->
+                                tourOwner = d["user_id"].toString()
+                                notificationTool.addNotification(tourOwner, "liked your tour", false)
+                            }
 
                         }
                         //equals "UNLIKE" -> delete from users_liked
