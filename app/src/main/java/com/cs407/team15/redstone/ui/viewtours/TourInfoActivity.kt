@@ -1,6 +1,7 @@
 package com.cs407.team15.redstone.ui.viewtours
 
 import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -157,6 +158,39 @@ class TourInfoActivity : AppCompatActivity(), OnMapReadyCallback{
                     tourTimeStr = "Time Unavailable"
                 }
                 setTime.setText("Time: " + tourTimeStr)
+            }
+        }
+
+//        val showLocationBtn = findViewById<Button>(R.id.btn_tour_locations)
+//        showLocationBtn.setOnClickListener {
+//            var tourLocations: ArrayList<String>
+//            FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+//            if (doc != null){
+//                tourLocations = doc["locations"] as ArrayList<String>
+//                val builder = AlertDialog.Builder(this)
+//                val locToStr = "You will visit " + tourLocations.joinToString(separator = ", ") + "."
+//                builder.setMessage(locToStr).setCancelable(false).setPositiveButton("OK",  DialogInterface.OnClickListener{
+//                        dialog, id -> dialog.cancel()
+//                })
+//                val alert = builder.create()
+//                alert.setTitle("Touring Locations: ")
+//                alert.show()
+//            }
+//        }
+
+        val showLocationBtn = findViewById<Button>(R.id.btn_tour_locations)
+        showLocationBtn.setOnClickListener {
+            var tourLocations: ArrayList<String>
+            FirebaseFirestore.getInstance().collection("tours").document(tourId).get().addOnSuccessListener { doc ->
+                if (doc != null){
+                    tourLocations = doc["locations"] as ArrayList<String>
+                    val builder = AlertDialog.Builder(this)
+                    val locToStr = "You will visit " + tourLocations.joinToString(separator = ", ") + "."
+                    builder.setMessage(locToStr)
+                    val alert = builder.create()
+                    alert.setTitle("Touring Locations: ")
+                    alert.show()
+                }
             }
         }
 
